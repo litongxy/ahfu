@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>精准健康 - 同仁堂</title>
+  <link rel="stylesheet" href="/styles/common.css">
+  <style>
+    body { padding: 0; background: transparent; }
+    .header { 
+      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%); 
+      padding: 24px 20px; 
+      border-radius: 0 0 28px 28px; 
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(196, 30, 58, 0.3);
+    }
+    .header h1 { font-size: 22px; margin-bottom: 6px; }
+    .header p { font-size: 13px; opacity: 0.9; }
+    .back-btn { 
+      background: rgba(255,255,255,0.2); 
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white; 
+      padding: 10px 18px; 
+      border-radius: 20px; 
+      font-size: 14px; 
+      cursor: pointer; 
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.3); transform: translateX(-4px); }
+    .card { 
+      background: white; 
+      border-radius: 16px; 
+      padding: 20px; 
+      margin-bottom: 16px; 
+      margin: 0 16px 16px 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08); 
+    }
+    .card-title { 
+      font-size: 17px; 
+      font-weight: 600; 
+      margin-bottom: 18px; 
+      color: #212121; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+    }
+    .card-title::before {
+      content: '';
+      width: 4px;
+      height: 20px;
+      background: linear-gradient(180deg, #c41e3a 0%, #d32f2f 100%);
+      border-radius: 2px;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-label { 
+      display: block; 
+      font-size: 14px; 
+      font-weight: 500;
+      color: #616161; 
+      margin-bottom: 10px; 
+    }
+    .form-input { 
+      width: 100%; 
+      padding: 14px 16px; 
+      border: 2px solid #e0e0e0; 
+      border-radius: 12px; 
+      font-size: 15px; 
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+    .form-input:focus { 
+      outline: none; 
+      border-color: #c41e3a; 
+      background: white;
+      box-shadow: 0 0 0 4px rgba(196, 30, 58, 0.1);
+    }
+    .form-select { 
+      width: 100%; 
+      padding: 14px 16px; 
+      border: 2px solid #e0e0e0; 
+      border-radius: 12px; 
+      font-size: 15px; 
+      background: #fafafa;
+      transition: all 0.3s ease;
+    }
+    .form-select:focus {
+      outline: none;
+      border-color: #c41e3a;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(196, 30, 58, 0.1);
+    }
+    .btn { 
+      margin: 0 16px;
+      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%);
+      color: white; 
+      border: none; 
+      padding: 16px 24px; 
+      border-radius: 28px; 
+      font-size: 16px;
+      font-weight: 500;
+      width: calc(100% - 32px);
+      cursor: pointer; 
+      box-shadow: 0 6px 20px rgba(196, 30, 58, 0.35);
+      transition: all 0.3s ease;
+    }
+    .btn:hover { 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(196, 30, 58, 0.45);
+    }
+    .checkbox-group { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 10px; 
+    }
+    .checkbox-item { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      font-size: 14px;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .checkbox-item:hover { background: #e0e0e0; }
+    .checkbox-item input { 
+      width: 18px;
+      height: 18px;
+      margin: 0; 
+      accent-color: #c41e3a;
+    }
+    /* Uniapp 弹窗样式 */
+    .uni-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .uni-modal-dialog {
+      background: white;
+      border-radius: 16px;
+      width: 70%;
+      max-width: 300px;
+      overflow: hidden;
+      animation: scaleIn 0.3s ease;
+    }
+    @keyframes scaleIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .uni-modal-title {
+      padding: 20px 16px 10px;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 600;
+      color: #333;
+    }
+    .uni-modal-content {
+      padding: 0 20px 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+    }
+    .uni-modal-btn-group {
+      display: flex;
+      border-top: 1px solid #eee;
+    }
+    .uni-modal-btn {
+      flex: 1;
+      padding: 14px 0;
+      text-align: center;
+      font-size: 16px;
+      border: none;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .uni-modal-btn:active {
+      background: #f5f5f5;
+    }
+    .uni-modal-btn-primary {
+      color: #c41e3a;
+      font-weight: 500;
+      border-left: 1px solid #eee;
+    }
+    .uni-modal-btn-primary:active {
+      background: #ffebee;
+    }
+    .uni-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.75);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      z-index: 10000;
+      animation: toastIn 0.3s ease;
+      max-width: 80%;
+      text-align: center;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="/chat.html" class="back-btn" style="text-decoration:none;display:inline-block;">← 返回</a>
+    <h1>📋 精准健康档案</h1>
+    <p>建立您的个人健康档案，获得个性化建议</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👤 基本信息</div>
+    <div class="form-group">
+      <label class="form-label">姓名</label>
+      <input type="text" class="form-input" id="name" placeholder="请输入姓名">
+    </div>
+    <div class="form-group">
+      <label class="form-label">年龄</label>
+      <input type="number" class="form-input" id="age" placeholder="请输入年龄">
+    </div>
+    <div class="form-group">
+      <label class="form-label">性别</label>
+      <select class="form-select" id="gender">
+        <option value="">请选择</option>
+        <option value="男">男</option>
+        <option value="女">女</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏥 健康信息</div>
+    <div class="form-group">
+      <label class="form-label">慢性病（可多选）</label>
+      <div class="checkbox-group" id="chronicDiseaseGroup">
+        <label class="checkbox-item"><input type="checkbox" value="高血压"> 高血压</label>
+        <label class="checkbox-item"><input type="checkbox" value="糖尿病"> 糖尿病</label>
+        <label class="checkbox-item"><input type="checkbox" value="高血脂"> 高血脂</label>
+        <label class="checkbox-item"><input type="checkbox" value="冠心病"> 冠心病</label>
+        <label class="checkbox-item"><input type="checkbox" value="胃溃疡"> 胃溃疡</label>
+        <label class="checkbox-item"><input type="checkbox" value="哮喘"> 哮喘</label>
+        <label class="checkbox-item"><input type="checkbox" value="肾功能不全"> 肾功能不全</label>
+        <label class="checkbox-item"><input type="checkbox" value="无"> 无</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">是否做过体检？</label>
+      <select class="form-select" id="体检">
+        <option value="">请选择</option>
+        <option value="一年内">一年内</option>
+        <option value="1-2年">1-2年</option>
+        <option value="2年以上">2年以上</option>
+        <option value="从未">从未</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">过敏史</label>
+      <input type="text" class="form-input" id="allergy" placeholder="如：青霉素、虾等">
+    </div>
+    <div class="form-group">
+      <label class="form-label">近期症状</label>
+      <input type="text" class="form-input" id="symptoms" placeholder="如：头痛、失眠、胃痛等">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🍽️ 饮食偏好</div>
+    <div class="form-group">
+      <label class="form-label">饮食偏好</label>
+      <select class="form-select" id="diet">
+        <option value="">请选择</option>
+        <option value="清淡">清淡饮食</option>
+        <option value="辣">喜辣</option>
+        <option value="油腻">喜油腻</option>
+        <option value="素食">素食</option>
+        <option value="均衡">均衡饮食</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">每日睡眠时间</label>
+      <select class="form-select" id="sleep">
+        <option value="">请选择</option>
+        <option value="<6">不足6小时</option>
+        <option value="6-7">6-7小时</option>
+        <option value="7-8">7-8小时</option>
+        <option value=">8">8小时以上</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">运动频率</label>
+      <select class="form-select" id="exercise">
+        <option value="">请选择</option>
+        <option value="从不">几乎不运动</option>
+        <option value="偶尔">每周1-2次</option>
+        <option value="经常">每周3-5次</option>
+        <option value="每天">每天运动</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn" id="saveBtn">💾 保存健康档案</button>
+  
+  <div style="height: 30px;"></div>
+
+  <script>
+    function showToast(message, duration) {
+      duration = duration || 2000;
+      const existing = document.querySelector('.uni-toast');
+      if (existing) existing.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = 'uni-toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => toast.remove(), duration);
+    }
+    
+    function showModal(options) {
+      const { title, content, confirmText, onConfirm } = options;
+      
+      const modal = document.createElement('div');
+      modal.className = 'uni-modal';
+      modal.innerHTML = `
+        <div class="uni-modal-dialog">
+          <div class="uni-modal-title">${title}</div>
+          <div class="uni-modal-content">${content}</div>
+          <div class="uni-modal-btn-group">
+            <button class="uni-modal-btn uni-modal-btn-primary" id="modalConfirm">${confirmText || '确定'}</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+      
+      document.getElementById('modalConfirm').addEventListener('click', function() {
+        modal.remove();
+        if (onConfirm) onConfirm();
+      });
+    }
+    function getUserId() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('userId') || 'anonymous';
+    }
+    
+    async function loadProfile() {
+      const userId = getUserId();
+      try {
+        const res = await fetch('//localhost:3000/acp/health/profile?userId=' + userId);
+        const data = await res.json();
+        if (data.code === 0 && data.data) {
+          const p = data.data;
+          if (p.name) document.getElementById('name').value = p.name;
+          if (p.age) document.getElementById('age').value = p.age;
+          if (p.gender) document.getElementById('gender').value = p.gender;
+          if (p.chronicDisease && p.chronicDisease.length > 0) {
+            const checkboxes = document.querySelectorAll('#chronicDiseaseGroup input[type="checkbox"]');
+            checkboxes.forEach(function(cb) {
+              cb.checked = p.chronicDisease.includes(cb.value);
+            });
+          }
+          if (p.lastCheckup) document.getElementById('体检').value = p.lastCheckup;
+          if (p.allergy) document.getElementById('allergy').value = p.allergy.join('、');
+          if (p.symptoms) document.getElementById('symptoms').value = p.symptoms.join('、');
+          if (p.dietHabit) document.getElementById('diet').value = p.dietHabit;
+          if (p.sleepInfo) document.getElementById('sleep').value = p.sleepInfo;
+          if (p.exerciseHabit) document.getElementById('exercise').value = p.exerciseHabit;
+        }
+      } catch (e) {
+        console.log('加载档案失败', e);
+      }
+    }
+    
+    function getSelectedChronicDiseases() {
+      const checkboxes = document.querySelectorAll('#chronicDiseaseGroup input[type="checkbox"]:checked');
+      const values = Array.from(checkboxes).map(function(cb) { return cb.value; });
+      if (values.includes('无')) return [];
+      return values;
+    }
+    
+    async function saveProfile() {
+      var name = document.getElementById('name').value;
+      var age = document.getElementById('age').value;
+      var gender = document.getElementById('gender').value;
+      var chronicDiseases = getSelectedChronicDiseases();
+      var lastCheckup = document.getElementById('体检').value;
+      var allergy = document.getElementById('allergy').value;
+      var symptoms = document.getElementById('symptoms').value;
+      var diet = document.getElementById('diet').value;
+      var sleep = document.getElementById('sleep').value;
+      var exercise = document.getElementById('exercise').value;
+      
+      if (!name || !age || !gender) {
+        alert('请填写完整基本信息');
+        return;
+      }
+      
+      var userId = getUserId();
+      
+      var profileData = {
+        userId: userId,
+        name: name,
+        age: parseInt(age),
+        gender: gender,
+        chronicDisease: chronicDiseases,
+        lastCheckup: lastCheckup,
+        allergy: allergy ? allergy.split(/[,，、]/).filter(function(s) { return s.trim(); }) : [],
+        symptoms: symptoms ? symptoms.split(/[,，、]/).filter(function(s) { return s.trim(); }) : [],
+        dietHabit: diet,
+        sleepInfo: sleep,
+        exerciseHabit: exercise,
+      };
+      
+      try {
+        console.log('保存数据:', profileData);
+        var res = await fetch('//localhost:3000/acp/health/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(profileData)
+        });
+        console.log('响应状态:', res.status);
+        var data = await res.json();
+        console.log('响应数据:', data);
+        
+        if (data.code === 0) {
+          showModal({
+            title: '✅ 保存成功',
+            content: '根据您的信息，我们为您推荐：<br>• 体检报告分析<br>• 个性化食谱<br>• 运动课程',
+            confirmText: '我知道了',
+            onConfirm: function() {
+              window.location.href = '/chat.html';
+            }
+          });
+        } else {
+          showToast('保存失败: ' + data.message);
+        }
+      } catch (e) {
+        console.error('保存出错:', e);
+        showToast('保存失败，请稍后重试');
+      }
+    }
+    
+    document.getElementById('saveBtn').addEventListener('click', function() {
+      saveProfile();
+    });
+    
+    loadProfile();
+  </script>
+</body>
+</html>

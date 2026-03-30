@@ -1,0 +1,341 @@
+openapi: 3.0.3
+info:
+  title: 同仁堂元气助手 - AI对话API
+  version: 1.0.0
+  description: AI健康咨询对话服务接口
+
+servers:
+  - url: https://api.tongrentang.com/v1
+    description: 生产环境
+  - url: https://staging-api.tongrentang.com/v1
+    description: 测试环境
+
+paths:
+  /chat/send:
+    post:
+      summary: 发送聊天消息
+      operationId: sendMessage
+      tags:
+        - Chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: 用户消息
+                  example: "最近总是失眠怎么办"
+                userId:
+                  type: string
+                  description: 用户ID
+                  example: "user_123456"
+                context:
+                  type: object
+                  description: 上下文（可选）
+                  properties:
+                    scene:
+                      type: string
+                      description: 场景类型
+                    conversationId:
+                      type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400':
+          description: 请求参数错误
+        '401':
+          description: 未授权
+        '500':
+          description: 服务器错误
+
+  /chat/history:
+    get:
+      summary: 获取对话历史
+      operationId: getHistory
+      tags:
+        - Chat
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: object
+                    properties:
+                      list:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Conversation'
+                      total:
+                        type: integer
+
+  /health-profile:
+    get:
+      summary: 获取用户健康档案
+      operationId: getHealthProfile
+      tags:
+        - Health
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthProfile'
+
+    post:
+      summary: 更新用户健康档案
+      operationId: updateHealthProfile
+      tags:
+        - Health
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HealthProfileInput'
+      responses:
+        '200':
+          description: 成功
+
+  /knowledge/search:
+    post:
+      summary: 搜索知识库
+      operationId: searchKnowledge
+      tags:
+        - Knowledge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - keyword
+              properties:
+                keyword:
+                  type: string
+                scene:
+                  type: string
+                  description: 场景类型（可选）
+      responses:
+        '200':
+          description: 成功
+
+  /scenes:
+    get:
+      summary: 获取场景列表
+      operationId: getScenes
+      tags:
+        - Scene
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Scene'
+
+  /quick-questions:
+    get:
+      summary: 获取快捷问题列表
+      operationId: getQuickQuestions
+      tags:
+        - Config
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    question:
+                      type: string
+                    scene:
+                      type: string
+
+components:
+  schemas:
+    ChatResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        data:
+          type: object
+          properties:
+            response:
+              type: string
+              description: AI回复内容
+            scene:
+              type: string
+              description: 场景类型
+            conversationId:
+              type: string
+            recommendations:
+              type: object
+              properties:
+                contents:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Content'
+                goods:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Goods'
+                pages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      url:
+                        type: string
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        scene:
+          type: string
+        userMessage:
+          type: string
+        aiResponse:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    HealthProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        dietHabit:
+          type: object
+        exerciseHabit:
+          type: object
+        sleepInfo:
+          type: object
+        stressLevel:
+          type: integer
+        healthGoals:
+          type: array
+          items:
+            type: string
+        constitutionType:
+          type: string
+
+    HealthProfileInput:
+      type: object
+      properties:
+        dietHabit:
+          type: object
+        exerciseHabit:
+          type: object
+        sleepInfo:
+          type: object
+        stressLevel:
+          type: integer
+        healthGoals:
+          type: array
+          items:
+            type: string
+
+    Scene:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameEn:
+          type: string
+        description:
+          type: string
+        enabled:
+          type: boolean
+
+    Content:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [recipe, exercise, psychology, sleep]
+        title:
+          type: string
+        description:
+          type: string
+        mediaUrl:
+          type: string
+        duration:
+          type: integer
+        calories:
+          type: integer
+
+    Goods:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        price:
+          type: number
+        imageUrl:
+          type: string

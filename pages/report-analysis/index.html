@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>体检报告分析 - 同仁堂</title>
+  <link rel="stylesheet" href="/styles/common.css">
+  <style>
+    body { padding: 0; background: transparent; }
+    .header { 
+      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%); 
+      color: white; 
+      padding: 24px 20px; 
+      border-radius: 0 0 28px 28px; 
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(196, 30, 58, 0.3);
+    }
+    .header h1 { font-size: 22px; margin-bottom: 6px; }
+    .header p { font-size: 13px; opacity: 0.9; }
+    .back-btn { 
+      background: rgba(255,255,255,0.2); 
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white; 
+      padding: 10px 18px; 
+      border-radius: 20px; 
+      font-size: 14px; 
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.3); transform: translateX(-4px); }
+    .card { 
+      background: white; 
+      border-radius: 16px; 
+      padding: 20px; 
+      margin: 0 16px 16px 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08); 
+    }
+    .card-title { font-size: 17px; font-weight: 600; margin-bottom: 18px; color: #212121; }
+    .upload-area { 
+      border: 2px dashed #e0e0e0; 
+      border-radius: 16px; 
+      padding: 40px 20px; 
+      text-align: center; 
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+      transition: all 0.3s ease;
+    }
+    .upload-area:hover { border-color: #c41e3a; background: #fff8f8; }
+    .upload-area input { display: none; }
+    .upload-btn { 
+      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%);
+      color: white; 
+      border: none; 
+      padding: 14px 32px; 
+      border-radius: 25px; 
+      font-size: 15px; 
+      font-weight: 500;
+      cursor: pointer; 
+      box-shadow: 0 4px 16px rgba(196, 30, 58, 0.3);
+      transition: all 0.3s ease;
+    }
+    .upload-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(196, 30, 58, 0.4); }
+    .result-box { 
+      background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); 
+      border-radius: 12px; 
+      padding: 20px; 
+      margin-top: 16px;
+      border-left: 4px solid #ff9800;
+    }
+    .result-title { font-weight: 600; color: #e65100; margin-bottom: 14px; font-size: 16px; }
+    .result-item { 
+      padding: 12px 0; 
+      border-bottom: 1px solid rgba(255, 152, 0, 0.2); 
+      font-size: 14px;
+    }
+    .result-item:last-child { border-bottom: none; }
+    .result-item strong { color: #bf360c; }
+    .rec-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 16px; }
+    .rec-card { 
+      background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%); 
+      border-radius: 12px; 
+      padding: 16px; 
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .rec-card:hover { transform: translateY(-4px); background: white; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .rec-card img { width: 100%; height: 80px; background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%); border-radius: 10px; margin-bottom: 10px; object-fit: cover; }
+    .rec-card-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .rec-card-desc { font-size: 12px; color: #757575; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .badge-warning { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); color: #e65100; }
+    .badge-danger { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); color: #c62828; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="/chat.html" class="back-btn" style="text-decoration:none;display:inline-block;">← 返回</a>
+    <h1>📊 体检报告分析</h1>
+    <p>上传体检报告，AI智能分析</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📤 上传报告</div>
+    <div class="upload-area" id="uploadArea">
+      <p style="color:#999;margin-bottom:10px;">仅支持 PDF 格式</p>
+      <label class="upload-btn" for="fileInput">选择文件</label>
+      <input type="file" id="fileInput" accept=".pdf" onchange="handleUpload(this)">
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="card-title">📋 分析结果</div>
+    <div id="resultContent"></div>
+  </div>
+
+  <div class="card" id="aiAnalysisCard" style="display:none;">
+    <div class="card-title">🤖 AI健康建议</div>
+    <div id="aiAnalysisContent" style="font-size:13px;line-height:1.8;color:#333;"></div>
+  </div>
+
+  <div class="card" id="recCard" style="display:none;">
+    <div class="card-title">💡 推荐方案</div>
+    <div id="recContent"></div>
+  </div>
+
+  <script>
+    async function handleUpload(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const area = document.getElementById('uploadArea');
+      area.innerHTML = '<p style="color:#c41e3a;">⏳ 正在分析...</p>';
+
+      try {
+        const fd = new FormData();
+        fd.append('file', file);
+
+        const res = await fetch('//localhost:3000/acp/report/upload?userId=test-user', {
+          method: 'POST',
+          body: fd
+        });
+        const data = await res.json();
+
+        if (data.code === 0 && data.data && data.data.reportId) {
+          const detail = await fetch('//localhost:3000/acp/report/' + data.data.reportId);
+          const detailData = await detail.json();
+          
+          if (detailData.code === 0 && detailData.data) {
+            showResult(detailData.data);
+          } else {
+            throw new Error(detailData.message || '获取报告详情失败');
+          }
+        } else {
+          throw new Error(data.message || '上传失败');
+        }
+      } catch(e) {
+        console.error('Upload error:', e);
+        area.innerHTML = '<p style="color:#c62828;margin-bottom:10px;">❌ 上传失败: ' + e.message + '</p><button class="upload-btn" onclick="resetUpload()">重新上传</button>';
+      }
+    }
+
+    function showResult(report) {
+      if (!report) {
+        alert('报告数据为空');
+        return;
+      }
+      
+      const area = document.getElementById('uploadArea');
+      area.innerHTML = '<p style="color:#4caf50;margin-bottom:10px;">✅ 报告已上传</p><button class="upload-btn" onclick="resetUpload()">重新上传</button>';
+
+      const resultCard = document.getElementById('resultCard');
+      if (resultCard) resultCard.style.display = 'block';
+
+      let html = '<div class="result-box">';
+      html += '<div class="result-title">⚠️ 发现 ' + (report.anomalyCount || 0) + ' 项异常</div>';
+
+      if (report.indicators && report.indicators.length > 0) {
+        report.indicators.forEach(item => {
+          const cls = item.severity === 'serious' ? 'danger' : (item.severity === 'abnormal' ? 'warning' : 'normal');
+          html += '<div class="result-item">';
+          html += '<strong>' + item.name + '</strong>: ' + item.value + ' ' + item.unit;
+          if (item.isAnomaly) {
+            html += ' <span class="badge badge-' + cls + '">' + (item.severity === 'serious' ? '严重' : '轻度') + '</span>';
+          }
+          html += '<br><small>' + (item.suggestion || '参考范围: ' + item.referenceRange) + '</small>';
+          html += '</div>';
+        });
+      }
+
+      html += '</div>';
+      document.getElementById('resultContent').innerHTML = html;
+
+      // AI分析结果
+      if (report.aiAnalysis) {
+        const aiCard = document.getElementById('aiAnalysisCard');
+        if (aiCard) {
+          aiCard.style.display = 'block';
+          document.getElementById('aiAnalysisContent').innerHTML = report.aiAnalysis.replace(/\n/g, '<br>');
+        }
+      }
+
+      // 检查是否是解析失败
+      const isParseFailed = report.indicators && report.indicators.some(function(item) {
+        return item.name.includes('解析失败') || item.name.includes('未找到') || item.name.includes('请上传');
+      });
+
+      // 推荐方案 - 只有解析成功才显示
+      if (!isParseFailed) {
+        const recCard = document.getElementById('recCard');
+        if (recCard) recCard.style.display = 'block';
+
+        let recHtml = '<div class="rec-cards">';
+        recHtml += '<div class="rec-card"><img src="/images/r1.jpg"><div class="rec-card-title">牛肉土豆杂蔬焖菜</div><div class="rec-card-desc">378千卡</div></div>';
+        recHtml += '<div class="rec-card"><img src="/images/e1.jpg"><div class="rec-card-title">HIIT燃脂</div><div class="rec-card-desc">20分钟</div></div>';
+        recHtml += '</div>';
+        document.getElementById('recContent').innerHTML = recHtml;
+      }
+    }
+    function resetUpload() {
+      document.getElementById('uploadArea').innerHTML = 
+        '<p style="color:#999;margin-bottom:10px;">仅支持 PDF 格式</p>' +
+        '<label class="upload-btn" for="fileInput">选择文件</label>' +
+        '<input type="file" id="fileInput" accept=".pdf" onchange="handleUpload(this)">';
+      const resultCard = document.getElementById('resultCard');
+      const aiCard = document.getElementById('aiAnalysisCard');
+      const recCard = document.getElementById('recCard');
+      if (resultCard) resultCard.style.display = 'none';
+      if (aiCard) aiCard.style.display = 'none';
+      if (recCard) recCard.style.display = 'none';
+    }
+  </script>
+</body>
+</html>

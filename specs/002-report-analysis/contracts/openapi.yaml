@@ -1,0 +1,213 @@
+openapi: 3.0.3
+info:
+  title: 同仁堂元气助手 - 体检报告分析API
+  version: 1.0.0
+  description: 体检报告上传、解析、分析接口
+
+servers:
+  - url: https://api.tongrentang.com/v1
+    description: 生产环境
+
+paths:
+  /report/upload:
+    post:
+      summary: 上传体检报告
+      operationId: uploadReport
+      tags:
+        - Report
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 体检报告文件 (PDF/JPG/PNG, 最大20MB)
+                userId:
+                  type: string
+      responses:
+        '200':
+          description: 上传成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportUploadResponse'
+        '400':
+          description: 文件格式不支持
+
+  /report/{reportId}:
+    get:
+      summary: 获取报告详情
+      operationId: getReport
+      tags:
+        - Report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportDetail'
+
+  /report/history:
+    get:
+      summary: 获取报告历史
+      operationId: getReportHistory
+      tags:
+        - Report
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 成功
+
+  /report/analyze/{reportId}:
+    post:
+      summary: 分析报告（重新分析）
+      operationId: analyzeReport
+      tags:
+        - Report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 分析完成
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportAnalysis'
+
+components:
+  schemas:
+    ReportUploadResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        data:
+          type: object
+          properties:
+            reportId:
+              type: string
+            status:
+              type: string
+              enum: [parsing, parsed, failed]
+            progress:
+              type: integer
+              description: 解析进度百分比
+
+    ReportDetail:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        uploadTime:
+          type: string
+          format: date-time
+        indicators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Indicator'
+        anomalyCount:
+          type: integer
+        analysisResult:
+          type: string
+        interventionPlan:
+          $ref: '#/components/schemas/InterventionPlan'
+
+    Indicator:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "ALT"
+        value:
+          type: string
+          example: "45"
+        unit:
+          type: string
+          example: "U/L"
+        referenceRange:
+          type: string
+          example: "0-40"
+        isAnomaly:
+          type: boolean
+        severity:
+          type: string
+          enum: [normal, slight, abnormal, serious]
+        suggestion:
+          type: string
+
+    InterventionPlan:
+      type: object
+      properties:
+        summary:
+          type: string
+        diet:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              recipes:
+                type: array
+                items:
+                  type: object
+        exercise:
+          type: array
+          items:
+            type: object
+        sleep:
+          type: array
+          items:
+            type: object
+        followUp:
+          type: string
+          description: 复查建议
+
+    ReportAnalysis:
+      type: object
+      properties:
+        anomalyItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/Indicator'
+        analysisSummary:
+          type: string
+        recommendations:
+          type: array
+          items:
+            type: string
