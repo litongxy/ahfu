@@ -1,0 +1,21 @@
+{
+  "id": "report_1774861112917_vh1ttujqd",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1774861112909-680130221.pdf",
+  "uploadTime": "2026-03-30T08:58:32.917Z",
+  "indicators": [
+    {
+      "name": "PDF解析功能维护中",
+      "value": "暂时无法解析PDF",
+      "unit": "",
+      "referenceRange": "",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": "请稍后再试，或联系客服"
+    }
+  ],
+  "anomalyCount": 0,
+  "status": "parsed",
+  "aiAnalysis": "⚠️ 无法分析：请上传包含体检指标的PDF文件（如血常规、肝功能、血糖等检测报告）",
+  "analysisResult": "⚠️ 无法分析：请上传包含体检指标的PDF文件（如血常规、肝功能、血糖等检测报告）"
+}

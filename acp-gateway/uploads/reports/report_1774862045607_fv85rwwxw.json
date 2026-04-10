@@ -1,0 +1,66 @@
+{
+  "id": "report_1774862045607_fv85rwwxw",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1774862045596-827062646.pdf",
+  "uploadTime": "2026-03-30T09:14:05.608Z",
+  "indicators": [
+    {
+      "name": "血红蛋白(HGB)",
+      "value": "165.71587289988204",
+      "unit": "g/L",
+      "referenceRange": "100-160",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查血红蛋白(HGB)，注意休息"
+    },
+    {
+      "name": "血小板(PLT)",
+      "value": "328.210952294913",
+      "unit": "10^9/L",
+      "referenceRange": "100-300",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查血小板(PLT)，注意休息"
+    },
+    {
+      "name": "谷丙转氨酶(ALT)",
+      "value": "62.0889812677504",
+      "unit": "U/L",
+      "referenceRange": "10-40",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议复查谷丙转氨酶(ALT)，注意休息"
+    },
+    {
+      "name": "空腹血糖(GLU)",
+      "value": "10.920787576531058",
+      "unit": "mmol/L",
+      "referenceRange": "4-6.1",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议复查空腹血糖(GLU)，注意饮食控制"
+    },
+    {
+      "name": "甲状腺结节",
+      "value": "检出",
+      "unit": "",
+      "referenceRange": "正常",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议进一步检查甲状腺结节相关情况"
+    },
+    {
+      "name": "尿蛋白阳性",
+      "value": "检出",
+      "unit": "",
+      "referenceRange": "正常",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议进一步检查尿蛋白阳性相关情况"
+    }
+  ],
+  "anomalyCount": 6,
+  "status": "parsed",
+  "analysisResult": "您的体检报告发现 6 项异常指标。\n\n- 肝功能指标异常，建议避免饮酒，保持充足睡眠\n- 血糖偏高，建议控制糖分摄入，规律饮食\n- 血常规部分指标异常，建议适当补充营养\n- 建议3个月后复查相关指标\n- 如有不适，请及时就医",
+  "aiAnalysis": "您的体检报告发现 6 项异常指标。\n\n- 肝功能指标异常，建议避免饮酒，保持充足睡眠\n- 血糖偏高，建议控制糖分摄入，规律饮食\n- 血常规部分指标异常，建议适当补充营养\n- 建议3个月后复查相关指标\n- 如有不适，请及时就医"
+}

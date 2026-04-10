@@ -1,0 +1,10 @@
+[
+  {
+    "userId": "phone_18611111111",
+    "phone": "18611111111",
+    "salt": "e7b0afd36a53a7f862b91df1cba8d73c",
+    "passwordHash": "080d27db7b5e5a02eeb2fd592e62b9229770f6161cf4cb20a9b4de72c2dda817",
+    "createdAt": 1775745203320,
+    "updatedAt": 1775745217825
+  }
+]

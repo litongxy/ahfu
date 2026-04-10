@@ -1,0 +1,139 @@
+{
+  "id": "report_1775035092383_oxrx1n7ps",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1775035092328-226558950.pdf",
+  "originalName": "000101022081542393-00.pdf",
+  "uploadTime": "2026-04-01T09:18:12.383Z",
+  "indicators": [
+    {
+      "name": "白细胞(WBC)",
+      "value": "6.23",
+      "unit": "10^9/L",
+      "referenceRange": "3.5-9.5",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "红细胞(RBC)",
+      "value": "4.30",
+      "unit": "10^12/L",
+      "referenceRange": "3.8-5.1",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "血红蛋白(HGB)",
+      "value": "133.0",
+      "unit": "g/L",
+      "referenceRange": "115-150",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "血小板(PLT)",
+      "value": "259.0",
+      "unit": "10^9/L",
+      "referenceRange": "125-350",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "谷丙转氨酶(ALT)",
+      "value": "17.0",
+      "unit": "U/L",
+      "referenceRange": "7.00-40.00",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "谷草转氨酶(AST)",
+      "value": "15.5",
+      "unit": "U/L",
+      "referenceRange": "13.00-35.00",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "空腹血糖(GLU)",
+      "value": "5.01",
+      "unit": "mmol/L",
+      "referenceRange": "3.9-6.1",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "总胆固醇(TC)",
+      "value": "4.41",
+      "unit": "mmol/L",
+      "referenceRange": "<5.18",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "甘油三酯(TG)",
+      "value": "0.98",
+      "unit": "mmol/L",
+      "referenceRange": "<1.7",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "高密度脂蛋白(HDL)",
+      "value": "1.57",
+      "unit": "mmol/L",
+      "referenceRange": "1.04-1.55",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查"
+    },
+    {
+      "name": "低密度脂蛋白(LDL)",
+      "value": "2.10",
+      "unit": "mmol/L",
+      "referenceRange": "<3.37",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "尿酸(UA)",
+      "value": "304.00",
+      "unit": "umol/L",
+      "referenceRange": "155.00-357.00",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "肌酐(Cr)",
+      "value": "70.90",
+      "unit": "umol/L",
+      "referenceRange": "41.00-73.00",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "心电图",
+      "value": "正常",
+      "unit": "",
+      "referenceRange": "正常",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    }
+  ],
+  "anomalyCount": 1,
+  "status": "parsed",
+  "analysisResult": "我来帮你分析这份体检报告。首先让我加载相关的健康顾问技能。\n根据您的体检报告，我来为您分析这份HDL异常的检查结果：\n\n---\n\n## 1. 整体健康状况评估\n\n您的**高密度脂蛋白(HDL)为1.57mmol/L**，略高于参考范围上限(1.04-1.55 mmol/L)。这是一个相对**较好的异常结果**。\n\nHDL被称为\"好胆固醇\"，其主要功能是将外周组织的胆固醇运回肝脏进行代谢，具有**保护心血管**的作用。HDL轻度升高通常被认为是心血管疾病的保护因素。\n\n---\n\n## 2. 各项异常指标的可能原因\n\n**HDL轻度升高的可能原因：**\n- **生理性因素**：长期规律运动（尤其是有氧运动）、适量饮酒（尤其是红酒）\n- **药物因素**：某些降脂药（如他汀类）、雌激素类药物\n- **遗传因素**：家族性高HDL血症\n- **其他**：肝功能异常、甲状腺功能亢进等\n\n---\n\n## 3. 生活方式调整建议\n\n### 饮食建议：\n- 保持均衡饮食，**无需特意降低HDL**\n- 继续摄入富含膳食纤维的食物（蔬菜、水果、全谷物）\n- 适量摄入优质蛋白质（鱼、鸡胸肉、豆制品）\n- 减少高脂肪、高胆固醇食物\n\n### 运动建议：\n- 保持规律运动习惯，这是升高HDL的**健康方式**\n- 建议：每周3-5次有氧运动，每次30-60分钟\n- 如快走、跑步、游泳、骑自行车等\n\n### 睡眠建议：\n- 保持规律作息\n- 每天7-8小时高质量睡眠\n\n---\n\n## 4. 是否需要进一步检查或就医\n\n**建议：**\n- HDL轻度升高**不需要特别治疗**，属于相对健康的指标\n- 可以定期复查（建议6-12个月一次）\n- 如果同时有其他血脂异常（如甘油三酯升高、低密度脂蛋白升高），建议就医\n- 结合整体血脂谱、血压、血糖等指标综合评估心血管风险\n\n---\n\n## 5. 中医调理建议\n\n从中医角度，HDL升高属于\"脂浊\"范畴，建议：\n\n- **饮食调理**：可以喝山楂茶、荷叶茶帮助化浊降脂\n- **穴位按摩**：可按摩足三里、丰隆穴帮助健脾化痰\n- **生活调养**：保持心情舒畅，避免过度劳累\n- **体质辨识**：建议面诊中医师，根据体质辨证调理\n\n---\n\n> **重要提示**：以上信息仅供参考，不能替代专业医疗建议。HDL轻度升高通常不是病理状态，但建议结合整体体检结果和临床症状综合评估。如有疑虑，请咨询专业医生。\n\n---\n\n请问您还有其他体检指标需要分析吗？或者您目前有什么不适症状吗？",
+  "aiAnalysis": "我来帮你分析这份体检报告。首先让我加载相关的健康顾问技能。\n根据您的体检报告，我来为您分析这份HDL异常的检查结果：\n\n---\n\n## 1. 整体健康状况评估\n\n您的**高密度脂蛋白(HDL)为1.57mmol/L**，略高于参考范围上限(1.04-1.55 mmol/L)。这是一个相对**较好的异常结果**。\n\nHDL被称为\"好胆固醇\"，其主要功能是将外周组织的胆固醇运回肝脏进行代谢，具有**保护心血管**的作用。HDL轻度升高通常被认为是心血管疾病的保护因素。\n\n---\n\n## 2. 各项异常指标的可能原因\n\n**HDL轻度升高的可能原因：**\n- **生理性因素**：长期规律运动（尤其是有氧运动）、适量饮酒（尤其是红酒）\n- **药物因素**：某些降脂药（如他汀类）、雌激素类药物\n- **遗传因素**：家族性高HDL血症\n- **其他**：肝功能异常、甲状腺功能亢进等\n\n---\n\n## 3. 生活方式调整建议\n\n### 饮食建议：\n- 保持均衡饮食，**无需特意降低HDL**\n- 继续摄入富含膳食纤维的食物（蔬菜、水果、全谷物）\n- 适量摄入优质蛋白质（鱼、鸡胸肉、豆制品）\n- 减少高脂肪、高胆固醇食物\n\n### 运动建议：\n- 保持规律运动习惯，这是升高HDL的**健康方式**\n- 建议：每周3-5次有氧运动，每次30-60分钟\n- 如快走、跑步、游泳、骑自行车等\n\n### 睡眠建议：\n- 保持规律作息\n- 每天7-8小时高质量睡眠\n\n---\n\n## 4. 是否需要进一步检查或就医\n\n**建议：**\n- HDL轻度升高**不需要特别治疗**，属于相对健康的指标\n- 可以定期复查（建议6-12个月一次）\n- 如果同时有其他血脂异常（如甘油三酯升高、低密度脂蛋白升高），建议就医\n- 结合整体血脂谱、血压、血糖等指标综合评估心血管风险\n\n---\n\n## 5. 中医调理建议\n\n从中医角度，HDL升高属于\"脂浊\"范畴，建议：\n\n- **饮食调理**：可以喝山楂茶、荷叶茶帮助化浊降脂\n- **穴位按摩**：可按摩足三里、丰隆穴帮助健脾化痰\n- **生活调养**：保持心情舒畅，避免过度劳累\n- **体质辨识**：建议面诊中医师，根据体质辨证调理\n\n---\n\n> **重要提示**：以上信息仅供参考，不能替代专业医疗建议。HDL轻度升高通常不是病理状态，但建议结合整体体检结果和临床症状综合评估。如有疑虑，请咨询专业医生。\n\n---\n\n请问您还有其他体检指标需要分析吗？或者您目前有什么不适症状吗？"
+}

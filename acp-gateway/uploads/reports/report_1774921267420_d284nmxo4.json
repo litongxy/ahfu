@@ -1,0 +1,75 @@
+{
+  "id": "report_1774921267420_d284nmxo4",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1774921267333-733346871.pdf",
+  "uploadTime": "2026-03-31T01:41:07.420Z",
+  "indicators": [
+    {
+      "name": "尿酸(UA)",
+      "value": "498.7",
+      "unit": "umol/L",
+      "referenceRange": "150-420",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查尿酸(UA)，注意休息"
+    },
+    {
+      "name": "空腹血糖(GLU)",
+      "value": "7.519498526746938",
+      "unit": "mmol/L",
+      "referenceRange": "4-6.1",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查空腹血糖(GLU)，注意饮食控制"
+    },
+    {
+      "name": "血小板(PLT)",
+      "value": "334.7",
+      "unit": "10^9/L",
+      "referenceRange": "100-300",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查血小板(PLT)，注意休息"
+    },
+    {
+      "name": "白细胞(WBC)",
+      "value": "14.663261717391627",
+      "unit": "10^9/L",
+      "referenceRange": "4-10",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议复查白细胞(WBC)，注意休息"
+    },
+    {
+      "name": "血红蛋白(HGB)",
+      "value": "167.1582621067331",
+      "unit": "g/L",
+      "referenceRange": "100-160",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查血红蛋白(HGB)，注意休息"
+    },
+    {
+      "name": "高血压",
+      "value": "检出",
+      "unit": "",
+      "referenceRange": "正常",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议进一步检查高血压相关情况"
+    },
+    {
+      "name": "尿蛋白阳性",
+      "value": "检出",
+      "unit": "",
+      "referenceRange": "正常",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议进一步检查尿蛋白阳性相关情况"
+    }
+  ],
+  "anomalyCount": 7,
+  "status": "parsed",
+  "analysisResult": "您的体检报告发现 7 项异常指标。\n\n- 血糖偏高，建议控制糖分摄入，规律饮食\n- 血常规部分指标异常，建议适当补充营养\n- 建议进一步专科检查，评估身体健康状况\n- 建议3个月后复查相关指标\n- 如有不适，请及时就医",
+  "aiAnalysis": "您的体检报告发现 7 项异常指标。\n\n- 血糖偏高，建议控制糖分摄入，规律饮食\n- 血常规部分指标异常，建议适当补充营养\n- 建议进一步专科检查，评估身体健康状况\n- 建议3个月后复查相关指标\n- 如有不适，请及时就医"
+}

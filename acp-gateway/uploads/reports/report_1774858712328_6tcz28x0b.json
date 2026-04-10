@@ -1,0 +1,21 @@
+{
+  "id": "report_1774858712328_6tcz28x0b",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1774858712324-904827622.pdf",
+  "uploadTime": "2026-03-30T08:18:32.328Z",
+  "indicators": [
+    {
+      "name": "PDF解析功能维护中",
+      "value": "暂时无法解析PDF",
+      "unit": "",
+      "referenceRange": "",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": "请稍后再试，或联系客服"
+    }
+  ],
+  "anomalyCount": 0,
+  "status": "parsed",
+  "analysisResult": "您的体检报告各项指标均在正常范围内，身体健康状况良好。建议继续保持健康的生活方式，定期体检。",
+  "aiAnalysis": "您的体检报告各项指标均在正常范围内，身体健康状况良好。建议继续保持健康的生活方式，定期体检。"
+}

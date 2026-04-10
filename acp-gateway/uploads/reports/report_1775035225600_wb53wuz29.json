@@ -1,0 +1,103 @@
+{
+  "id": "report_1775035225600_wb53wuz29",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1775035225583-188361026.pdf",
+  "originalName": "0010900225880955.pdf",
+  "uploadTime": "2026-04-01T09:20:25.600Z",
+  "indicators": [
+    {
+      "name": "白细胞(WBC)",
+      "value": "8.3",
+      "unit": "10^9/L",
+      "referenceRange": "3.5-9.5",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "红细胞(RBC)",
+      "value": "4.36",
+      "unit": "10^12/L",
+      "referenceRange": "3.8-5.1",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "血小板(PLT)",
+      "value": "270.0",
+      "unit": "10^9/L",
+      "referenceRange": "125-350",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "谷草转氨酶(AST)",
+      "value": "15",
+      "unit": "U/L",
+      "referenceRange": "0-35",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "总胆固醇(TC)",
+      "value": "4.85",
+      "unit": "mmol/L",
+      "referenceRange": "<5.2",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "甘油三酯(TG)",
+      "value": "1.39",
+      "unit": "mmol/L",
+      "referenceRange": "0.40-1.70",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "高密度脂蛋白(HDL)",
+      "value": "1.39",
+      "unit": "mmol/L",
+      "referenceRange": "1.0-2.1",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "低密度脂蛋白(LDL)",
+      "value": "2.73",
+      "unit": "mmol/L",
+      "referenceRange": "0-3.37",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "尿酸(UA)",
+      "value": "282",
+      "unit": "umol/L",
+      "referenceRange": "150-360",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "肌酐(Cr)",
+      "value": "63",
+      "unit": "umol/L",
+      "referenceRange": "41-73",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    }
+  ],
+  "anomalyCount": 0,
+  "status": "parsed",
+  "analysisResult": "您的体检报告各项指标均在正常范围内，身体健康状况良好。建议继续保持健康的生活方式，定期体检。",
+  "aiAnalysis": "您的体检报告各项指标均在正常范围内，身体健康状况良好。建议继续保持健康的生活方式，定期体检。"
+}

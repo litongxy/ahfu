@@ -1,0 +1,4 @@
+interface:
+  display_name: "Document Retrieval"
+  short_description: "Search local docs and pinpoint exact passages"
+  default_prompt: "Use $document-retrieval to search the local knowledge base and return exact file paths and line numbers."

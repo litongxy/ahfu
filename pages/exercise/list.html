@@ -156,15 +156,77 @@
     }
 
     .video-frame {
+      position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
       background: #000;
+      overflow: hidden;
     }
 
     .video-frame iframe {
       width: 100%;
       height: 100%;
       border: 0;
+    }
+
+    .video-loading {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.62);
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 13px;
+      line-height: 1.4;
+      transition: opacity 220ms ease;
+    }
+
+    .video-loading-spinner {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.28);
+      border-top-color: #ffffff;
+      animation: video-spin 0.9s linear infinite;
+    }
+
+    .video-frame.is-ready .video-loading {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .video-frame.is-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #111814, #0f120f);
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .video-fallback {
+      width: min(100%, 420px);
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px dashed rgba(213, 230, 204, 0.28);
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      color: rgba(248, 255, 246, 0.92);
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @keyframes video-spin {
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     @media (max-width: 480px) {
@@ -220,7 +282,7 @@
           </div>
         </div>
 
-        <div class="segmented">
+        <div class="segmented segmented-scrollable" id="goalSegmented" aria-label="按目标筛选">
           <button class="tab active is-active" data-type="all">推荐</button>
           <button class="tab" data-type="goal-strength">力量训练</button>
           <button class="tab" data-type="goal-flexibility">柔韧/身心</button>
@@ -758,7 +820,21 @@ micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https
       if (active) {
         active.classList.add('active');
         active.classList.add('is-active');
+        ensureActiveTabVisible(active);
       }
+    }
+
+    function ensureActiveTabVisible(tab) {
+      if (!tab || typeof tab.scrollIntoView !== 'function') {
+        return;
+      }
+
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      tab.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: 'nearest',
+        inline: 'nearest',
+      });
     }
 
     function toPositiveNumber(value) {
@@ -774,34 +850,51 @@ micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https
       return text === '1' || text === 'true' || text === 'yes';
     }
 
+    function extractBvid(value) {
+      const text = String(value || '').trim();
+      if (!text) return '';
+      const matched = text.match(/BV[0-9A-Za-z]{10}/i);
+      return matched ? matched[0].toUpperCase() : '';
+    }
+
+    function isMiniProgramRuntime() {
+      if (typeof window !== 'undefined' && window.__wxjs_environment === 'miniprogram') {
+        return true;
+      }
+      const ua = String((typeof navigator !== 'undefined' && navigator.userAgent) || '').toLowerCase();
+      return ua.includes('miniprogram');
+    }
+
     const videoQueryParamsToClear = ['bvid', 'isMicro', 'clipSeconds', 'contentId', 'source', 'returnTo'];
 
     function navigateBack(fallbackUrl) {
       const fallback = fallbackUrl || '/chat.html';
-      const referrer = document.referrer;
-      let shouldUseHistory = false;
+      const currentUrl = window.location.href;
+      const canUseHistoryBack =
+        window.history
+        && typeof window.history.back === 'function'
+        && window.history.length > 1;
 
-      if (referrer) {
-        try {
-          const referrerUrl = new URL(referrer);
-          shouldUseHistory = referrerUrl.origin === window.location.origin;
-        } catch (error) {
-          // Ignore malformed referrer and fallback to default page.
-        }
-      }
+      if (canUseHistoryBack) {
+        let leftCurrentPage = false;
+        const markPageLeft = function() {
+          leftCurrentPage = true;
+        };
+        window.addEventListener('pagehide', markPageLeft, { once: true });
 
-      if (shouldUseHistory) {
-        const currentUrl = window.location.href;
         window.history.back();
+
+        // In some WebView environments, history back may settle slower.
+        // Delay fallback to avoid interrupting an in-flight back navigation.
         window.setTimeout(function() {
-          if (window.location.href === currentUrl) {
-            window.location.href = fallback;
+          if (!leftCurrentPage && window.location.href === currentUrl) {
+            window.location.replace(fallback);
           }
-        }, 220);
+        }, 900);
         return;
       }
 
-      window.location.href = fallback;
+      window.location.replace(fallback);
     }
 
     function isChatReferrer() {
@@ -862,6 +955,10 @@ micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https
 
     function removeVideoModal(modal) {
       if (!modal) return;
+      const loadingTimer = Number(modal.dataset.loadingTimer || 0);
+      if (loadingTimer > 0) {
+        window.clearTimeout(loadingTimer);
+      }
       modal.remove();
     }
 
@@ -900,12 +997,33 @@ micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https
             <button class="video-close" type="button" aria-label="关闭">✕</button>
           </div>
           <div class="video-frame">
-            <iframe src="https://player.bilibili.com/player.html?bvid=${bvid}&autoplay=1" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            <div class="video-loading" role="status" aria-live="polite">
+              <span class="video-loading-spinner" aria-hidden="true"></span>
+              <span>视频加载中...</span>
+            </div>
+            <iframe src="https://player.bilibili.com/player.html?bvid=${bvid}&autoplay=1" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe>
           </div>
         </div>
       `;
 
       document.body.appendChild(modal);
+      const frame = modal.querySelector('.video-frame');
+      const iframe = modal.querySelector('.video-frame iframe');
+      const markReady = function() {
+        if (frame) {
+          frame.classList.add('is-ready');
+        }
+        const timerId = Number(modal.dataset.loadingTimer || 0);
+        if (timerId > 0) {
+          window.clearTimeout(timerId);
+          modal.dataset.loadingTimer = '0';
+        }
+      };
+      if (iframe) {
+        iframe.addEventListener('load', markReady, { once: true });
+        iframe.addEventListener('error', markReady, { once: true });
+      }
+      modal.dataset.loadingTimer = String(window.setTimeout(markReady, 8000));
 
       const closeBtn = modal.querySelector('.video-close');
       if (closeBtn) {

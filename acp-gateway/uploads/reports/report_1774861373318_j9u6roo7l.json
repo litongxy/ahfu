@@ -1,0 +1,75 @@
+{
+  "id": "report_1774861373318_j9u6roo7l",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1774861373314-932735304.pdf",
+  "uploadTime": "2026-03-30T09:02:53.318Z",
+  "indicators": [
+    {
+      "name": "谷丙转氨酶(ALT)",
+      "value": "77.5",
+      "unit": "U/L",
+      "referenceRange": "10-40",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议复查谷丙转氨酶(ALT)，注意休息"
+    },
+    {
+      "name": "空腹血糖(GLU)",
+      "value": "7.8",
+      "unit": "mmol/L",
+      "referenceRange": "4-6.1",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查空腹血糖(GLU)，注意饮食控制"
+    },
+    {
+      "name": "血红蛋白(HGB)",
+      "value": "168.57061854138718",
+      "unit": "g/L",
+      "referenceRange": "100-160",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查血红蛋白(HGB)，注意休息"
+    },
+    {
+      "name": "白细胞(WBC)",
+      "value": "12.151908066143939",
+      "unit": "10^9/L",
+      "referenceRange": "4-10",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查白细胞(WBC)，注意休息"
+    },
+    {
+      "name": "甘油三酯(TG)",
+      "value": "2.5",
+      "unit": "mmol/L",
+      "referenceRange": "0.5-1.7",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议复查甘油三酯(TG)，注意休息"
+    },
+    {
+      "name": "脂肪肝",
+      "value": "检出",
+      "unit": "",
+      "referenceRange": "正常",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议进一步检查脂肪肝相关情况"
+    },
+    {
+      "name": "高血压",
+      "value": "检出",
+      "unit": "",
+      "referenceRange": "正常",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议进一步检查高血压相关情况"
+    }
+  ],
+  "anomalyCount": 7,
+  "status": "parsed",
+  "analysisResult": "您的体检报告发现 7 项异常指标。\n\n- 肝功能指标异常，建议避免饮酒，保持充足睡眠\n- 血糖偏高，建议控制糖分摄入，规律饮食\n- 血脂异常，建议低脂饮食，增加有氧运动\n- 血常规部分指标异常，建议适当补充营养\n- 建议进一步专科检查，评估身体健康状况\n- 建议3个月后复查相关指标\n- 如有不适，请及时就医",
+  "aiAnalysis": "您的体检报告发现 7 项异常指标。\n\n- 肝功能指标异常，建议避免饮酒，保持充足睡眠\n- 血糖偏高，建议控制糖分摄入，规律饮食\n- 血脂异常，建议低脂饮食，增加有氧运动\n- 血常规部分指标异常，建议适当补充营养\n- 建议进一步专科检查，评估身体健康状况\n- 建议3个月后复查相关指标\n- 如有不适，请及时就医"
+}

@@ -1,0 +1,84 @@
+{
+  "id": "report_1774840139330_p7d0ud6v6",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1774840139327-5007007.pdf",
+  "uploadTime": "2026-03-30T03:08:59.330Z",
+  "indicators": [
+    {
+      "name": "空腹血糖(GLU)",
+      "value": "7.7",
+      "unit": "mmol/L",
+      "referenceRange": "4-6.1",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查空腹血糖(GLU)，注意饮食控制"
+    },
+    {
+      "name": "血红蛋白(HGB)",
+      "value": "154",
+      "unit": "g/L",
+      "referenceRange": "100-160",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "尿酸(UA)",
+      "value": "181.9",
+      "unit": "umol/L",
+      "referenceRange": "150-420",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "白细胞(WBC)",
+      "value": "10.5",
+      "unit": "10^9/L",
+      "referenceRange": "4-10",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查白细胞(WBC)，注意休息"
+    },
+    {
+      "name": "血小板(PLT)",
+      "value": "224.9",
+      "unit": "10^9/L",
+      "referenceRange": "100-300",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "甘油三酯(TG)",
+      "value": "2.2",
+      "unit": "mmol/L",
+      "referenceRange": "0.5-1.7",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查甘油三酯(TG)，注意休息"
+    },
+    {
+      "name": "脂肪肝",
+      "value": "检出",
+      "unit": "",
+      "referenceRange": "正常",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议进一步检查脂肪肝相关情况"
+    },
+    {
+      "name": "高血压",
+      "value": "检出",
+      "unit": "",
+      "referenceRange": "正常",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议进一步检查高血压相关情况"
+    }
+  ],
+  "anomalyCount": 5,
+  "status": "parsed",
+  "analysisResult": "您的体检报告发现 5 项异常指标。\n\n- 血糖偏高，建议控制糖分摄入，规律饮食\n- 血脂异常，建议低脂饮食，增加有氧运动\n- 血常规部分指标异常，建议适当补充营养\n- 建议进一步专科检查，评估身体健康状况\n- 建议3个月后复查相关指标\n- 如有不适，请及时就医",
+  "aiAnalysis": "您的体检报告发现 5 项异常指标。\n\n- 血糖偏高，建议控制糖分摄入，规律饮食\n- 血脂异常，建议低脂饮食，增加有氧运动\n- 血常规部分指标异常，建议适当补充营养\n- 建议进一步专科检查，评估身体健康状况\n- 建议3个月后复查相关指标\n- 如有不适，请及时就医"
+}

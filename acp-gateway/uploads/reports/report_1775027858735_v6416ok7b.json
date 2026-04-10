@@ -1,0 +1,139 @@
+{
+  "id": "report_1775027858735_v6416ok7b",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/Desktop/000101022081542393-00.pdf",
+  "originalName": "000101022081542393-00.pdf",
+  "uploadTime": "2026-04-01T07:17:38.735Z",
+  "indicators": [
+    {
+      "name": "白细胞(WBC)",
+      "value": "6.23",
+      "unit": "10^9/L",
+      "referenceRange": "3.5-9.5",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "红细胞(RBC)",
+      "value": "4.30",
+      "unit": "10^12/L",
+      "referenceRange": "3.8-5.1",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "血红蛋白(HGB)",
+      "value": "133.0",
+      "unit": "g/L",
+      "referenceRange": "115-150",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "血小板(PLT)",
+      "value": "259.0",
+      "unit": "10^9/L",
+      "referenceRange": "125-350",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "谷丙转氨酶(ALT)",
+      "value": "17.0",
+      "unit": "U/L",
+      "referenceRange": "7.00-40.00",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "谷草转氨酶(AST)",
+      "value": "15.5",
+      "unit": "U/L",
+      "referenceRange": "13.00-35.00",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "空腹血糖(GLU)",
+      "value": "5.01",
+      "unit": "mmol/L",
+      "referenceRange": "3.9-6.1",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "总胆固醇(TC)",
+      "value": "4.41",
+      "unit": "mmol/L",
+      "referenceRange": "<5.18",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "甘油三酯(TG)",
+      "value": "0.98",
+      "unit": "mmol/L",
+      "referenceRange": "<1.7",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "高密度脂蛋白(HDL)",
+      "value": "1.04",
+      "unit": "mmol/L",
+      "referenceRange": "1.0-1.9",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "低密度脂蛋白(LDL)",
+      "value": "2.10",
+      "unit": "mmol/L",
+      "referenceRange": "<3.37",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "尿酸(UA)",
+      "value": "304.00",
+      "unit": "umol/L",
+      "referenceRange": "155.00-357.00",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "肌酐(Cr)",
+      "value": "70.90",
+      "unit": "umol/L",
+      "referenceRange": "41.00-73.00",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "心电图",
+      "value": "正常",
+      "unit": "",
+      "referenceRange": "正常",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    }
+  ],
+  "anomalyCount": 0,
+  "status": "parsed",
+  "analysisResult": "您的体检报告各项指标均在正常范围内，身体健康状况良好。建议继续保持健康的生活方式，定期体检。",
+  "aiAnalysis": "您的体检报告各项指标均在正常范围内，身体健康状况良好。建议继续保持健康的生活方式，定期体检。"
+}

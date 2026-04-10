@@ -1,0 +1,66 @@
+{
+  "id": "report_1774834171007_tfxlp9rwy",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1774834170986-772567725.pdf",
+  "uploadTime": "2026-03-30T01:29:31.007Z",
+  "indicators": [
+    {
+      "name": "谷丙转氨酶(ALT)",
+      "value": "45",
+      "unit": "U/L",
+      "referenceRange": "0-40",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查肝功能，避免饮酒"
+    },
+    {
+      "name": "空腹血糖(GLU)",
+      "value": "6.5",
+      "unit": "mmol/L",
+      "referenceRange": "3.9-6.1",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "建议复查空腹血糖，注意饮食控制"
+    },
+    {
+      "name": "甘油三酯(TG)",
+      "value": "2.1",
+      "unit": "mmol/L",
+      "referenceRange": "0.4-1.7",
+      "isAnomaly": true,
+      "severity": "slight",
+      "suggestion": "控制饮食，增加运动"
+    },
+    {
+      "name": "脂肪肝",
+      "value": "轻度",
+      "unit": "",
+      "referenceRange": "无",
+      "isAnomaly": true,
+      "severity": "abnormal",
+      "suggestion": "建议复查，注意饮食调理"
+    },
+    {
+      "name": "白细胞(WBC)",
+      "value": "6.8",
+      "unit": "10^9/L",
+      "referenceRange": "4-10",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "血红蛋白(HGB)",
+      "value": "135",
+      "unit": "g/L",
+      "referenceRange": "120-160",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    }
+  ],
+  "anomalyCount": 4,
+  "status": "parsed",
+  "analysisResult": "您的体检报告发现 4 项异常指标。\n\n- 代谢相关指标异常，可能与饮食、运动习惯有关\n- 建议控制饮食，减少高脂高糖食物摄入\n- 增加有氧运动，每周3-5次\n- 脂肪肝建议低脂饮食，避免饮酒\n- 适度运动有助于改善脂肪肝\n- 建议3个月后复查相关指标\n- 如症状明显，请及时就医",
+  "aiAnalysis": "您的体检报告发现 4 项异常指标。\n\n- 代谢相关指标异常，可能与饮食、运动习惯有关\n- 建议控制饮食，减少高脂高糖食物摄入\n- 增加有氧运动，每周3-5次\n- 脂肪肝建议低脂饮食，避免饮酒\n- 适度运动有助于改善脂肪肝\n- 建议3个月后复查相关指标\n- 如症状明显，请及时就医"
+}

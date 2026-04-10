@@ -1,0 +1,23 @@
+{
+  "id": "report_1775048134791_mve9d63ga",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1775048134779-776614096.pdf",
+  "originalName": "report-1774856299810-132891381.pdf",
+  "extractedText": "--- PAGE 1 ---\n",
+  "uploadTime": "2026-04-01T12:55:34.791Z",
+  "indicators": [
+    {
+      "name": "⚠️ 解析失败",
+      "value": "未检测到有效指标",
+      "unit": "",
+      "referenceRange": "",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": "PDF 内容为空，未能识别体检指标。"
+    }
+  ],
+  "anomalyCount": 0,
+  "status": "parsed",
+  "aiAnalysis": "⚠️ 无法分析：PDF 内容为空，未能识别体检指标。",
+  "analysisResult": "⚠️ 无法分析：PDF 内容为空，未能识别体检指标。"
+}

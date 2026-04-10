@@ -1,0 +1,21 @@
+{
+  "id": "report_1774856477719_5jak9ez2o",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1774856477715-837950668.pdf",
+  "uploadTime": "2026-03-30T07:41:17.719Z",
+  "indicators": [
+    {
+      "name": "解析失败",
+      "value": "PDF文件格式不正确",
+      "unit": "",
+      "referenceRange": "",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": "请确保上传的是有效的PDF文件"
+    }
+  ],
+  "anomalyCount": 0,
+  "status": "parsed",
+  "aiAnalysis": "⚠️ 无法分析：请上传包含体检指标的PDF文件（如血常规、肝功能、血糖等检测报告）",
+  "analysisResult": "⚠️ 无法分析：请上传包含体检指标的PDF文件（如血常规、肝功能、血糖等检测报告）"
+}

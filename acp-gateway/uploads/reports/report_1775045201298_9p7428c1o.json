@@ -1,0 +1,211 @@
+{
+  "id": "report_1775045201298_9p7428c1o",
+  "userId": "test-user",
+  "reportUrl": "/Users/litongb/dev/ahfu2/acp-gateway/uploads/reports/report-1775045201284-900863600.pdf",
+  "originalName": "0010900225880955.pdf",
+  "uploadTime": "2026-04-01T12:06:41.298Z",
+  "indicators": [
+    {
+      "name": "白细胞(WBC)",
+      "value": "8.3",
+      "unit": "10^9/L",
+      "referenceRange": "3.5-9.5",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "红细胞(RBC)",
+      "value": "4.36",
+      "unit": "10^12/L",
+      "referenceRange": "3.8-5.1",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "血红蛋白(HGB)",
+      "value": "134.0",
+      "unit": "g/L",
+      "referenceRange": "115-150",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "血小板(PLT)",
+      "value": "270.0",
+      "unit": "10^9/L",
+      "referenceRange": "125-350",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "谷草转氨酶(AST)",
+      "value": "15",
+      "unit": "U/L",
+      "referenceRange": "0-35",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "碱性磷酸酶(ALP)",
+      "value": "62",
+      "unit": "U/L",
+      "referenceRange": "35-100",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "总胆红素(TBIL)",
+      "value": "8.1",
+      "unit": "umol/L",
+      "referenceRange": "0-21",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "空腹血糖(GLU)",
+      "value": "4.72",
+      "unit": "mmol/L",
+      "referenceRange": "3.9-6.1",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "糖化血红蛋白(HbA1c)",
+      "value": "5.6",
+      "unit": "%",
+      "referenceRange": "4.0-6.0",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "总胆固醇(TC)",
+      "value": "4.85",
+      "unit": "mmol/L",
+      "referenceRange": "<5.2",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "甘油三酯(TG)",
+      "value": "1.39",
+      "unit": "mmol/L",
+      "referenceRange": "0.40-1.70",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "高密度脂蛋白(HDL)",
+      "value": "1.39",
+      "unit": "mmol/L",
+      "referenceRange": "1.0-2.1",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "低密度脂蛋白(LDL)",
+      "value": "2.73",
+      "unit": "mmol/L",
+      "referenceRange": "0-3.37",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "尿酸(UA)",
+      "value": "282",
+      "unit": "umol/L",
+      "referenceRange": "150-360",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "肌酐(Cr)",
+      "value": "63",
+      "unit": "umol/L",
+      "referenceRange": "41-73",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "促甲状腺激素(TSH)",
+      "value": "1.858",
+      "unit": "mIU/L",
+      "referenceRange": "0.38-4.34",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "降钙素原(PCT)",
+      "value": "0.250",
+      "unit": "ng/mL",
+      "referenceRange": "0.15-0.5",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "尿蛋白",
+      "value": "阴性",
+      "unit": "",
+      "referenceRange": "阴性",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "尿糖",
+      "value": "阴性",
+      "unit": "",
+      "referenceRange": "阴性",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "尿酮体",
+      "value": "阴性",
+      "unit": "",
+      "referenceRange": "阴性",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "尿潜血",
+      "value": "阴性",
+      "unit": "",
+      "referenceRange": "阴性",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    },
+    {
+      "name": "尿白细胞",
+      "value": "阴性",
+      "unit": "",
+      "referenceRange": "阴性",
+      "isAnomaly": false,
+      "severity": "normal",
+      "suggestion": ""
+    }
+  ],
+  "anomalyCount": 0,
+  "status": "parsed",
+  "analysisResult": "您的体检报告各项指标均在正常范围内，身体健康状况良好。建议继续保持健康的生活方式，定期体检。",
+  "aiAnalysis": "您的体检报告各项指标均在正常范围内，身体健康状况良好。建议继续保持健康的生活方式，定期体检。"
+}
