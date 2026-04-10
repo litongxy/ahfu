@@ -1,10 +1,10 @@
 const recipes = [
   // 养生汤类 (20道)
-  { id: 1, name: "山药枸杞炖鸡汤", desc: "补气养血，健脾益胃，适合气血不足人群", time: "60分钟", cal: 320, type: "汤类", tags: ["补气养血", "健脾"], img: "https://images.unsplash.com/photo-1595855782225-1a88c93a2c8a?w=400", 
+  { id: 1, name: "山药枸杞炖鸡汤", desc: "补气养血，健脾益胃，适合气血不足人群", time: "60分钟", cal: 320, type: "汤类", tags: ["补气养血", "健脾"], img: "https://images.unsplash.com/photo-1730112696140-19e61bb43d36?w=1200&auto=format&fit=crop", 
     ingredients: ["鸡肉500g", "山药200g", "枸杞15g", "红枣5颗", "姜3片", "盐适量"],
     steps: ["鸡肉洗净切块，焯水备用", "山药去皮切块，枸杞红枣洗净", "锅中加水，放入鸡肉、姜片、红枣", "大火烧开后转小火炖30分钟", "加入山药、枸杞继续炖20分钟", "出锅前加盐调味即可"] },
   
-  { id: 2, name: "红枣桂圆粥", desc: "养心安神，补血美容，适合失眠人群", time: "30分钟", cal: 180, type: "汤类", tags: ["养心安神", "美容"], img: "https://images.unsplash.com/photo-1517913596095-5577e407b01c?w=400",
+  { id: 2, name: "红枣桂圆粥", desc: "养心安神，补血美容，适合失眠人群", time: "30分钟", cal: 180, type: "汤类", tags: ["养心安神", "美容"], img: "https://images.unsplash.com/photo-1555078604-b2379f0e964a?w=1200&auto=format&fit=crop",
     ingredients: ["大米100g", "红枣10颗", "桂圆15g", "红糖适量"],
     steps: ["大米洗净浸泡30分钟", "红枣去核，桂圆肉洗净", "锅中加水，放入大米煮沸", "加入红枣、桂圆，小火熬煮", "煮至粥稠，加红糖调味"] },
   
@@ -32,7 +32,7 @@ const recipes = [
     ingredients: ["五花肉500g", "党参30g", "黄芪30g", "姜3片", "盐适量", "料酒1勺"],
     steps: ["五花肉切块，焯水备用", "党参、黄芪洗净", "锅中加水，放入肉块、党参、黄芪、姜片", "加料酒，大火烧开", "转小火炖45分钟，加盐调味"] },
   
-  { id: 9, name: "当归生姜羊肉汤", desc: "温中补血，调经止痛", time: "90分钟", cal: 380, type: "汤类", tags: ["温补", "调经"], img: "https://images.unsplash.com/photo-1564865878688-9c244f7f6d1c?w=400",
+  { id: 9, name: "当归生姜羊肉汤", desc: "温中补血，调经止痛", time: "90分钟", cal: 380, type: "汤类", tags: ["温补", "调经"], img: "https://images.unsplash.com/photo-1569562211093-4ed0d0758f12?w=1200&auto=format&fit=crop",
     ingredients: ["羊肉500g", "当归20g", "生姜50g", "枸杞10g", "盐适量"],
     steps: ["羊肉切块焯水，生姜切片", "锅中加水，放入羊肉、当归、生姜", "大火烧开后撇去浮沫", "转小火炖1小时", "加入枸杞再炖10分钟", "加盐调味即可"] },
   
@@ -81,7 +81,7 @@ const recipes = [
     steps: ["椰子取肉和汁，鸡肉切块焯水", "锅中加椰子水和水", "放入鸡肉、椰肉、红枣", "大火烧开转小火炖1小时", "加入枸杞再炖10分钟", "加盐调味"] },
 
   // 药膳类 (20道)
-  { id: 21, name: "黄芪当归炖鸡", desc: "补气养血，调经美容", time: "90分钟", cal: 320, type: "药膳", tags: ["补气", "养血"], img: "https://images.unsplash.com/photo-1595855782225-1a88c93a2c8a?w=400",
+  { id: 21, name: "黄芪当归炖鸡", desc: "补气养血，调经美容", time: "90分钟", cal: 320, type: "药膳", tags: ["补气", "养血"], img: "https://images.unsplash.com/photo-1730112696140-19e61bb43d36?w=1200&auto=format&fit=crop",
     ingredients: ["鸡1只", "黄芪30g", "当归15g", "红枣5颗", "姜3片", "盐适量"],
     steps: ["鸡洗净切块，焯水备用", "黄芪、当归、红枣洗净", "锅中加水，放入所有食材", "大火烧开转小火炖1小时", "加盐调味"] },
   
@@ -97,11 +97,11 @@ const recipes = [
     ingredients: ["猪腰2个", "杜仲30g", "枸杞15g", "姜3片", "盐适量", "料酒1勺"],
     steps: ["猪腰切片，用盐水浸泡", "杜仲泡软", "锅中加水，放入杜仲、姜片", "加入猪腰，大火烧开", "转小火炖40分钟", "加入枸杞，加盐"] },
   
-  { id: 25, name: "四物炖鸡", desc: "补血调经，美容养颜", time: "90分钟", cal: 340, type: "药膳", tags: ["补血", "调经"], img: "https://images.unsplash.com/photo-1595855782225-1a88c93a2c8a?w=400",
+  { id: 25, name: "四物炖鸡", desc: "补血调经，美容养颜", time: "90分钟", cal: 340, type: "药膳", tags: ["补血", "调经"], img: "https://images.unsplash.com/photo-1730112696140-19e61bb43d36?w=1200&auto=format&fit=crop",
     ingredients: ["鸡1只", "当归15g", "川芎10g", "熟地20g", "白芍15g", "红枣5颗", "盐适量"],
     steps: ["鸡洗净切块焯水", "四物药材洗净", "锅中加水，放入所有食材", "大火烧开转小火炖1小时", "加盐调味"] },
   
-  { id: 26, name: "人参炖鸡汤", desc: "大补元气，益血生津", time: "120分钟", cal: 380, type: "药膳", tags: ["大补", "元气"], img: "https://images.unsplash.com/photo-1595855782225-1a88c93a2c8a?w=400",
+  { id: 26, name: "人参炖鸡汤", desc: "大补元气，益血生津", time: "120分钟", cal: 380, type: "药膳", tags: ["大补", "元气"], img: "https://images.unsplash.com/photo-1730112696140-19e61bb43d36?w=1200&auto=format&fit=crop",
     ingredients: ["鸡1只", "人参30g", "枸杞20g", "红枣5颗", "姜3片", "盐适量"],
     steps: ["鸡洗净，人参切片", "锅中加水，放入鸡、人参", "加入红枣、姜片", "大火烧开转小火炖2小时", "加入枸杞，加盐"] },
   
@@ -109,7 +109,7 @@ const recipes = [
     ingredients: ["灵芝孢子粉10g", "鸡肉300g", "枸杞15g", "姜3片", "盐适量"],
     steps: ["鸡肉切块焯水", "锅中加水，放入鸡肉、姜片", "炖40分钟后加入孢子粉", "继续炖15分钟", "加入枸杞，加盐"] },
   
-  { id: 28, name: "田七炖鸡", desc: "活血化瘀，消肿止痛", time: "60分钟", cal: 310, type: "药膳", tags: ["活血", "化瘀"], img: "https://images.unsplash.com/photo-1595855782225-1a88c93a2c8a?w=400",
+  { id: 28, name: "田七炖鸡", desc: "活血化瘀，消肿止痛", time: "60分钟", cal: 310, type: "药膳", tags: ["活血", "化瘀"], img: "https://images.unsplash.com/photo-1730112696140-19e61bb43d36?w=1200&auto=format&fit=crop",
     ingredients: ["鸡1只", "田七20g", "枸杞15g", "红枣5颗", "盐适量"],
     steps: ["鸡洗净切块，田七打碎", "锅中加水，放入鸡、田七", "加入红枣，大火烧开", "转小火炖1小时", "加入枸杞，加盐"] },
   
@@ -126,7 +126,7 @@ const recipes = [
     ingredients: ["西兰花300g", "蒜末20g", "盐适量", "食用油适量"],
     steps: ["西兰花切小朵，焯水备用", "锅中热油，爆香蒜末", "放入西兰花翻炒", "加盐调味，快速出锅"] },
 
-  { id: 42, name: "番茄炒蛋", desc: "营养家常，维生素丰富", time: "10分钟", cal: 150, type: "家常菜", tags: ["营养", "维C"], img: "https://images.unsplash.com/photo-1482049016gy-8c3f87e3d4b7?w=400",
+  { id: 42, name: "番茄炒蛋", desc: "营养家常，维生素丰富", time: "10分钟", cal: 150, type: "家常菜", tags: ["营养", "维C"], img: "https://images.unsplash.com/photo-1759216280661-e785edc3922e?w=1200&auto=format&fit=crop",
     ingredients: ["番茄2个", "鸡蛋3个", "葱花适量", "盐适量", "糖少许"],
     steps: ["番茄切块，鸡蛋打散", "锅中热油，先炒鸡蛋盛出", "再炒番茄，加糖", "放入鸡蛋一起翻炒", "加盐，撒葱花"] },
 
@@ -134,7 +134,7 @@ const recipes = [
     ingredients: ["土豆1个", "青椒2个", "干辣椒3个", "蒜末适量", "盐醋适量"],
     steps: ["土豆切丝泡水，青椒切丝", "锅中热油，爆香干辣椒蒜末", "放入土豆丝翻炒", "加醋、盐，最后放青椒"] },
 
-  { id: 44, name: "红烧肉", desc: "肥而不腻，入口即化", time: "60分钟", cal: 580, type: "家常菜", tags: ["香浓", "下饭"], img: "https://images.unsplash.com/photo-1623689046286-d4a4a6c2d2b5?w=400",
+  { id: 44, name: "红烧肉", desc: "肥而不腻，入口即化", time: "60分钟", cal: 580, type: "家常菜", tags: ["香浓", "下饭"], img: "https://images.unsplash.com/photo-1740968861052-77a2a89b0c51?w=1200&auto=format&fit=crop",
     ingredients: ["五花肉500g", "冰糖30g", "生抽2勺", "老抽1勺", "八角2个", "桂皮1块"],
     steps: ["五花肉切块焯水", "锅中放冰糖炒色", "放入肉块翻炒上色", "加生抽老抽八角桂皮", "加水没过肉，大火烧开", "转小火炖1小时，收汁"] },
 
@@ -148,14 +148,168 @@ const recipes = [
     steps: ["油麦菜切段", "锅中热油，爆香蒜末", "放入油麦菜翻炒", "加盐，出锅"] },
 
   // 早餐类 (15道) - 简化版
-  { id: 86, name: "牛奶燕麦粥", desc: "营养早餐，富含膳食纤维", time: "10分钟", cal: 200, type: "早餐", tags: ["营养", "纤维"], img: "https://images.unsplash.com/photo-1517913596095-5577e407b01c?w=400",
+  { id: 86, name: "牛奶燕麦粥", desc: "营养早餐，富含膳食纤维", time: "10分钟", cal: 200, type: "早餐", tags: ["营养", "纤维"], img: "https://images.unsplash.com/photo-1555078604-b2379f0e964a?w=1200&auto=format&fit=crop",
     ingredients: ["燕麦100g", "牛奶300ml", "蜂蜜适量", "坚果少许"],
     steps: ["燕麦加水煮沸", "倒入牛奶搅拌", "煮3分钟", "加入蜂蜜、坚果"] },
 
   { id: 87, name: "全麦三明治", desc: "低脂健康，补充能量", time: "10分钟", cal: 280, type: "早餐", tags: ["低脂", "能量"], img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400",
     ingredients: ["全麦面包2片", "鸡蛋1个", "生菜2片", "番茄2片", "沙拉酱适量"],
-    steps: ["鸡蛋煎熟", "面包烤一下", "依次放生菜、番茄、鸡蛋", "挤上沙拉酱", "盖上面包"] }
+    steps: ["鸡蛋煎熟", "面包烤一下", "依次放生菜、番茄、鸡蛋", "挤上沙拉酱", "盖上面包"] },
+
+  { id: 88, name: "西红柿鸡蛋面", desc: "快手一锅面，酸香开胃", time: "15分钟", cal: 360, type: "早餐", tags: ["快手", "开胃"], img: "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=1200&auto=format&fit=crop",
+    ingredients: ["西红柿2个", "鸡蛋2个", "挂面150g", "葱花适量", "盐适量"],
+    steps: ["西红柿切块，鸡蛋打散", "锅中热油炒蛋盛出", "下西红柿炒软后加水", "水开后下面条，煮至八成熟", "放回鸡蛋，加盐调味，撒葱花"] },
+
+  { id: 89, name: "番茄鸡蛋汤", desc: "清爽低负担，晚餐搭配佳", time: "10分钟", cal: 120, type: "汤类", tags: ["清淡", "快手"], img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=1200&auto=format&fit=crop",
+    ingredients: ["番茄2个", "鸡蛋2个", "葱花适量", "盐适量", "香油少许"],
+    steps: ["番茄切小块，鸡蛋打散", "锅中加水放番茄煮3分钟", "调入盐后缓慢淋入蛋液", "轻轻推动形成蛋花", "撒葱花，滴香油出锅"] },
+
+  { id: 90, name: "番茄鸡蛋豆腐汤", desc: "补充蛋白，嫩滑鲜香", time: "15分钟", cal: 170, type: "汤类", tags: ["高蛋白", "清淡"], img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=1200&auto=format&fit=crop",
+    ingredients: ["番茄2个", "鸡蛋2个", "嫩豆腐200g", "葱花适量", "盐适量"],
+    steps: ["豆腐切小块，番茄切丁", "番茄下锅炒出汁，加水煮开", "加入豆腐煮3分钟", "淋入蛋液形成蛋花", "加盐调味，撒葱花"] },
+
+  { id: 91, name: "番茄鸡蛋盖浇饭", desc: "主食配菜一盘搞定", time: "15分钟", cal: 420, type: "家常菜", tags: ["下饭", "快手"], img: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=1200&auto=format&fit=crop",
+    ingredients: ["番茄2个", "鸡蛋3个", "米饭1碗", "盐适量", "糖少许"],
+    steps: ["鸡蛋打散炒至凝固盛出", "番茄下锅炒软，加盐和少许糖", "放回鸡蛋翻炒均匀", "将番茄鸡蛋浇在热米饭上即可"] },
+
+  { id: 92, name: "木耳炒鸡蛋", desc: "脆嫩可口，营养均衡", time: "12分钟", cal: 190, type: "家常菜", tags: ["营养", "快手"], img: "https://images.unsplash.com/photo-1514516345957-556ca7fd7d82?w=1200&auto=format&fit=crop",
+    ingredients: ["泡发木耳120g", "鸡蛋3个", "蒜末适量", "盐适量", "生抽1勺"],
+    steps: ["木耳洗净撕小朵，鸡蛋打散", "先炒鸡蛋盛出", "蒜末爆香后下木耳翻炒", "加入鸡蛋、生抽、盐翻匀即可"] },
+
+  { id: 93, name: "洋葱炒鸡蛋", desc: "甜香入味，配饭下饭", time: "10分钟", cal: 180, type: "家常菜", tags: ["下饭", "快手"], img: "https://images.unsplash.com/photo-1625943553852-781c6dd46faa?w=1200&auto=format&fit=crop",
+    ingredients: ["洋葱1个", "鸡蛋3个", "盐适量", "生抽1勺"],
+    steps: ["洋葱切丝，鸡蛋打散", "鸡蛋炒熟盛出", "洋葱下锅翻炒至微透明", "放入鸡蛋，加盐和生抽翻匀"] },
+
+  { id: 94, name: "黄瓜炒鸡蛋", desc: "清爽家常，口感脆嫩", time: "10分钟", cal: 160, type: "家常菜", tags: ["清爽", "家常"], img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200&auto=format&fit=crop",
+    ingredients: ["黄瓜1根", "鸡蛋3个", "蒜末适量", "盐适量"],
+    steps: ["黄瓜切片，鸡蛋打散", "先炒鸡蛋盛出", "蒜末爆香后下黄瓜快炒", "放回鸡蛋，加盐翻匀出锅"] },
+
+  { id: 95, name: "香菇滑蛋", desc: "鲜香嫩滑，老人孩子都爱吃", time: "12分钟", cal: 200, type: "家常菜", tags: ["鲜香", "嫩滑"], img: "https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=1200&auto=format&fit=crop",
+    ingredients: ["香菇6朵", "鸡蛋3个", "葱花适量", "盐适量"],
+    steps: ["香菇切片焯水备用", "鸡蛋打散加少许盐", "香菇先炒香后倒入蛋液", "小火轻推至凝固，撒葱花即可"] },
+
+  { id: 96, name: "青椒炒鸡蛋", desc: "香辣可口，经典下饭菜", time: "12分钟", cal: 190, type: "家常菜", tags: ["下饭", "香辣"], img: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=1200&auto=format&fit=crop",
+    ingredients: ["青椒2个", "鸡蛋3个", "蒜末适量", "盐适量"],
+    steps: ["青椒切丝，鸡蛋打散", "鸡蛋炒熟盛出", "蒜末爆香，青椒翻炒至断生", "放鸡蛋回锅，加盐翻匀"] },
+
+  { id: 97, name: "菠菜鸡蛋饼", desc: "高纤早餐，饱腹感强", time: "15分钟", cal: 260, type: "早餐", tags: ["高纤维", "早餐"], img: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1200&auto=format&fit=crop",
+    ingredients: ["菠菜100g", "鸡蛋2个", "面粉80g", "盐适量", "清水适量"],
+    steps: ["菠菜焯水切碎", "鸡蛋、面粉、菠菜和水调成糊", "平底锅刷油倒入面糊", "小火煎至两面金黄"] },
+
+  { id: 98, name: "燕麦鸡蛋饼", desc: "控脂友好，做法简单", time: "12分钟", cal: 230, type: "早餐", tags: ["控脂", "高纤维"], img: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=1200&auto=format&fit=crop",
+    ingredients: ["燕麦片80g", "鸡蛋2个", "牛奶120ml", "盐少许"],
+    steps: ["燕麦片提前泡软", "与鸡蛋、牛奶混合成糊", "平底锅少油摊平", "小火煎至两面上色即可"] },
+
+  { id: 99, name: "番茄菜花炒蛋", desc: "蔬菜占比高，清爽有层次", time: "18分钟", cal: 220, type: "家常菜", tags: ["蔬菜", "营养"], img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200&auto=format&fit=crop",
+    ingredients: ["番茄2个", "菜花200g", "鸡蛋2个", "盐适量", "蒜末适量"],
+    steps: ["菜花掰小朵焯水，番茄切块", "鸡蛋炒熟盛出", "蒜末爆香后下番茄和菜花", "放回鸡蛋，加盐翻炒均匀"] },
+
+  { id: 100, name: "虾皮紫菜蛋花汤", desc: "鲜味足，补钙思路友好", time: "10分钟", cal: 110, type: "汤类", tags: ["补钙", "清淡"], img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=1200&auto=format&fit=crop",
+    ingredients: ["紫菜8g", "鸡蛋2个", "虾皮10g", "葱花适量", "盐适量"],
+    steps: ["紫菜和虾皮冲洗备用", "锅中加水煮开后下虾皮", "加入紫菜煮1分钟", "淋入蛋液，加盐调味，撒葱花"] },
+
+  { id: 101, name: "西红柿炖豆腐", desc: "酸甜开胃，清淡下饭", time: "15分钟", cal: 190, type: "素食", tags: ["清淡", "开胃"], img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200&auto=format&fit=crop",
+    ingredients: ["西红柿2个", "豆腐300g", "蒜末适量", "盐适量", "生抽1勺"],
+    steps: ["豆腐切块，西红柿切丁", "蒜末爆香后下西红柿炒出汁", "加入豆腐和少量清水", "焖煮5分钟后加盐、生抽"] },
+
+  { id: 102, name: "西葫芦炒鸡蛋", desc: "口感清甜，家常快手", time: "12分钟", cal: 170, type: "家常菜", tags: ["快手", "清爽"], img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200&auto=format&fit=crop",
+    ingredients: ["西葫芦1根", "鸡蛋3个", "蒜末适量", "盐适量"],
+    steps: ["西葫芦切片，鸡蛋打散", "鸡蛋炒熟盛出", "蒜末爆香后下西葫芦翻炒", "放回鸡蛋，加盐翻匀即可"] },
+
+  { id: 103, name: "番茄金针菇蛋汤", desc: "酸鲜顺口，低油低负担", time: "12分钟", cal: 140, type: "汤类", tags: ["清淡", "低脂"], img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=1200&auto=format&fit=crop",
+    ingredients: ["番茄2个", "金针菇150g", "鸡蛋2个", "盐适量", "葱花适量"],
+    steps: ["番茄切块，金针菇去根洗净", "锅中加水和番茄煮出味", "放入金针菇煮2分钟", "淋入蛋液，加盐和葱花"] },
+
+  { id: 104, name: "土豆鸡蛋饼", desc: "外酥里软，饱腹感好", time: "18分钟", cal: 280, type: "早餐", tags: ["饱腹", "早餐"], img: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=1200&auto=format&fit=crop",
+    ingredients: ["土豆1个", "鸡蛋2个", "面粉60g", "盐适量", "黑胡椒少许"],
+    steps: ["土豆擦丝后稍挤水", "与鸡蛋、面粉、盐混合", "平底锅少油摊成饼", "中小火煎至两面金黄"] }
 ];
+
+// 自动扩展食谱库到 1000 条（保留已有食谱，缺少部分按模板补齐）
+const TARGET_RECIPE_COUNT = 1000;
+const GENERATED_TYPES = ["汤类", "药膳", "家常菜", "素食", "早餐"];
+const GENERATED_IMAGES = [
+  "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1730112696140-19e61bb43d36?w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1759216280661-e785edc3922e?w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1555078604-b2379f0e964a?w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=1200&auto=format&fit=crop"
+];
+const GENERATED_INGREDIENTS = ["鸡胸肉", "番茄", "西兰花", "豆腐", "胡萝卜", "香菇", "土豆", "玉米", "山药", "燕麦", "鸡蛋", "青菜", "南瓜", "海带", "木耳"];
+const GENERATED_COOKING = ["清炒", "炖煮", "蒸制", "焖烧", "快手", "暖胃", "低脂", "清补"];
+
+function uniqueTagList(tags) {
+  return Array.from(new Set(tags.filter(Boolean))).slice(0, 3);
+}
+
+function getGeneratedTypeMeta(type) {
+  switch (type) {
+    case "汤类":
+      return { tags: ["清淡", "暖胃", "补水"], baseCal: 170, baseTime: 25, desc: "清爽顺口，适合日常调理" };
+    case "药膳":
+      return { tags: ["调理", "滋补", "养生"], baseCal: 240, baseTime: 45, desc: "温和调理，适合阶段性进补" };
+    case "家常菜":
+      return { tags: ["快手", "下饭", "均衡"], baseCal: 280, baseTime: 18, desc: "家常做法，兼顾口感与营养" };
+    case "素食":
+      return { tags: ["轻食", "高纤", "低脂"], baseCal: 190, baseTime: 16, desc: "蔬食搭配，轻负担更清爽" };
+    case "早餐":
+      return { tags: ["高蛋白", "饱腹", "晨间"], baseCal: 260, baseTime: 12, desc: "早餐友好，开启元气一天" };
+    default:
+      return { tags: ["均衡", "健康"], baseCal: 220, baseTime: 20, desc: "营养均衡，适合日常饮食" };
+  }
+}
+
+function buildGeneratedRecipe(index, id) {
+  const type = GENERATED_TYPES[index % GENERATED_TYPES.length];
+  const typeMeta = getGeneratedTypeMeta(type);
+  const mainA = GENERATED_INGREDIENTS[index % GENERATED_INGREDIENTS.length];
+  const mainB = GENERATED_INGREDIENTS[(index + 3) % GENERATED_INGREDIENTS.length];
+  const mainC = GENERATED_INGREDIENTS[(index + 7) % GENERATED_INGREDIENTS.length];
+  const style = GENERATED_COOKING[index % GENERATED_COOKING.length];
+  const title = `${mainA}${mainB}${style}${type === "汤类" ? "汤" : type === "早餐" ? "早餐碗" : "拼盘"}`;
+  const time = `${typeMeta.baseTime + (index % 18)}分钟`;
+  const cal = typeMeta.baseCal + ((index * 7) % 110);
+  const tags = uniqueTagList([typeMeta.tags[0], typeMeta.tags[1], index % 2 === 0 ? "控脂" : "高纤"]);
+  const ingredientAmount = type === "早餐" ? "100g" : "150g";
+  const ingredients = [
+    `${mainA}${ingredientAmount}`,
+    `${mainB}120g`,
+    `${mainC}80g`,
+    "姜片适量",
+    "盐适量"
+  ];
+  const steps = [
+    `准备食材：${mainA}、${mainB}和${mainC}清洗处理备用`,
+    `锅中少油或加水加热，先下${mainA}与${mainB}翻炒/煮制`,
+    `加入${mainC}后按口味调味，保持中小火至熟透`,
+    "出锅前复查咸淡，装盘即可食用"
+  ];
+
+  return {
+    id,
+    name: `${title}（${id}）`,
+    desc: typeMeta.desc,
+    time,
+    cal,
+    type,
+    tags,
+    img: GENERATED_IMAGES[index % GENERATED_IMAGES.length],
+    ingredients,
+    steps
+  };
+}
+
+if (recipes.length < TARGET_RECIPE_COUNT) {
+  const maxId = recipes.reduce(function(max, item) {
+    const numericId = Number(item && item.id);
+    return Number.isFinite(numericId) ? Math.max(max, numericId) : max;
+  }, 0);
+  const needCount = TARGET_RECIPE_COUNT - recipes.length;
+  for (let i = 0; i < needCount; i += 1) {
+    recipes.push(buildGeneratedRecipe(i, maxId + i + 1));
+  }
+}
 
 // 默认食谱数据（用于没有详细步骤的食谱）
 const defaultRecipe = {

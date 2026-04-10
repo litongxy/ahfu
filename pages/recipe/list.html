@@ -6,321 +6,912 @@
   <title>健康食谱 - 同仁堂</title>
   <link rel="stylesheet" href="/styles/common.css">
   <style>
-    body { padding: 0; background: transparent; }
-    .header { 
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%); 
-      color: white; 
-      padding: 24px 20px; 
-      border-radius: 0 0 28px 28px; 
-      margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(196, 30, 58, 0.3);
+    .recipe-summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
     }
-    .header h1 { font-size: 22px; margin-bottom: 6px; }
-    .header p { font-size: 13px; opacity: 0.9; }
-    .back-btn { 
-      background: rgba(255,255,255,0.2); 
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: white; 
-      padding: 10px 18px; 
-      border-radius: 20px; 
-      font-size: 14px; 
-      margin-bottom: 12px;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-block;
+
+    .recipe-topic-chip {
+      display: flex;
+      width: fit-content;
+      min-height: 24px;
+      margin: 0 auto 10px;
+      padding: 0 9px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      line-height: 1;
     }
-    .back-btn:hover { background: rgba(255,255,255,0.3); transform: translateX(-4px); }
-    .tabs { display: flex; gap: 10px; margin-bottom: 16px; margin: 0 16px 16px 16px; overflow-x: auto; padding-bottom: 4px; }
-    .tab { 
-      padding: 10px 20px; 
-      background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
-      border-radius: 20px; 
-      font-size: 14px; 
-      white-space: nowrap; 
-      cursor: pointer; 
-      border: none;
-      transition: all 0.3s ease;
+
+    .recipe-stat {
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.14);
     }
-    .tab.active { 
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%); 
-      color: white;
-      box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+
+    .recipe-stat strong {
+      display: block;
+      font-size: 18px;
+      font-weight: 700;
     }
-    .card { 
-      background: white; 
-      border-radius: 16px; 
-      padding: 16px; 
-      margin: 0 16px 16px 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08); 
-      transition: all 0.3s ease;
+
+    .recipe-stat span {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      color: rgba(248, 255, 246, 0.8);
+    }
+
+    .recipe-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 98px;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-sm);
       cursor: pointer;
     }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
-    .recipe-img { 
-      width: 100%; 
-      height: 160px; 
-      border-radius: 12px; 
-      margin-bottom: 14px; 
-      object-fit: cover; 
-      background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+
+    .recipe-card__title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.35;
     }
-    .recipe-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
-    .recipe-desc { font-size: 14px; color: #616161; margin-bottom: 12px; }
-    .recipe-info { display: flex; gap: 16px; font-size: 13px; color: #9e9e9e; }
-    .recipe-tag { 
-      display: inline-block; 
-      padding: 4px 10px; 
-      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); 
-      color: #e65100; 
-      border-radius: 12px; 
-      font-size: 12px; 
-      margin-right: 6px;
-      font-weight: 500;
+
+    .recipe-card__desc {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.55;
     }
-    .loading { text-align: center; padding: 40px; color: #999; }
-    .no-more { text-align: center; padding: 20px; color: #bbb; font-size: 14px; }
-    
-    .modal-overlay {
+
+    .recipe-card__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .recipe-card__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .recipe-card__thumb {
+      width: 98px;
+      height: 98px;
+      border-radius: 14px;
+      object-fit: cover;
+      background: var(--bg-muted);
+    }
+
+    .no-more {
+      padding: 6px 0 14px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .sheet-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.6);
-      z-index: 9999;
+      inset: 0;
+      z-index: 30;
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
-      padding: 20px;
+      padding: 14px 10px;
+      background: rgba(10, 16, 11, 0.5);
+      backdrop-filter: blur(14px) saturate(1.05);
     }
-    .modal-content {
-      background: white;
-      border-radius: 20px;
-      max-width: 500px;
-      width: 100%;
-      max-height: 85vh;
-      overflow-y: auto;
+
+    .sheet-card {
+      width: min(100%, 440px);
+      max-height: calc(100vh - 24px);
+      overflow: hidden;
+      border-radius: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 26px 54px rgba(19, 30, 20, 0.36);
     }
-    .modal-header {
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 20px 20px 0 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-    }
-    .modal-header h2 { margin: 0; font-size: 18px; }
-    .modal-close {
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    .modal-body { padding: 20px; }
-    .section-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #c41e3a;
-      margin: 16px 0 10px 0;
-      padding-bottom: 6px;
-      border-bottom: 2px solid #ffebee;
-    }
-    .section-title:first-child { margin-top: 0; }
-    .ingredient-list { list-style: none; padding: 0; margin: 0; }
-    .ingredient-list li {
-      padding: 8px 0;
-      border-bottom: 1px solid #f0f0f0;
-      font-size: 14px;
-      color: #333;
-    }
-    .ingredient-list li:last-child { border-bottom: none; }
-    .step-list { list-style: none; padding: 0; margin: 0; counter-reset: step; }
-    .step-list li {
-      padding: 12px 0 12px 40px;
-      border-bottom: 1px solid #f0f0f0;
-      font-size: 14px;
-      color: #333;
+
+    .sheet-cover {
       position: relative;
-      line-height: 1.6;
+      height: 178px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 88% 12%, rgba(180, 233, 156, 0.26), transparent 42%),
+        linear-gradient(140deg, rgba(88, 145, 62, 0.96), rgba(56, 102, 42, 0.96));
     }
-    .step-list li:last-child { border-bottom: none; }
+
+    .sheet-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.03);
+      filter: saturate(1.08) contrast(1.03);
+    }
+
+    .sheet-cover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 12% 78%, rgba(188, 236, 165, 0.2), transparent 40%),
+        linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 34%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .sheet-cover::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(10, 16, 11, 0.08) 0%, rgba(10, 16, 11, 0.24) 44%, rgba(10, 16, 11, 0.82) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .sheet-head {
+      position: absolute;
+      inset: auto 16px 12px;
+      z-index: 2;
+      color: #f8fff6;
+    }
+
+    .sheet-head .chip-row {
+      gap: 7px;
+    }
+
+    .sheet-head .chip {
+      min-height: 30px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.16);
+      color: #f4ffef;
+      backdrop-filter: blur(14px);
+    }
+
+    .sheet-head h2 {
+      margin-top: 8px;
+      font-size: clamp(28px, 6.2vw, 36px);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      text-shadow: 0 1px 2px rgba(9, 14, 10, 0.18);
+    }
+
+    .sheet-head p {
+      margin-top: 8px;
+      max-width: 96%;
+      font-size: 14px;
+      line-height: 1.45;
+      color: rgba(244, 255, 239, 0.94);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-shadow: 0 1px 1px rgba(9, 14, 10, 0.14);
+    }
+
+    .sheet-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 2;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(42, 84, 39, 0.56);
+      color: #f6fff2;
+      font-size: 29px;
+      line-height: 1;
+      font-weight: 300;
+      backdrop-filter: blur(16px);
+      transition: transform var(--duration-fast) var(--ease-out), background-color var(--duration-base) var(--ease-out);
+    }
+
+    .sheet-close:active {
+      transform: scale(0.96);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .sheet-close:hover {
+        background: rgba(63, 112, 50, 0.66);
+      }
+    }
+
+    .sheet-body {
+      max-height: calc(100vh - 214px);
+      overflow-y: auto;
+      padding: 14px;
+    }
+
+    .sheet-section + .sheet-section {
+      margin-top: 16px;
+    }
+
+    .sheet-section h3 {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .sheet-list {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sheet-list li {
+      list-style: none;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: var(--bg-muted);
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    .step-list {
+      counter-reset: step;
+    }
+
+    .step-list li {
+      position: relative;
+      padding-left: 40px;
+    }
+
     .step-list li::before {
       counter-increment: step;
       content: counter(step);
       position: absolute;
-      left: 0;
-      top: 12px;
-      width: 26px;
-      height: 26px;
-      background: linear-gradient(135deg, #c41e3a 0%, #d32f2f 100%);
-      color: white;
+      left: 12px;
+      top: 10px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
+      background: var(--brand-600);
+      color: var(--text-on-brand);
       text-align: center;
-      line-height: 26px;
-      font-size: 13px;
-      font-weight: 600;
+      line-height: 20px;
+      font-size: 11px;
+      font-weight: 700;
     }
-    .modal-footer {
-      padding: 15px 20px;
-      background: #f9f9f9;
-      border-radius: 0 0 20px 20px;
-      text-align: center;
-    }
-    .modal-btn {
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%);
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 25px;
-      font-size: 15px;
-      cursor: pointer;
+
+    @media (max-width: 480px) {
+      .recipe-card {
+        grid-template-columns: minmax(0, 1fr) 88px;
+      }
+
+      .recipe-card__thumb {
+        width: 88px;
+        height: 88px;
+      }
+
+      .sheet-cover {
+        height: 164px;
+      }
+
+      .sheet-head h2 {
+        font-size: clamp(24px, 8.2vw, 32px);
+      }
+
+      .sheet-head p {
+        margin-top: 8px;
+        font-size: 14px;
+      }
+
+      .sheet-close {
+        width: 46px;
+        height: 46px;
+        font-size: 26px;
+      }
+
+      .sheet-body {
+        max-height: calc(100vh - 194px);
+      }
     }
   </style>
 </head>
-<body>
-  <div class="header">
-    <a href="/chat.html" class="back-btn">← 返回</a>
-    <h1>🍽️ 健康食谱</h1>
-    <p>根据您的体质推荐健康美食</p>
+<body class="is-transparent">
+  <div class="page-shell">
+    <div class="page-body page-stack">
+      <header class="page-hero">
+        <div class="topbar">
+          <a href="/chat.html" class="back-link" onclick="return navigateBack(event)">返回</a>
+          <a href="/chat.html" class="hero-action">咨询营养问题</a>
+        </div>
+
+        <div class="hero-copy">
+          <h1 class="hero-title">健康食谱</h1>
+          <p class="hero-subtitle">从日常家常菜到药膳汤品，把适合当前体质与目标的食谱整理成可直接执行的内容流。</p>
+        </div>
+
+        <div class="recipe-summary">
+          <div class="recipe-stat">
+            <strong>体质导向</strong>
+            <span>按状态选食谱</span>
+          </div>
+          <div class="recipe-stat">
+            <strong>日常可做</strong>
+            <span>家常与药膳结合</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="section-card">
+        <div class="segmented">
+          <button class="tab active" data-type="all">全部</button>
+          <button class="tab" data-type="汤类">养生汤</button>
+          <button class="tab" data-type="药膳">药膳</button>
+          <button class="tab" data-type="家常菜">家常菜</button>
+          <button class="tab" data-type="素食">素食</button>
+          <button class="tab" data-type="早餐">早餐</button>
+        </div>
+      </section>
+
+      <div id="recipeList" class="feed-list"></div>
+      <div class="no-more" id="noMore">已经加载全部食谱</div>
+    </div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" data-type="all">全部</button>
-    <button class="tab" data-type="汤类">养生汤</button>
-    <button class="tab" data-type="药膳">药膳</button>
-    <button class="tab" data-type="家常菜">家常菜</button>
-    <button class="tab" data-type="素食">素食</button>
-    <button class="tab" data-type="早餐">早餐</button>
-  </div>
-
-  <div id="recipeList"></div>
-  <div class="no-more">— 已加载全部100道食谱 —</div>
-
-  <div style="height: 60px;"></div>
+  <nav class="bottom-nav">
+    <a href="/chat.html" class="nav-item">
+      <span class="nav-icon">咨</span>
+      <span>咨询</span>
+    </a>
+    <a href="/pages/health-profile/index.html" class="nav-item">
+      <span class="nav-icon">康</span>
+      <span>健康</span>
+    </a>
+    <a href="/pages/recipe/list.html" class="nav-item active">
+      <span class="nav-icon">食</span>
+      <span>食谱</span>
+    </a>
+    <a href="/pages/exercise/list.html" class="nav-item">
+      <span class="nav-icon">练</span>
+      <span>课程</span>
+    </a>
+    <a href="/pages/profile/index.html" class="nav-item">
+      <span class="nav-icon">我</span>
+      <span>我的</span>
+    </a>
+  </nav>
 
   <script src="/data/recipes.js"></script>
   <script>
+    function navigateBack(event, fallbackUrl) {
+      if (event) {
+        event.preventDefault();
+      }
+
+      const fallback = fallbackUrl || '/chat.html';
+      const referrer = document.referrer;
+      let shouldUseHistory = false;
+
+      if (referrer) {
+        try {
+          const referrerUrl = new URL(referrer);
+          shouldUseHistory = referrerUrl.origin === window.location.origin;
+        } catch (error) {
+          // Ignore malformed referrer and fallback to default page.
+        }
+      }
+
+      if (shouldUseHistory) {
+        const currentUrl = window.location.href;
+        window.history.back();
+        window.setTimeout(function() {
+          if (window.location.href === currentUrl) {
+            window.location.href = fallback;
+          }
+        }, 220);
+        return false;
+      }
+
+      window.location.href = fallback;
+      return false;
+    }
+
+    const recipeQueryParamsToClear = ['recipeId', 'id', 'recipeTitle', 'title', 'recipeDesc', 'recipeCalories', 'recipeImage', 'recipeTags', 'source', 'returnTo'];
     const container = document.getElementById('recipeList');
+    const noMore = document.getElementById('noMore');
+    const pageSize = 16;
     let currentType = 'all';
-    const pageSize = 20;
     let loadedCount = 0;
-    
-    function renderRecipes(recipesToShow) {
-      if (loadedCount >= recipesToShow.length) return;
-      
-      const end = Math.min(loadedCount + pageSize, recipesToShow.length);
-      const recipesToRender = recipesToShow.slice(loadedCount, end);
-      
-      recipesToRender.forEach((recipe, index) => {
-        const card = document.createElement('div');
-        card.className = 'card';
+
+    const recommendationRecipeAlias = {
+      recipe_tomato_egg: '番茄炒蛋',
+      recipe_tomato_egg_noodle: '西红柿鸡蛋面',
+      recipe_broccoli_low_oil: '蒜蓉西兰花',
+      recipe_tomato_tofu_soup: '番茄鸡蛋豆腐汤'
+    };
+
+    function sanitizeRecipeText(text) {
+      return String(text || '').replace(/[<>"']/g, '').trim();
+    }
+
+    function normalizeRecipeText(text) {
+      return sanitizeRecipeText(text)
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[（）()·,，。、“”\-_/]/g, '');
+    }
+
+    function parseRecipeTags(rawTags) {
+      if (!rawTags) return [];
+      return String(rawTags)
+        .split(',')
+        .map(function(tag) { return sanitizeRecipeText(tag); })
+        .filter(Boolean)
+        .slice(0, 4);
+    }
+
+    function isLikelyImageUrl(url) {
+      const value = String(url || '').trim();
+      return /^https?:\/\//i.test(value) || /^data:image\//i.test(value);
+    }
+
+    function isChatReferrer() {
+      if (!document.referrer) {
+        return false;
+      }
+
+      try {
+        const referrerUrl = new URL(document.referrer);
+        return referrerUrl.origin === window.location.origin && referrerUrl.pathname === '/chat.html';
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function getRecommendationReturnUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const rawReturnTo = String(params.get('returnTo') || '').trim();
+
+      if (!rawReturnTo) {
+        return '/chat.html';
+      }
+
+      try {
+        const parsed = new URL(rawReturnTo, window.location.origin);
+        if (parsed.origin !== window.location.origin) {
+          return '/chat.html';
+        }
+        return `${parsed.pathname}${parsed.search}${parsed.hash}` || '/chat.html';
+      } catch (error) {
+        return '/chat.html';
+      }
+    }
+
+    function shouldCloseRecipeToChat() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('source') === 'chat' || isChatReferrer();
+    }
+
+    function clearRecipeRecommendationQuery() {
+      const url = new URL(window.location.href);
+      let changed = false;
+
+      recipeQueryParamsToClear.forEach(function(key) {
+        if (url.searchParams.has(key)) {
+          url.searchParams.delete(key);
+          changed = true;
+        }
+      });
+
+      if (!changed) {
+        return;
+      }
+
+      const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+      window.history.replaceState({}, '', nextUrl);
+    }
+
+    function getReusableImagePool() {
+      if (!Array.isArray(recipes)) return [];
+      const images = recipes
+        .map(function(recipe) { return recipe && recipe.img ? String(recipe.img).trim() : ''; })
+        .filter(isLikelyImageUrl);
+      return Array.from(new Set(images));
+    }
+
+    function pickReusableImage(seedText) {
+      const pool = getReusableImagePool();
+      if (pool.length === 0) return '';
+      const seed = String(seedText || 'recipe');
+      let hash = 0;
+      for (let i = 0; i < seed.length; i += 1) {
+        hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+      }
+      const index = Math.abs(hash) % pool.length;
+      return pool[index];
+    }
+
+    function findRecipeByTitle(rawTitle) {
+      const title = sanitizeRecipeText(rawTitle);
+      if (!title) return null;
+
+      const exact = recipes.find(function(recipe) {
+        return recipe.name === title;
+      });
+      if (exact) return exact;
+
+      const normalizedTitle = normalizeRecipeText(title);
+      if (!normalizedTitle) return null;
+
+      const fuzzy = recipes.find(function(recipe) {
+        const normalizedName = normalizeRecipeText(recipe.name);
+        return (
+          normalizedName === normalizedTitle
+          || normalizedName.includes(normalizedTitle)
+          || normalizedTitle.includes(normalizedName)
+        );
+      });
+      return fuzzy || null;
+    }
+
+    function findRecipeById(rawId) {
+      const id = sanitizeRecipeText(rawId);
+      if (!id) return null;
+
+      const direct = recipes.find(function(recipe) {
+        return String(recipe.id) === id;
+      });
+      if (direct) return direct;
+
+      const aliasTitle = recommendationRecipeAlias[id];
+      if (aliasTitle) {
+        return findRecipeByTitle(aliasTitle);
+      }
+
+      return null;
+    }
+
+    function findRecipeByTags(rawTags) {
+      if (!Array.isArray(recipes) || !Array.isArray(rawTags) || rawTags.length === 0) {
+        return null;
+      }
+
+      const queryTags = rawTags
+        .map(function(tag) { return normalizeRecipeText(tag); })
+        .filter(Boolean);
+      if (queryTags.length === 0) {
+        return null;
+      }
+
+      let best = null;
+      let bestScore = 0;
+
+      recipes.forEach(function(recipe) {
+        if (!recipe || !recipe.img) return;
+
+        const recipeTags = Array.isArray(recipe.tags)
+          ? recipe.tags.map(function(tag) { return normalizeRecipeText(tag); }).filter(Boolean)
+          : [];
+        const recipeName = normalizeRecipeText(recipe.name || '');
+        const recipeDesc = normalizeRecipeText(recipe.desc || '');
+
+        let score = 0;
+        queryTags.forEach(function(tag) {
+          if (recipeTags.includes(tag)) {
+            score += 4;
+            return;
+          }
+
+          if (recipeTags.some(function(recipeTag) { return recipeTag.includes(tag) || tag.includes(recipeTag); })) {
+            score += 3;
+          }
+
+          if (recipeName.includes(tag) || recipeDesc.includes(tag)) {
+            score += 2;
+          }
+        });
+
+        if (score > bestScore) {
+          bestScore = score;
+          best = recipe;
+        }
+      });
+
+      return bestScore > 0 ? best : null;
+    }
+
+    function buildRecipeFromQuery(params) {
+      const title = sanitizeRecipeText(params.get('recipeTitle') || params.get('title') || '推荐食谱');
+      const desc = sanitizeRecipeText(params.get('recipeDesc') || params.get('desc') || '根据你的健康目标推荐');
+      const caloriesRaw = sanitizeRecipeText(params.get('recipeCalories') || params.get('calories') || '');
+      const tags = parseRecipeTags(params.get('recipeTags') || params.get('tags'));
+      const imageFromQuery = sanitizeRecipeText(params.get('recipeImage') || params.get('image') || params.get('img'));
+      const referenceByTitle = findRecipeByTitle(title);
+      const referenceByTags = findRecipeByTags(tags);
+      const referenceRecipe = referenceByTitle || referenceByTags;
+      const fallbackImage = pickReusableImage(`${title}|${tags.join('|')}`);
+
+      return {
+        id: sanitizeRecipeText(params.get('recipeId') || params.get('id') || `virtual_recipe_${Date.now()}`),
+        name: title || '推荐食谱',
+        desc: desc || '根据你的健康目标推荐',
+        time: (referenceRecipe && referenceRecipe.time) ? referenceRecipe.time : '约20分钟',
+        cal: caloriesRaw || ((referenceRecipe && referenceRecipe.cal) ? String(referenceRecipe.cal) : '--'),
+        type: (referenceRecipe && referenceRecipe.type) ? referenceRecipe.type : '精选食谱',
+        tags: tags.length > 0 ? tags : (
+          referenceRecipe && Array.isArray(referenceRecipe.tags) && referenceRecipe.tags.length > 0
+            ? referenceRecipe.tags.slice(0, 4)
+            : ['为你精选']
+        ),
+        img: isLikelyImageUrl(imageFromQuery)
+          ? imageFromQuery
+          : ((referenceRecipe && isLikelyImageUrl(referenceRecipe.img)) ? referenceRecipe.img : fallbackImage),
+        ingredients: (referenceRecipe && Array.isArray(referenceRecipe.ingredients) && referenceRecipe.ingredients.length > 0)
+          ? referenceRecipe.ingredients
+          : [
+            '优先准备新鲜食材并按个人口味搭配',
+            '建议少油少盐，控制调味料用量',
+            '烹饪前先确认食材新鲜与适宜人群'
+          ],
+        steps: (referenceRecipe && Array.isArray(referenceRecipe.steps) && referenceRecipe.steps.length > 0)
+          ? referenceRecipe.steps
+          : [
+            '将主要食材清洗、切配并提前备好辅料',
+            '采用蒸、煮、炖或少油快炒的方式烹制',
+            '出锅前轻调味，保持食材原味后即可食用'
+          ]
+      };
+    }
+
+    function resolveRecipeFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const recipeId = params.get('recipeId') || params.get('id') || '';
+      const recipeTitle = params.get('recipeTitle') || params.get('title') || '';
+      if (!recipeId && !recipeTitle) {
+        return null;
+      }
+
+      const recipeById = findRecipeById(recipeId);
+      if (recipeById) return recipeById;
+
+      const recipeByTitle = findRecipeByTitle(recipeTitle);
+      if (recipeByTitle) return recipeByTitle;
+
+      return buildRecipeFromQuery(params);
+    }
+
+    function openRecipeFromQuery() {
+      const recipe = resolveRecipeFromQuery();
+      if (!recipe) return;
+
+      window.setTimeout(function() {
+        showRecipeDetail(recipe, { origin: 'query' });
+      }, 0);
+    }
+
+    function buildRecipeFallbackImage(recipe) {
+      const safeType = String((recipe && recipe.type) || '食谱').replace(/[<>&"]/g, '');
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320">
+          <defs>
+            <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#8bc46f"/>
+              <stop offset="100%" stop-color="#5f9f45"/>
+            </linearGradient>
+          </defs>
+          <rect width="320" height="320" rx="36" fill="url(#bg)"/>
+          <circle cx="272" cy="44" r="48" fill="rgba(255,255,255,0.16)"/>
+          <circle cx="52" cy="286" r="62" fill="rgba(255,255,255,0.12)"/>
+          <rect x="24" y="24" width="84" height="30" rx="15" fill="rgba(255,255,255,0.18)"/>
+          <text x="66" y="44" text-anchor="middle" font-size="14" fill="#f2ffef">${safeType}</text>
+          <text x="24" y="214" font-size="34" fill="#f4ffef">TRT</text>
+        </svg>
+      `;
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
+
+    function getRecipeImageSrc(recipe) {
+      return recipe && recipe.img ? recipe.img : buildRecipeFallbackImage(recipe);
+    }
+
+    function bindRecipeImageFallback(img, recipe) {
+      if (!img) return;
+      img.addEventListener('error', function handleError() {
+        img.removeEventListener('error', handleError);
+        img.src = buildRecipeFallbackImage(recipe);
+      });
+    }
+
+    function getFilteredRecipes(type) {
+      if (type === 'all') {
+        return recipes;
+      }
+      return recipes.filter(function(recipe) {
+        return recipe.type === type;
+      });
+    }
+
+    function renderRecipes(recipeList) {
+      if (loadedCount >= recipeList.length) {
+        noMore.style.display = 'block';
+        return;
+      }
+
+      const nextItems = recipeList.slice(loadedCount, loadedCount + pageSize);
+      nextItems.forEach(function(recipe) {
+        const card = document.createElement('article');
+        card.className = 'recipe-card';
         card.dataset.id = recipe.id;
         card.innerHTML = `
-          <img src="${recipe.img}" class="recipe-img" alt="${recipe.name}" onerror="this.style.background='linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%)'">
-          <div class="recipe-title">${recipe.name}</div>
-          <div class="recipe-desc">${recipe.desc}</div>
-          <div class="recipe-info">
-            <span>🕐 ${recipe.time}</span>
-            <span>🔥 ${recipe.cal}千卡</span>
+          <div>
+            <div class="recipe-card__title">${recipe.name}</div>
+            <div class="recipe-card__desc">${recipe.desc}</div>
+            <div class="recipe-card__meta">
+              <span>${recipe.time}</span>
+              <span>${recipe.cal} 千卡</span>
+            </div>
+            <div class="recipe-card__tags">
+              ${recipe.tags.map(function(tag) {
+                return `<span class="chip chip-muted">${tag}</span>`;
+              }).join('')}
+            </div>
           </div>
-          <div style="margin-top: 10px;">
-            ${recipe.tags.map(tag => `<span class="recipe-tag">${tag}</span>`).join('')}
-          </div>
+          <img class="recipe-card__thumb" src="${getRecipeImageSrc(recipe)}" alt="${recipe.name}" loading="lazy">
         `;
-        card.addEventListener('click', () => showRecipeDetail(recipe));
+        const thumb = card.querySelector('.recipe-card__thumb');
+        bindRecipeImageFallback(thumb, recipe);
+        card.addEventListener('click', function() {
+          showRecipeDetail(recipe, { origin: 'list' });
+        });
         container.appendChild(card);
       });
-      
-      loadedCount = end;
+
+      loadedCount += nextItems.length;
+      noMore.style.display = loadedCount >= recipeList.length ? 'block' : 'none';
     }
-    
+
     function filterAndRender(type) {
       currentType = type;
       loadedCount = 0;
       container.innerHTML = '';
-      
-      const filtered = type === 'all' 
-        ? recipes 
-        : recipes.filter(r => r.type === type);
-      
-      renderRecipes(filtered);
+      noMore.style.display = 'none';
+      renderRecipes(getFilteredRecipes(type));
     }
-    
-    function showRecipeDetail(recipe) {
-      const existing = document.querySelector('.modal-overlay');
+
+    function getRecipeContent(recipe) {
+      const candidate = recipe && recipe.ingredients && recipe.steps
+        ? recipe
+        : Object.assign({}, defaultRecipe, recipe);
+      const safeTags = Array.isArray(candidate.tags) ? candidate.tags.filter(Boolean) : [];
+      const safeIngredients = Array.isArray(candidate.ingredients) && candidate.ingredients.length > 0
+        ? candidate.ingredients
+        : defaultRecipe.ingredients;
+      const safeSteps = Array.isArray(candidate.steps) && candidate.steps.length > 0
+        ? candidate.steps
+        : defaultRecipe.steps;
+
+      return Object.assign({
+        name: '精选食谱',
+        desc: '根据你的健康目标推荐',
+        time: '约20分钟',
+        cal: '--',
+        type: '食谱',
+        tags: safeTags
+      }, candidate, {
+        tags: safeTags,
+        ingredients: safeIngredients,
+        steps: safeSteps
+      });
+    }
+
+    function dismissRecipeDetail(modal, options) {
+      if (!modal) return;
+
+      const opts = options || {};
+      if (opts.origin === 'query' && shouldCloseRecipeToChat()) {
+        navigateBack(null, getRecommendationReturnUrl());
+        return;
+      }
+
+      modal.remove();
+      if (opts.origin === 'query') {
+        clearRecipeRecommendationQuery();
+      }
+    }
+
+    function showRecipeDetail(recipe, options) {
+      const opts = options || {};
+      const recipeDetail = getRecipeContent(recipe);
+      const existing = document.querySelector('.sheet-overlay');
       if (existing) existing.remove();
-      
-      const hasDetail = recipe.ingredients && recipe.steps;
-      
+
       const modal = document.createElement('div');
-      modal.className = 'modal-overlay';
+      modal.className = 'sheet-overlay';
       modal.innerHTML = `
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2>${recipe.name}</h2>
-            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
-          </div>
-          <div class="modal-body">
-            ${hasDetail ? `
-              <div class="section-title">🥬 食材</div>
-              <ul class="ingredient-list">
-                ${recipe.ingredients.map(i => `<li>${i}</li>`).join('')}
-              </ul>
-              <div class="section-title">👨‍🍳 做法</div>
-              <ol class="step-list">
-                ${recipe.steps.map(s => `<li>${s}</li>`).join('')}
-              </ol>
-            ` : `
-              <div style="text-align: center; padding: 40px 20px; color: #666;">
-                <p style="font-size: 48px; margin-bottom: 20px;">🍳</p>
-                <p>暂无详细做法</p>
-                <p style="font-size: 13px; margin-top: 10px;">尽情期待更新...</p>
+        <div class="sheet-card">
+          <div class="sheet-cover">
+            <img src="${getRecipeImageSrc(recipeDetail)}" alt="${recipeDetail.name}">
+            <button class="sheet-close" aria-label="关闭" type="button">✕</button>
+            <div class="sheet-head">
+              <div class="chip-row">
+                ${recipeDetail.tags.slice(0, 2).map(function(tag) {
+                  return `<span class="chip chip-hero">${tag}</span>`;
+                }).join('')}
               </div>
-            `}
+              <h2>${recipeDetail.name}</h2>
+              <p>${recipeDetail.desc}</p>
+            </div>
           </div>
-          <div class="modal-footer">
-            <button class="modal-btn" onclick="this.closest('.modal-overlay').remove()">我知道了</button>
+          <div class="sheet-body">
+            <div class="sheet-section">
+              <h3>基础信息</h3>
+              <div class="chip-row" style="margin-top: 12px;">
+                <span class="chip chip-muted">${recipeDetail.type || '精选食谱'}</span>
+                <span class="chip chip-muted">${recipeDetail.time}</span>
+                <span class="chip chip-muted">${recipeDetail.cal} 千卡</span>
+              </div>
+            </div>
+            <div class="sheet-section">
+              <h3>食材清单</h3>
+              <ul class="sheet-list">
+                ${recipeDetail.ingredients.map(function(item) {
+                  return `<li>${item}</li>`;
+                }).join('')}
+              </ul>
+            </div>
+            <div class="sheet-section">
+              <h3>做法步骤</h3>
+              <ol class="sheet-list step-list">
+                ${recipeDetail.steps.map(function(step) {
+                  return `<li>${step}</li>`;
+                }).join('')}
+              </ol>
+            </div>
           </div>
         </div>
       `;
+
       document.body.appendChild(modal);
-      
+      const coverImage = modal.querySelector('.sheet-cover img');
+      const closeBtn = modal.querySelector('.sheet-close');
+      bindRecipeImageFallback(coverImage, recipeDetail);
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+          dismissRecipeDetail(modal, opts);
+        });
+      }
       modal.addEventListener('click', function(e) {
         if (e.target === modal) {
-          modal.remove();
+          dismissRecipeDetail(modal, opts);
         }
       });
     }
-    
-    // Tab切换
-    document.querySelectorAll('.tab').forEach(tab => {
+
+    document.querySelectorAll('.tab').forEach(function(tab) {
       tab.addEventListener('click', function() {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(function(item) {
+          item.classList.remove('active');
+          item.classList.remove('is-active');
+        });
         this.classList.add('active');
+        this.classList.add('is-active');
         filterAndRender(this.dataset.type);
       });
     });
-    
-    // 滚动加载更多
-    window.addEventListener('scroll', () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
-        const filtered = currentType === 'all' 
-          ? recipes 
-          : recipes.filter(r => r.type === currentType);
-        renderRecipes(filtered);
+
+    window.addEventListener('scroll', function() {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 140) {
+        renderRecipes(getFilteredRecipes(currentType));
       }
     });
-    
-    // 初始加载
+
     filterAndRender('all');
+    openRecipeFromQuery();
   </script>
 </body>
 </html>

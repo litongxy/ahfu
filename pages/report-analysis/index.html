@@ -6,228 +6,713 @@
   <title>体检报告分析 - 同仁堂</title>
   <link rel="stylesheet" href="/styles/common.css">
   <style>
-    body { padding: 0; background: transparent; }
-    .header { 
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%); 
-      color: white; 
-      padding: 24px 20px; 
-      border-radius: 0 0 28px 28px; 
-      margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(196, 30, 58, 0.3);
-    }
-    .header h1 { font-size: 22px; margin-bottom: 6px; }
-    .header p { font-size: 13px; opacity: 0.9; }
-    .back-btn { 
-      background: rgba(255,255,255,0.2); 
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: white; 
-      padding: 10px 18px; 
-      border-radius: 20px; 
-      font-size: 14px; 
-      margin-bottom: 12px;
-      transition: all 0.3s ease;
-    }
-    .back-btn:hover { background: rgba(255,255,255,0.3); transform: translateX(-4px); }
-    .card { 
-      background: white; 
-      border-radius: 16px; 
-      padding: 20px; 
-      margin: 0 16px 16px 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08); 
-    }
-    .card-title { font-size: 17px; font-weight: 600; margin-bottom: 18px; color: #212121; }
-    .upload-area { 
-      border: 2px dashed #e0e0e0; 
-      border-radius: 16px; 
-      padding: 40px 20px; 
-      text-align: center; 
-      margin-bottom: 15px;
-      background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
-      transition: all 0.3s ease;
-    }
-    .upload-area:hover { border-color: #c41e3a; background: #fff8f8; }
-    .upload-area input { display: none; }
-    .upload-btn { 
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%);
-      color: white; 
-      border: none; 
-      padding: 14px 32px; 
-      border-radius: 25px; 
-      font-size: 15px; 
-      font-weight: 500;
-      cursor: pointer; 
-      box-shadow: 0 4px 16px rgba(196, 30, 58, 0.3);
-      transition: all 0.3s ease;
-    }
-    .upload-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(196, 30, 58, 0.4); }
-    .result-box { 
-      background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); 
-      border-radius: 12px; 
-      padding: 20px; 
-      margin-top: 16px;
-      border-left: 4px solid #ff9800;
-    }
-    .result-title { font-weight: 600; color: #e65100; margin-bottom: 14px; font-size: 16px; }
-    .result-item { 
-      padding: 12px 0; 
-      border-bottom: 1px solid rgba(255, 152, 0, 0.2); 
-      font-size: 14px;
-    }
-    .result-item:last-child { border-bottom: none; }
-    .result-item strong { color: #bf360c; }
-    .rec-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 16px; }
-    .rec-card { 
-      background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%); 
-      border-radius: 12px; 
-      padding: 16px; 
+    .upload-zone {
+      padding: 20px 14px;
+      border-radius: 16px;
+      border: 1px dashed rgba(95, 159, 69, 0.28);
+      background: linear-gradient(180deg, rgba(95, 159, 69, 0.06), rgba(95, 159, 69, 0.02));
       text-align: center;
-      transition: all 0.3s ease;
     }
-    .rec-card:hover { transform: translateY(-4px); background: white; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
-    .rec-card img { width: 100%; height: 80px; background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%); border-radius: 10px; margin-bottom: 10px; object-fit: cover; }
-    .rec-card-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-    .rec-card-desc { font-size: 12px; color: #757575; }
-    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
-    .badge-warning { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); color: #e65100; }
-    .badge-danger { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); color: #c62828; }
+
+    .upload-zone strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .upload-zone p {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .upload-zone input {
+      display: none;
+    }
+
+    .upload-zone .upload-primary-action {
+      margin-top: 18px;
+    }
+
+    .stage-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stage-item {
+      padding: 10px 8px;
+      border-radius: 14px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border-soft);
+    }
+
+    .stage-item strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .stage-item span {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .report-summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .report-kpi {
+      padding: 13px;
+      border-radius: 16px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border-soft);
+    }
+
+    .report-kpi strong {
+      display: block;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .report-kpi span {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .result-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .result-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .result-tab {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: var(--bg-muted);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-out);
+    }
+
+    .result-tab.is-active {
+      border-color: rgba(95, 159, 69, 0.35);
+      background: rgba(95, 159, 69, 0.14);
+      color: var(--brand-700);
+      box-shadow: inset 0 0 0 1px rgba(95, 159, 69, 0.16);
+    }
+
+    .result-item {
+      padding: 13px;
+      border-radius: 14px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border-soft);
+    }
+
+    .result-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .result-name {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .result-value {
+      margin-top: 6px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .result-note {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .analysis-copy {
+      font-size: 17px;
+      line-height: 1.9;
+      color: var(--text-secondary);
+    }
+
+    .recommend-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .recommend-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 14px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border-soft);
+    }
+
+    .recommend-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(95, 159, 69, 0.12);
+      color: var(--brand-700);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .recommend-copy strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .recommend-copy span {
+      display: block;
+      margin-top: 3px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
   </style>
 </head>
-<body>
-  <div class="header">
-    <a href="/chat.html" class="back-btn" style="text-decoration:none;display:inline-block;">← 返回</a>
-    <h1>📊 体检报告分析</h1>
-    <p>上传体检报告，AI智能分析</p>
-  </div>
+<body class="is-transparent">
+  <div class="page-shell">
+    <div class="page-body page-stack">
+      <header class="page-hero">
+        <div class="topbar">
+          <a href="/chat.html" class="back-link" onclick="return navigateBack(event)">返回</a>
+          <span class="hero-action">PDF / AI 解读</span>
+        </div>
 
-  <div class="card">
-    <div class="card-title">📤 上传报告</div>
-    <div class="upload-area" id="uploadArea">
-      <p style="color:#999;margin-bottom:10px;">仅支持 PDF 格式</p>
-      <label class="upload-btn" for="fileInput">选择文件</label>
-      <input type="file" id="fileInput" accept=".pdf" onchange="handleUpload(this)">
+        <div class="hero-copy">
+          <div class="eyebrow">Report Analysis</div>
+          <h1 class="hero-title">体检报告分析</h1>
+          <p class="hero-subtitle">把体检 PDF 上传进来，我们会先识别指标，再整理异常项和后续建议。</p>
+        </div>
+      </header>
+
+      <section class="section-card">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Flow</div>
+            <div class="section-title">三步完成分析</div>
+          </div>
+        </div>
+
+        <div class="stage-list">
+          <div class="stage-item">
+            <strong>01</strong>
+            <span>上传 PDF</span>
+          </div>
+          <div class="stage-item">
+            <strong>02</strong>
+            <span>识别指标</span>
+          </div>
+          <div class="stage-item">
+            <strong>03</strong>
+            <span>生成建议</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Upload</div>
+            <div class="section-title">上传体检报告</div>
+            <div class="section-subtitle">目前支持 PDF 格式。建议使用包含血常规、肝功能、血糖或血压等指标的报告。</div>
+          </div>
+        </div>
+
+        <div class="upload-zone" id="uploadArea"></div>
+      </section>
+
+      <section class="section-card" id="resultCard" hidden>
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Results</div>
+            <div class="section-title">分析结果</div>
+          </div>
+        </div>
+        <div id="resultContent"></div>
+      </section>
+
+      <section class="section-card" id="aiAnalysisCard" hidden>
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">AI Notes</div>
+            <div class="section-title">AI 健康建议</div>
+          </div>
+        </div>
+        <div id="aiAnalysisContent" class="analysis-copy"></div>
+      </section>
+
+      <section class="section-card" id="recCard" hidden>
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Recommendations</div>
+            <div class="section-title">接下来可以继续</div>
+          </div>
+        </div>
+        <div id="recContent" class="recommend-grid"></div>
+      </section>
     </div>
   </div>
 
-  <div class="card" id="resultCard" style="display:none;">
-    <div class="card-title">📋 分析结果</div>
-    <div id="resultContent"></div>
-  </div>
-
-  <div class="card" id="aiAnalysisCard" style="display:none;">
-    <div class="card-title">🤖 AI健康建议</div>
-    <div id="aiAnalysisContent" style="font-size:13px;line-height:1.8;color:#333;"></div>
-  </div>
-
-  <div class="card" id="recCard" style="display:none;">
-    <div class="card-title">💡 推荐方案</div>
-    <div id="recContent"></div>
-  </div>
-
+  <script src="/scripts/auth-client.js"></script>
   <script>
+    const API_BASE = '/acp';
+    let currentReportId = null;
+    let autoRepairAttempted = false;
+
+    async function fetchWithAuth(url, options) {
+      if (window.AcpAuth && typeof window.AcpAuth.fetchWithAuth === 'function') {
+        return window.AcpAuth.fetchWithAuth(url, options);
+      }
+      return fetch(url, options);
+    }
+
+    function isPhoneLoggedIn() {
+      if (!window.AcpAuth || typeof window.AcpAuth.getLoginType !== 'function') {
+        return false;
+      }
+      return window.AcpAuth.getLoginType() === 'phone';
+    }
+
+    function redirectToPhoneLogin() {
+      const current = window.location.pathname + window.location.search + window.location.hash;
+      window.location.href = '/pages/login/index.html?redirect=' + encodeURIComponent(current);
+    }
+
+    function navigateBack(event, fallbackUrl) {
+      if (event) {
+        event.preventDefault();
+      }
+
+      const fallback = fallbackUrl || '/chat.html';
+      const referrer = document.referrer;
+      let shouldUseHistory = false;
+
+      if (referrer) {
+        try {
+          const referrerUrl = new URL(referrer);
+          shouldUseHistory = referrerUrl.origin === window.location.origin;
+        } catch (error) {
+          // Ignore malformed referrer and fallback to default page.
+        }
+      }
+
+      if (shouldUseHistory) {
+        const currentUrl = window.location.href;
+        window.history.back();
+        window.setTimeout(function() {
+          if (window.location.href === currentUrl) {
+            window.location.href = fallback;
+          }
+        }, 220);
+        return false;
+      }
+
+      window.location.href = fallback;
+      return false;
+    }
+
+    function renderUploadIdle() {
+      document.getElementById('uploadArea').innerHTML = `
+        <strong>选择一份体检报告</strong>
+        <label class="btn upload-primary-action" for="fileInput">选择文件</label>
+        <input type="file" id="fileInput" accept=".pdf" onchange="handleUpload(this)">
+      `;
+    }
+
+    function renderUploadLoading(fileName) {
+      document.getElementById('uploadArea').innerHTML = `
+        <strong>正在解析报告</strong>
+        <p>${escapeHtml(fileName)} 已上传，系统正在提取指标并生成建议，请稍候。</p>
+        <div class="chip-row" style="justify-content:center; margin-top: 16px;">
+          <span class="chip chip-warning">识别中</span>
+        </div>
+      `;
+    }
+
+    function renderUploadDone(fileName) {
+      document.getElementById('uploadArea').innerHTML = `
+        <strong>报告已上传</strong>
+        <p>${escapeHtml(fileName)} 已完成上传，你可以继续查看结果，或重新选择其他文件。</p>
+        <div class="btn-row" style="margin-top: 18px;">
+          <button class="btn btn-outline" onclick="resetUpload()">重新上传</button>
+          <a class="btn" href="#resultCard">查看结果</a>
+        </div>
+      `;
+    }
+
+    function renderUploadError(message) {
+      document.getElementById('uploadArea').innerHTML = `
+        <strong>上传失败</strong>
+        <p>${escapeHtml(message)}</p>
+        <div style="margin-top: 18px;">
+          <button class="btn" onclick="resetUpload()">重新上传</button>
+        </div>
+      `;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     async function handleUpload(input) {
-      const file = input.files[0];
+      if (!isPhoneLoggedIn()) {
+        redirectToPhoneLogin();
+        return;
+      }
+
+      const file = input.files && input.files[0];
       if (!file) return;
 
-      const area = document.getElementById('uploadArea');
-      area.innerHTML = '<p style="color:#c41e3a;">⏳ 正在分析...</p>';
+      renderUploadLoading(file.name);
 
       try {
-        const fd = new FormData();
-        fd.append('file', file);
+        const formData = new FormData();
+        formData.append('file', file);
 
-        const res = await fetch('//localhost:3000/acp/report/upload?userId=test-user', {
+        const uploadRes = await fetchWithAuth(`${API_BASE}/report/upload`, {
           method: 'POST',
-          body: fd
+          body: formData
         });
-        const data = await res.json();
+        const uploadData = await uploadRes.json();
 
-        if (data.code === 0 && data.data && data.data.reportId) {
-          const detail = await fetch('//localhost:3000/acp/report/' + data.data.reportId);
-          const detailData = await detail.json();
-          
-          if (detailData.code === 0 && detailData.data) {
-            showResult(detailData.data);
-          } else {
-            throw new Error(detailData.message || '获取报告详情失败');
-          }
-        } else {
-          throw new Error(data.message || '上传失败');
+        if (uploadData.code !== 0 || !uploadData.data || !uploadData.data.reportId) {
+          throw new Error(uploadData.message || '上传失败');
         }
-      } catch(e) {
-        console.error('Upload error:', e);
-        area.innerHTML = '<p style="color:#c62828;margin-bottom:10px;">❌ 上传失败: ' + e.message + '</p><button class="upload-btn" onclick="resetUpload()">重新上传</button>';
+
+        currentReportId = uploadData.data.reportId;
+        await loadAndShowReport(currentReportId);
+      } catch (error) {
+        console.error('Upload error:', error);
+        renderUploadError(error.message || '请稍后重试');
       }
+    }
+
+    function hasSuspiciousSampleValues(indicators) {
+      return (indicators || []).some(function(item) {
+        const value = item && item.value !== undefined && item.value !== null ? String(item.value) : '';
+        return /\.\d{4,}/.test(value);
+      });
+    }
+
+    function logExtractedPdfText(reportId, report) {
+      if (!report || !report.extractedText) {
+        return;
+      }
+
+      console.groupCollapsed(`[体检报告 ${reportId}] PDF提取文字`);
+      console.log(report.extractedText);
+      console.groupEnd();
+    }
+
+    async function loadAndShowReport(reportId, allowAutoRepair = true) {
+      const detailRes = await fetchWithAuth(`${API_BASE}/report/${reportId}`);
+      const detailData = await detailRes.json();
+      if (detailData.code !== 0 || !detailData.data) {
+        throw new Error(detailData.message || '获取报告详情失败');
+      }
+
+      const report = detailData.data;
+      logExtractedPdfText(reportId, report);
+      const indicators = Array.isArray(report.indicators) ? report.indicators : [];
+
+      if (allowAutoRepair && !autoRepairAttempted && hasSuspiciousSampleValues(indicators)) {
+        autoRepairAttempted = true;
+        await reAnalyzeReport(reportId, { silent: true });
+        return loadAndShowReport(reportId, false);
+      }
+
+      showResult(report);
+    }
+
+    async function reAnalyzeReport(reportId, options) {
+      const silent = options && options.silent;
+      if (!silent) {
+        const aiCard = document.getElementById('aiAnalysisCard');
+        const aiContent = document.getElementById('aiAnalysisContent');
+        aiCard.hidden = false;
+        aiContent.innerHTML = '正在重新解析报告，请稍候...';
+      }
+
+      const res = await fetchWithAuth(`${API_BASE}/report/analyze/${reportId}`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (data.code !== 0) {
+        throw new Error(data.message || '重新解析失败');
+      }
+      return data.data;
+    }
+
+    function getSeverityChip(item) {
+      if (!item.isAnomaly) {
+        return '<span class="chip chip-success">正常</span>';
+      }
+      if (item.severity === 'serious') {
+        return '<span class="chip chip-danger">重点关注</span>';
+      }
+      return '<span class="chip chip-warning">轻度异常</span>';
     }
 
     function showResult(report) {
-      if (!report) {
-        alert('报告数据为空');
+      const resultCard = document.getElementById('resultCard');
+      const aiAnalysisCard = document.getElementById('aiAnalysisCard');
+      const recCard = document.getElementById('recCard');
+      const resultContent = document.getElementById('resultContent');
+      const aiAnalysisContent = document.getElementById('aiAnalysisContent');
+      const recContent = document.getElementById('recContent');
+
+      const fileName = report.originalName || '体检报告';
+      renderUploadDone(fileName);
+
+      resultCard.hidden = false;
+
+      const indicators = Array.isArray(report.indicators) ? report.indicators : [];
+      const isNotHealthReport = indicators.some(function(item) {
+        return item.name.includes('请上传') || item.name.includes('解析失败') || item.name.includes('未找到');
+      });
+
+      if (isNotHealthReport) {
+        const prompt = indicators.find(function(item) {
+          return item.name.includes('请上传') || item.name.includes('解析失败') || item.name.includes('未找到');
+        });
+        resultContent.innerHTML = `
+          <div class="danger-panel">
+            <strong style="display:block; font-size:18px;">暂时无法识别为体检报告</strong>
+            <div style="margin-top: 8px; font-size: 14px; color: var(--text-secondary); line-height: 1.7;">
+              ${escapeHtml(prompt && prompt.suggestion ? prompt.suggestion : '请上传包含血常规、肝功能、血糖或血压等指标的体检报告 PDF。')}
+            </div>
+          </div>
+        `;
+        aiAnalysisCard.hidden = true;
+        recCard.hidden = true;
         return;
       }
-      
-      const area = document.getElementById('uploadArea');
-      area.innerHTML = '<p style="color:#4caf50;margin-bottom:10px;">✅ 报告已上传</p><button class="upload-btn" onclick="resetUpload()">重新上传</button>';
 
-      const resultCard = document.getElementById('resultCard');
-      if (resultCard) resultCard.style.display = 'block';
+      const severityRank = {
+        serious: 3,
+        abnormal: 2,
+        slight: 1,
+        normal: 0,
+      };
 
-      let html = '<div class="result-box">';
-      html += '<div class="result-title">⚠️ 发现 ' + (report.anomalyCount || 0) + ' 项异常</div>';
+      const anomalyItems = indicators.filter(function(item) {
+        return item && item.isAnomaly;
+      });
+      const normalItems = indicators.filter(function(item) {
+        return item && !item.isAnomaly;
+      });
 
-      if (report.indicators && report.indicators.length > 0) {
-        report.indicators.forEach(item => {
-          const cls = item.severity === 'serious' ? 'danger' : (item.severity === 'abnormal' ? 'warning' : 'normal');
-          html += '<div class="result-item">';
-          html += '<strong>' + item.name + '</strong>: ' + item.value + ' ' + item.unit;
-          if (item.isAnomaly) {
-            html += ' <span class="badge badge-' + cls + '">' + (item.severity === 'serious' ? '严重' : '轻度') + '</span>';
+      anomalyItems.sort(function(a, b) {
+        const aRank = severityRank[a.severity] || 0;
+        const bRank = severityRank[b.severity] || 0;
+        if (aRank !== bRank) {
+          return bRank - aRank;
+        }
+        return String(a.name || '').localeCompare(String(b.name || ''), 'zh-Hans-CN');
+      });
+
+      const sortedIndicators = anomalyItems.concat(normalItems);
+
+      function renderItemList(items) {
+        return items.map(function(item) {
+          const unit = item.unit ? ` ${escapeHtml(item.unit)}` : '';
+          const note = item.suggestion || (item.referenceRange ? `参考范围：${item.referenceRange}` : '暂无补充说明');
+          const value = item.value === undefined || item.value === null || item.value === '' ? '--' : item.value;
+          return `
+            <div class="result-item">
+              <div class="result-top">
+                <div class="result-name">${escapeHtml(item.name)}</div>
+                ${getSeverityChip(item)}
+              </div>
+              <div class="result-value">${escapeHtml(value)}${unit}</div>
+              <div class="result-note">${escapeHtml(note)}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const hasAiAnalysis = typeof report.aiAnalysis === 'string' && report.aiAnalysis.trim() !== '';
+
+      const tabs = [
+        {
+          key: 'all',
+          label: `全部 ${sortedIndicators.length}`,
+          match: function() {
+            return true;
+          },
+        },
+        {
+          key: 'anomaly',
+          label: `异常 ${anomalyItems.length}`,
+          match: function(item) {
+            return !!item.isAnomaly;
+          },
+        },
+        {
+          key: 'normal',
+          label: `正常 ${normalItems.length}`,
+          match: function(item) {
+            return !item.isAnomaly;
+          },
+        },
+        {
+          key: 'analysis',
+          label: '分析',
+          match: function() {
+            return false;
+          },
+        },
+      ];
+
+      resultContent.innerHTML = `
+        <div class="result-tabs" id="resultTabs">
+          ${tabs.map(function(tab) {
+            return `<button type="button" class="result-tab${tab.key === 'all' ? ' is-active' : ''}" data-tab="${tab.key}">${escapeHtml(tab.label)}</button>`;
+          }).join('')}
+        </div>
+        <div class="result-list" id="resultList"></div>
+      `;
+
+      const resultTabs = document.getElementById('resultTabs');
+      const resultList = document.getElementById('resultList');
+      let activeTab = 'all';
+
+      function renderActiveTab() {
+        if (activeTab === 'analysis') {
+          if (hasAiAnalysis) {
+            resultList.innerHTML = `
+              <div class="result-item">
+                <div class="analysis-copy">${escapeHtml(report.aiAnalysis).replace(/\n/g, '<br>')}</div>
+              </div>
+            `;
+          } else {
+            resultList.innerHTML = '<div class="empty-card">暂无可展示的分析内容。</div>';
           }
-          html += '<br><small>' + (item.suggestion || '参考范围: ' + item.referenceRange) + '</small>';
-          html += '</div>';
+
+          const analysisButtons = resultTabs ? resultTabs.querySelectorAll('.result-tab') : [];
+          analysisButtons.forEach(function(button) {
+            button.classList.toggle('is-active', button.getAttribute('data-tab') === activeTab);
+          });
+          return;
+        }
+
+        const tab = tabs.find(function(item) {
+          return item.key === activeTab;
+        }) || tabs[0];
+        const filtered = sortedIndicators.filter(function(item) {
+          return tab.match(item);
+        });
+        const itemsHtml = renderItemList(filtered);
+        resultList.innerHTML = itemsHtml || '<div class="empty-card">当前筛选下没有可展示的指标。</div>';
+
+        const buttons = resultTabs ? resultTabs.querySelectorAll('.result-tab') : [];
+        buttons.forEach(function(button) {
+          button.classList.toggle('is-active', button.getAttribute('data-tab') === activeTab);
         });
       }
 
-      html += '</div>';
-      document.getElementById('resultContent').innerHTML = html;
-
-      // AI分析结果
-      if (report.aiAnalysis) {
-        const aiCard = document.getElementById('aiAnalysisCard');
-        if (aiCard) {
-          aiCard.style.display = 'block';
-          document.getElementById('aiAnalysisContent').innerHTML = report.aiAnalysis.replace(/\n/g, '<br>');
-        }
+      if (resultTabs) {
+        resultTabs.addEventListener('click', function(event) {
+          const target = event.target.closest('.result-tab');
+          if (!target) {
+            return;
+          }
+          const nextTab = target.getAttribute('data-tab') || 'all';
+          if (nextTab === activeTab) {
+            return;
+          }
+          activeTab = nextTab;
+          renderActiveTab();
+        });
       }
 
-      // 检查是否是解析失败
-      const isParseFailed = report.indicators && report.indicators.some(function(item) {
-        return item.name.includes('解析失败') || item.name.includes('未找到') || item.name.includes('请上传');
-      });
+      renderActiveTab();
 
-      // 推荐方案 - 只有解析成功才显示
-      if (!isParseFailed) {
-        const recCard = document.getElementById('recCard');
-        if (recCard) recCard.style.display = 'block';
+      aiAnalysisCard.hidden = true;
+      aiAnalysisContent.innerHTML = '';
 
-        let recHtml = '<div class="rec-cards">';
-        recHtml += '<div class="rec-card"><img src="/images/r1.jpg"><div class="rec-card-title">牛肉土豆杂蔬焖菜</div><div class="rec-card-desc">378千卡</div></div>';
-        recHtml += '<div class="rec-card"><img src="/images/e1.jpg"><div class="rec-card-title">HIIT燃脂</div><div class="rec-card-desc">20分钟</div></div>';
-        recHtml += '</div>';
-        document.getElementById('recContent').innerHTML = recHtml;
-      }
+      recCard.hidden = false;
+      recContent.innerHTML = `
+        <a href="/pages/recipe/list.html" class="recommend-link">
+          <span class="recommend-icon">食</span>
+          <span class="recommend-copy">
+            <strong>健康食谱</strong>
+            <span>根据当前报告，继续查看清淡、养护型饮食内容。</span>
+          </span>
+        </a>
+        <a href="/pages/exercise/list.html" class="recommend-link">
+          <span class="recommend-icon">练</span>
+          <span class="recommend-copy">
+            <strong>运动课程</strong>
+            <span>补充低强度与恢复型课程，帮助建立长期习惯。</span>
+          </span>
+        </a>
+        <a href="/chat.html" class="recommend-link">
+          <span class="recommend-icon">问</span>
+          <span class="recommend-copy">
+            <strong>继续咨询</strong>
+            <span>带着已上传报告继续问问题，系统会保留上下文。</span>
+          </span>
+        </a>
+      `;
     }
+
     function resetUpload() {
-      document.getElementById('uploadArea').innerHTML = 
-        '<p style="color:#999;margin-bottom:10px;">仅支持 PDF 格式</p>' +
-        '<label class="upload-btn" for="fileInput">选择文件</label>' +
-        '<input type="file" id="fileInput" accept=".pdf" onchange="handleUpload(this)">';
-      const resultCard = document.getElementById('resultCard');
-      const aiCard = document.getElementById('aiAnalysisCard');
-      const recCard = document.getElementById('recCard');
-      if (resultCard) resultCard.style.display = 'none';
-      if (aiCard) aiCard.style.display = 'none';
-      if (recCard) recCard.style.display = 'none';
+      document.getElementById('resultCard').hidden = true;
+      document.getElementById('aiAnalysisCard').hidden = true;
+      document.getElementById('recCard').hidden = true;
+      currentReportId = null;
+      autoRepairAttempted = false;
+      renderUploadIdle();
+    }
+
+    renderUploadIdle();
+    if (window.AcpAuth && typeof window.AcpAuth.ensurePhoneLogin === 'function') {
+      window.AcpAuth.ensurePhoneLogin().catch(function (error) {
+        console.warn('需要先手机号登录后再上传报告', error);
+      });
     }
   </script>
 </body>

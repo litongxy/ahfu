@@ -6,304 +6,1027 @@
   <title>运动课程 - 同仁堂</title>
   <link rel="stylesheet" href="/styles/common.css">
   <style>
-    body { padding: 0; background: transparent; }
-    .header { 
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%); 
-      color: white; 
-      padding: 24px 20px; 
-      border-radius: 0 0 28px 28px; 
-      margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(196, 30, 58, 0.3);
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
     }
-    .header h1 { font-size: 22px; margin-bottom: 6px; }
-    .header p { font-size: 13px; opacity: 0.9; }
-    .back-btn { 
-      background: rgba(255,255,255,0.2); 
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: white; 
-      padding: 10px 18px; 
-      border-radius: 20px; 
-      font-size: 14px; 
-      margin-bottom: 12px;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-block;
+
+    .course-stat {
+      padding: 10px 8px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      text-align: center;
     }
-    .back-btn:hover { background: rgba(255,255,255,0.3); transform: translateX(-4px); }
-    .tabs { display: flex; gap: 10px; margin-bottom: 16px; margin: 0 16px 16px 16px; overflow-x: auto; padding-bottom: 4px; }
-    .tab { 
-      padding: 10px 20px; 
-      background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
-      border-radius: 20px; 
-      font-size: 14px; 
-      white-space: nowrap; 
-      cursor: pointer; 
-      border: none;
-      transition: all 0.3s ease;
+
+    .course-stat strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 700;
     }
-    .tab.active { 
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%); 
-      color: white;
-      box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+
+    .course-stat span {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      color: rgba(248, 255, 246, 0.8);
     }
-    .card { 
-      background: white; 
-      border-radius: 16px; 
-      overflow: hidden; 
-      margin: 0 16px 16px 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+
+    .course-card {
       cursor: pointer;
-      transition: all 0.3s ease;
     }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
-    .card-img { 
-      width: 100%; 
-      height: 180px; 
-      object-fit: cover; 
-      position: relative;
+
+    .course-card .feed-media {
+      aspect-ratio: 16 / 10;
     }
-    .play-btn-overlay {
+
+    .play-trigger {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.3);
-      display: flex;
+      inset: 50% auto auto 50%;
+      z-index: 1;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .card:hover .play-btn-overlay { opacity: 1; }
-    .play-btn-large {
-      width: 60px;
-      height: 60px;
-      background: rgba(255,255,255,0.95);
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--brand-700);
+      font-size: 20px;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .level-row {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      color: #c41e3a;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-secondary);
     }
-    .card-content { padding: 16px; }
-    .card-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
-    .card-desc { font-size: 14px; color: #616161; margin-bottom: 12px; }
-    .card-info { display: flex; gap: 16px; font-size: 13px; color: #9e9e9e; margin-bottom: 12px; }
-    .card-tag { 
-      display: inline-block; 
-      padding: 4px 10px; 
-      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); 
-      color: #1565c0; 
-      border-radius: 12px; 
-      font-size: 12px; 
-      margin-right: 6px;
-      font-weight: 500;
+
+    .level-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--brand-600);
     }
-    .level { display: flex; align-items: center; gap: 6px; }
-    .level-dot { width: 10px; height: 10px; border-radius: 50%; background: #4caf50; }
-    .level-dot:nth-child(2) { background: #8bc34a; }
-    .level-dot:nth-child(3) { background: #ff9800; }
+
+    .level-dot.off {
+      background: rgba(128, 143, 124, 0.24);
+    }
 
     .video-modal {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.9);
-      z-index: 9999;
+      inset: 0;
+      z-index: 30;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 12px;
+      background: rgba(12, 16, 13, 0.76);
+      backdrop-filter: blur(10px);
     }
-    .video-container {
-      width: 100%;
-      max-width: 800px;
-      background: #000;
-      border-radius: 12px;
+
+    .video-dialog {
+      width: min(100%, 920px);
       overflow: hidden;
+      border-radius: 20px;
+      background: #0d100d;
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.34);
     }
+
     .video-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 15px 20px;
-      background: #222;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
       color: white;
     }
-    .video-header h3 { margin: 0; font-size: 16px; }
+
+    .video-header-main {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .video-header h3 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.45;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .video-clip-note {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.4;
+    }
+
+    .video-clip-note strong {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
     .video-close {
-      background: #444;
-      border: none;
-      color: white;
-      width: 32px;
-      height: 32px;
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      min-height: 40px;
+      padding: 0;
+      border: 0;
       border-radius: 50%;
-      font-size: 18px;
-      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.14);
+      color: white;
+      font-size: 16px;
+      line-height: 1;
+      appearance: none;
     }
+
     .video-frame {
       width: 100%;
-      aspect-ratio: 16/9;
+      aspect-ratio: 16 / 9;
       background: #000;
     }
+
     .video-frame iframe {
       width: 100%;
       height: 100%;
-      border: none;
+      border: 0;
     }
-    .video-tip {
-      text-align: center;
-      padding: 20px;
-      color: #999;
-      font-size: 14px;
+
+    @media (max-width: 480px) {
+      .course-grid {
+        gap: 6px;
+      }
+
+      .course-stat strong {
+        font-size: 15px;
+      }
+
+      .course-stat span {
+        font-size: 10.5px;
+      }
     }
   </style>
 </head>
-<body>
-  <div class="header">
-    <a href="/chat.html" class="back-btn">← 返回</a>
-    <h1>🏃 运动课程</h1>
-    <p>科学运动，健康生活</p>
-  </div>
+<body class="is-transparent">
+  <div class="page-shell">
+    <div class="page-body page-stack">
+      <header class="page-hero">
+        <div class="topbar">
+          <span class="chip chip-hero">运动健身</span>
+          <a href="/chat.html" class="hero-action">咨询适合我的课程</a>
+        </div>
 
-  <div class="tabs">
-    <button class="tab active" data-type="all">推荐</button>
-    <button class="tab" data-type="fat">燃脂</button>
-    <button class="tab" data-type="strength">力量</button>
-    <button class="tab" data-type="yoga">瑜伽</button>
-    <button class="tab" data-type="taichi">太极</button>
-  </div>
+        <div class="hero-copy">
+          <h1 class="hero-title">运动课程</h1>
+          <p class="hero-subtitle">全部改为 10-30 秒动作片段，围绕力量训练、柔韧/身心、心肺功能提升、放松减压、康复/功能恢复和体态改善等目标，碎片时间也能快速跟练。</p>
+        </div>
 
-  <!-- 使用B站封面图 -->
-  <div class="card" data-type="fat" data-bvid="BV1GJ411x7h7" data-title="20分钟HIIT燃脂训练">
-    <img src="https://i0.hdslb.com/bfs/archive/8e853f76b314f507f12e333a4a934e3a6e7d42d4.jpg@400w_225h_1c_!bucyunpic" class="card-img" alt="HIIT燃脂">
-    <div class="play-btn-overlay"><div class="play-btn-large">▶</div></div>
-    <div class="card-content">
-      <div class="card-title">🔥 20分钟HIIT燃脂训练</div>
-      <div class="card-desc">高强度间歇训练，快速燃脂，适合有一定基础的人群</div>
-      <div class="card-info"><span>🕐 20分钟</span><span>🔥 300千卡</span></div>
-      <div class="level"><span>难度：</span><span class="level-dot"></span><span class="level-dot"></span><span class="level-dot"></span></div>
-      <div style="margin-top:10px"><span class="card-tag">燃脂</span><span class="card-tag">高效</span></div>
+        <div class="course-grid">
+          <div class="course-stat">
+            <strong>科学编排</strong>
+            <span>循序进阶</span>
+          </div>
+          <div class="course-stat">
+            <strong>多元主题</strong>
+            <span>6 大目标</span>
+          </div>
+          <div class="course-stat">
+            <strong>30 秒内</strong>
+            <span>碎片时间跟练</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="section-card">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Categories</div>
+            <div class="section-title">按目标筛选</div>
+          </div>
+        </div>
+
+        <div class="segmented">
+          <button class="tab active is-active" data-type="all">推荐</button>
+          <button class="tab" data-type="goal-strength">力量训练</button>
+          <button class="tab" data-type="goal-flexibility">柔韧/身心</button>
+          <button class="tab" data-type="goal-cardio">心肺提升</button>
+          <button class="tab" data-type="goal-relax">放松减压</button>
+          <button class="tab" data-type="goal-rehab">康复恢复</button>
+          <button class="tab" data-type="goal-posture">体态改善</button>
+        </div>
+      </section>
+      <div class="feed-list" id="exerciseFeed"></div>
     </div>
   </div>
 
-  <div class="card" data-type="fat" data-bvid="BV1Sx411S7o7" data-title="10分钟全身燃脂运动">
-    <img src="https://i1.hdslb.com/bfs/archive/6a6f009f6c6a8c5f72a0e60669353e7d2f6e5268.jpg@400w_225h_1c_!bucyunpic" class="card-img" alt="燃脂运动">
-    <div class="play-btn-overlay"><div class="play-btn-large">▶</div></div>
-    <div class="card-content">
-      <div class="card-title">🔥 10分钟全身燃脂运动</div>
-      <div class="card-desc">周六野Zoey带练，无需器械，在家就能练</div>
-      <div class="card-info"><span>🕐 10分钟</span><span>🔥 150千卡</span></div>
-      <div class="level"><span>难度：</span><span class="level-dot"></span><span class="level-dot"></span><span class="level-dot" style="background:#ccc"></span></div>
-      <div style="margin-top:10px"><span class="card-tag">燃脂</span><span class="card-tag">全身</span></div>
-    </div>
-  </div>
-
-  <div class="card" data-type="taichi" data-bvid="BV1GW411Y7Po" data-title="八段锦完整版">
-    <img src="https://i2.hdslb.com/bfs/archive/3c0e4e2f50a1b4c5e6d7f8a9b0c1d2e3.jpg@400w_225h_1c_!bucyunpic" class="card-img" alt="八段锦">
-    <div class="play-btn-overlay"><div class="play-btn-large">▶</div></div>
-    <div class="card-content">
-      <div class="card-title">🧘 八段锦完整版</div>
-      <div class="card-desc">传统养生运动，疏通经络，增强体质</div>
-      <div class="card-info"><span>🕐 15分钟</span><span>🔥 100千卡</span></div>
-      <div class="level"><span>难度：</span><span class="level-dot"></span><span class="level-dot" style="background:#ccc"></span><span class="level-dot" style="background:#ccc"></span></div>
-      <div style="margin-top:10px"><span class="card-tag">养生</span><span class="card-tag">传统</span></div>
-    </div>
-  </div>
-
-  <div class="card" data-type="yoga" data-bvid="BV1Qx41187VT" data-title="20分钟瑜伽放松课程">
-    <img src="https://i2.hdslb.com/bfs/archive/5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d.jpg@400w_225h_1c_!bucyunpic" class="card-img" alt="瑜伽">
-    <div class="play-btn-overlay"><div class="play-btn-large">▶</div></div>
-    <div class="card-content">
-      <div class="card-title">🧘 20分钟瑜伽放松课程</div>
-      <div class="card-desc">缓解压力，舒展身体，适合初学者</div>
-      <div class="card-info"><span>🕐 20分钟</span><span>🔥 80千卡</span></div>
-      <div class="level"><span>难度：</span><span class="level-dot"></span><span class="level-dot" style="background:#ccc"></span><span class="level-dot" style="background:#ccc"></span></div>
-      <div style="margin-top:10px"><span class="card-tag">柔韧</span><span class="card-tag">减压</span></div>
-    </div>
-  </div>
-
-  <div class="card" data-type="strength" data-bvid="BV1Vx411j7VJ" data-title="腹肌撕裂者训练">
-    <img src="https://i0.hdslb.com/bfs/archive/9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d.jpg@400w_225h_1c_!bucyunpic" class="card-img" alt="腹肌训练">
-    <div class="play-btn-overlay"><div class="play-btn-large">▶</div></div>
-    <div class="card-content">
-      <div class="card-title">💪 腹肌撕裂者训练</div>
-      <div class="card-desc">核心力量训练，8块腹肌不是梦</div>
-      <div class="card-info"><span>🕐 15分钟</span><span>🔥 200千卡</span></div>
-      <div class="level"><span>难度：</span><span class="level-dot"></span><span class="level-dot"></span><span class="level-dot"></span></div>
-      <div style="margin-top:10px"><span class="card-tag">力量</span><span class="card-tag">核心</span></div>
-    </div>
-  </div>
-
-  <div class="card" data-type="all" data-bvid="BV1Vx411q7Kf" data-title="10分钟晨间拉伸">
-    <img src="https://i1.hdslb.com/bfs/archive/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d.jpg@400w_225h_1c_!bucyunpic" class="card-img" alt="晨间拉伸">
-    <div class="play-btn-overlay"><div class="play-btn-large">▶</div></div>
-    <div class="card-content">
-      <div class="card-title">🌅 10分钟晨间拉伸</div>
-      <div class="card-desc">唤醒身体活力，开启美好一天</div>
-      <div class="card-info"><span>🕐 10分钟</span><span>🔥 50千卡</span></div>
-      <div class="level"><span>难度：</span><span class="level-dot"></span><span class="level-dot" style="background:#ccc"></span><span class="level-dot" style="background:#ccc"></span></div>
-      <div style="margin-top:10px"><span class="card-tag">拉伸</span><span class="card-tag">晨练</span></div>
-    </div>
-  </div>
-
-  <div style="height:30px;"></div>
+  <nav class="bottom-nav">
+    <a href="/chat.html" class="nav-item">
+      <span class="nav-icon">咨</span>
+      <span>咨询</span>
+    </a>
+    <a href="/pages/health-profile/index.html" class="nav-item">
+      <span class="nav-icon">康</span>
+      <span>健康</span>
+    </a>
+    <a href="/pages/recipe/list.html" class="nav-item">
+      <span class="nav-icon">食</span>
+      <span>食谱</span>
+    </a>
+    <a href="/pages/exercise/list.html" class="nav-item active">
+      <span class="nav-icon">练</span>
+      <span>课程</span>
+    </a>
+    <a href="/pages/profile/index.html" class="nav-item">
+      <span class="nav-icon">我</span>
+      <span>我的</span>
+    </a>
+  </nav>
 
   <script>
-    // 标签切换
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', function() {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        const type = this.dataset.type;
-        document.querySelectorAll('.card').forEach(card => {
-          card.style.display = (type === 'all' || card.dataset.type === type) ? 'block' : 'none';
-        });
+    // 当前页统一展示 30 秒内动作片段，保留长视频数据仅兼容旧链接直达。
+    const LONG_VIDEO_COUNT = 0;
+    const MICRO_VIDEO_COUNT = 80;
+    const GOAL_TYPE_META = {
+      'goal-strength': {
+        chip: '力量训练',
+      },
+      'goal-flexibility': {
+        chip: '柔韧/身心',
+      },
+      'goal-cardio': {
+        chip: '心肺提升',
+      },
+      'goal-relax': {
+        chip: '放松减压',
+      },
+      'goal-rehab': {
+        chip: '康复恢复',
+      },
+      'goal-posture': {
+        chip: '体态改善',
+      },
+    };
+    const MICRO_TYPE_META = {
+      'micro-neck': {
+        chip: '肩颈',
+        baseType: 'yoga',
+        difficulty: 1,
+        calorieFactor: 0.35,
+        description: '适合脖子僵、肩颈紧、低头久坐后快速放松。',
+      },
+      'micro-sedentary': {
+        chip: '久坐',
+        baseType: 'yoga',
+        difficulty: 1,
+        calorieFactor: 0.35,
+        description: '适合办公久坐后立刻活动一下，时间短、好跟练。',
+      },
+      'micro-waist': {
+        chip: '腰背',
+        baseType: 'taichi',
+        difficulty: 1,
+        calorieFactor: 0.38,
+        description: '针对腰背僵硬、下背紧张、久坐酸痛的短时缓解动作。',
+      },
+      'micro-limb': {
+        chip: '下肢',
+        baseType: 'strength',
+        difficulty: 2,
+        calorieFactor: 0.45,
+        description: '针对髋部、骨盆或腿部紧绷，适合久坐后唤醒下肢。',
+      },
+      'micro-sleep': {
+        chip: '睡前',
+        baseType: 'yoga',
+        difficulty: 1,
+        calorieFactor: 0.3,
+        description: '适合睡前轻柔放松，动作不激烈，能帮助身体降下来。',
+      },
+      'micro-wrist': {
+        chip: '手腕',
+        baseType: 'strength',
+        difficulty: 1,
+        calorieFactor: 0.32,
+        description: '适合手腕酸胀、鼠标手和腱鞘炎预防。',
+      },
+    };
+    const MICRO_GOAL_BASE_TYPES = {
+      'micro-neck': ['goal-relax', 'goal-rehab', 'goal-posture'],
+      'micro-sedentary': ['goal-rehab', 'goal-flexibility', 'goal-posture'],
+      'micro-waist': ['goal-rehab', 'goal-flexibility', 'goal-posture'],
+      'micro-limb': ['goal-strength', 'goal-posture', 'goal-rehab'],
+      'micro-sleep': ['goal-relax', 'goal-flexibility'],
+      'micro-wrist': ['goal-rehab', 'goal-strength'],
+    };
+
+    const REAL_MICRO_VIDEOS_RAW = `
+micro-limb|10|BV1fw7tziEpy|当你开始练习髋关节！太意外了！ #髋关节 #拉伸 #腰背疼痛 #臀凹陷|71年健身梅姐|https://i0.hdslb.com/bfs/archive/46cae65804afbb12e88a23f69d6acb539432056f.jpg
+micro-limb|11|BV1PPNWziEdU|髋关节能力训练，加强臀背部力量，久坐人群|A光运动康复|https://i2.hdslb.com/bfs/archive/70728ffccdc623aa3187fd55caa8c777a72867a6.jpg
+micro-limb|18|BV1L8UsBSEaQ|长期久坐臀部扁平凹陷这个动作每天有时间就多练！#健身干货#臀腿训练#一起来锻炼#臀凹陷|71年健身梅姐|https://i2.hdslb.com/bfs/archive/2949498a2903f9c0443480049892c23a8270b728.jpg
+micro-limb|19|BV1rQr8BsEdc|腿部拉伸可以很简单|人体科学|https://i2.hdslb.com/bfs/archive/157052130e3155332dc5f86bdc6f452605ccca63.jpg
+micro-limb|21|BV1AVmjBvEMQ|骨盆侧倾体态矫正方法|人体科学|https://i1.hdslb.com/bfs/archive/1fbc4b0fc6af1fe14a492635b33b83f483c5d6e9.jpg
+micro-limb|27|BV1wD5KzCE16|5个适合普通人的骨盆回正拉伸动作！选自哈佛医学院拉伸手册中的经典动作～简单有用！|Freya是扶摇呀|https://i2.hdslb.com/bfs/archive/aeff8e2adbf5f95c4445f11b376848ca88650296.jpg
+micro-limb|30|BV1VQ4y1c72w|髋关节灵活性训练，久坐下背部僵硬，运动康复|A光运动康复|https://i0.hdslb.com/bfs/archive/f5cae711675e6413fb02e85303620bebc15ea6ee.jpg
+micro-neck|13|BV1HaeBzyETb|一招解决你肩胛骨缝疼痛 这里不舒服就试试这个动作！#拉伸 #居家锻炼#小动作大作用 #肩胛骨缝痛#拉伸动作|71年健身梅姐|https://i1.hdslb.com/bfs/archive/5be2b5a6a48a67d00e2ff5357defeeca65053dc2.jpg
+micro-neck|13|BV1coAozpEsr|肩颈僵硬这样拉伸|人体科学|https://i2.hdslb.com/bfs/archive/a61efdbdc4e0fdf7e9b97e8b55cfb7e3c1900e96.jpg
+micro-neck|14|BV1Et421A7a6|长期工作，肩胛提肌和上斜方肌紧张僵硬放松，运动康复|A光运动康复|https://i0.hdslb.com/bfs/archive/e6ecbf4c60d32f4c7346091908dc89478442a869.png
+micro-neck|17|BV1Z3vCBqELX|头前伸矫正方法|人体科学|https://i0.hdslb.com/bfs/archive/b145036dfc7ebd1dbac949842a3f95a5a806873f.jpg
+micro-neck|17|BV1ALF6zvEsg|脖子不舒服可以这样拉伸|人体科学|https://i0.hdslb.com/bfs/archive/01580b7cb242ba30f637218a2fe47bd7c73f69f2.jpg
+micro-neck|17|BV169fEBNEzG|脖子不舒服这样拉伸|人体科学|https://i1.hdslb.com/bfs/archive/a3a2d8a42ba57607c704324aa17d801dc00b2ecd.jpg
+micro-neck|18|BV1v9SRBBEZk|圆肩体态矫正指南|人体科学|https://i0.hdslb.com/bfs/archive/b03808c3392abed3938ff908b29f07d510319857.jpg
+micro-neck|20|BV1vmmLBpEU9|肩胛骨的运动康复|人体科学|https://i0.hdslb.com/bfs/archive/909a23f943b304b267b2b78f3ecb312bdc4e2514.jpg
+micro-neck|22|BV18CmEBXEmH|肩胛骨的运动康复解剖学|人体科学|https://i1.hdslb.com/bfs/archive/a1a34cf98d56f6dabda097de90010a407483a72d.jpg
+micro-neck|23|BV1wwSeB9ESW|肩袖最强维护：拉伸 + 放松 + 强化，一次搞定|Powerbuilding频道|https://i1.hdslb.com/bfs/archive/db3af20a3f3a625400a820d965b570febd940e44.jpg
+micro-neck|24|BV1PdmEByEjG|肩胛骨之间疼痛康复指南|人体科学|https://i0.hdslb.com/bfs/archive/3c47334e54da286bf84f157d7ebc65f2b8bd3d79.jpg
+micro-sedentary|12|BV1biFwziEVG|久坐后的腰，都怕这动作！久坐办公的人要去养腰|71年健身梅姐|https://i0.hdslb.com/bfs/archive/2aa65d9fa84a77b6269b2b228dc291fd37da5775.jpg
+micro-sedentary|14|BV1Th1MY9EJN|久坐久卧不爱运动可以练练这个，拉开脊柱，改善驼背|武当王资迪|https://i0.hdslb.com/bfs/archive/d7359bfb41ed63f37ce57c43a875e9833b65eed9.jpg
+micro-sedentary|15|BV1tc411Y7yt|上背部训练，释放久坐颈肩压力，运动康复|A光运动康复|https://i2.hdslb.com/bfs/archive/1ead5d812cdf4106a3dd434c6ce30583b4cdc09c.jpg
+micro-sedentary|15|BV1CLF6zeETZ|久坐后脊柱最喜欢的拉伸方式|人体科学|https://i2.hdslb.com/bfs/archive/90b8fd86557701d4483a9807d0312eea525def69.jpg
+micro-sedentary|23|BV1La8DzbE1M|核心肌群能力训练，毛巾滑块擦地。久坐人群|A光运动康复|https://i0.hdslb.com/bfs/archive/59a74b186ae51f744e7bbab3fab6ba3d9a969044.jpg
+micro-sedentary|23|BV1gskaByEFk|胸椎灵活性训练，久坐人群背部僵硬受限|A光运动康复|https://i1.hdslb.com/bfs/archive/e4cffac088d47864c2af9bacbfe69577cebeaf8d.jpg
+micro-sedentary|28|BV1GzmEBxEbr|办公久坐党的肩颈康复拉伸运动|人体科学|https://i0.hdslb.com/bfs/archive/b3a847c46290d5650a15a5f02cbaaf3b316e8ef0.jpg
+micro-sedentary|29|BV1NTmjBzEyZ|久坐腰疼康复训练|人体科学|https://i2.hdslb.com/bfs/archive/8b05b44792bbbadc0fb85fc7968c7067e57d81d1.jpg
+micro-sedentary|29|BV1V9PnzrEpd|经常久坐久站下背部不适，你需要这些动作|71年健身梅姐|https://i0.hdslb.com/bfs/archive/f7f193840760b436870fe80699c62c31f96b5755.jpg
+micro-sedentary|30|BV1Y9mLBEEcy|久坐腰疼拉伸解剖|人体科学|https://i0.hdslb.com/bfs/archive/a990a8e810a7440e199ec3ebd2eeda35e2be5e82.jpg
+micro-sleep|16|BV18fq6BRE78|每天睡前拉伸脊柱|人体科学|https://i2.hdslb.com/bfs/archive/95b73e9163df598abc607413106f351725c1777f.jpg
+micro-sleep|21|BV1FAiPBeEqn|睡前开龙脊缓解背痛|人体科学|https://i1.hdslb.com/bfs/archive/ca039ff11e6bdd1b9a23f91d220926d01ca02b0b.jpg
+micro-sleep|22|BV1APBaBsEtp|养成这个睡前拉伸习惯|人体科学|https://i0.hdslb.com/bfs/archive/a953792ca6decfee9eb7a96fba10650cc7be4411.jpg
+micro-waist|11|BV1gr9iYFErc|一个动作，脊柱对齐，背直了，胸背也不同了|魏你康复|https://i2.hdslb.com/bfs/archive/63d7927001f800661c6722448bbb77def3d5caba.jpg
+micro-waist|12|BV1w96xBCEUq|下背部拉伸，瑜伽砖辅助|A光运动康复|https://i2.hdslb.com/bfs/archive/2e09cede0e56c96f288b3dfa3eb3371ba9706a4c.jpg
+micro-waist|12|BV1vLsnzFECA|后背肩胛骨缝疼，一个动作来缓解|71年健身梅姐|https://i2.hdslb.com/bfs/archive/d4b2519d8be5f70160e19b8717525b1f9f38555b.jpg
+micro-waist|12|BV1eV6KBuEUL|含胸驼背这样拉伸|人体科学|https://i2.hdslb.com/bfs/archive/6bf28ebbd81ec3c2731e94642b23c5b25a3fec57.jpg
+micro-waist|12|BV1Z94y1p7jF|康复开龙脊·腰部最喜欢的两个拉伸动作|潘伽人yoga|https://i1.hdslb.com/bfs/archive/cebf2de9554a6dfcf49a7be4d5d20f7f78df569d.jpg
+micro-waist|12|BV1V94y1q7rM|腰椎最喜欢的三个动作|霄浩爱健身|https://i0.hdslb.com/bfs/archive/8e3fb54860fad4672fd1a3189d82af8190818d5e.jpg
+micro-waist|13|BV18bDMBAEew|后背肩胛骨缝疼，一个简单动作来缓解|71年健身梅姐|https://i1.hdslb.com/bfs/archive/938ade418a28220bb4d7e9dc37f467c7e6310570.jpg
+micro-waist|14|BV1ecWPzrEFz|三个动作拉开你的千年老腰|71年健身梅姐|https://i1.hdslb.com/bfs/archive/e4cc26bc1c2ad646bb33118e4436fd85fa60e197.jpg
+micro-waist|14|BV19CwVz7EKt|最简单的脊柱拉伸|人体科学|https://i0.hdslb.com/bfs/archive/b748f3b349f177b77d5be7a2c541997d62bd2c11.jpg
+micro-waist|15|BV1ejzwBoEb6|一个动作拉伸脊柱|人体科学|https://i1.hdslb.com/bfs/archive/123e7b043970d6a00054fecb6786e3a9d1b0bee4.jpg
+micro-waist|20|BV1gkmEBWE6y|腰椎间盘膨出康复方法|人体科学|https://i2.hdslb.com/bfs/archive/2a116bcde39a08077282be7c03e89ce19bfc8e7b.jpg
+micro-waist|21|BV1pS9RYiEoj|三个动作改善腰疼、腰部不适|魏你康复|https://i2.hdslb.com/bfs/archive/6407df5b1b263c9b44fac2614b5d950068cf1b00.jpg
+micro-waist|23|BV13zmEBxEfv|腰酸背痛康复指南|人体科学|https://i0.hdslb.com/bfs/archive/9c0bc8205444fe8fdee0c9b3947bf720d73f9586.jpg
+micro-waist|24|BV1a9mLBEESs|腰背肌肉拉伸指南|人体科学|https://i2.hdslb.com/bfs/archive/aa13fe5c3989d5599d9ab2e80c15c94bba391f52.jpg
+micro-waist|25|BV1m8rAB9EKi|缓解背痛拉伸脊柱|人体科学|https://i1.hdslb.com/bfs/archive/7904390caf145321de0ba795cdad132b0d72626d.jpg
+micro-waist|26|BV1Sgi8B9EXZ|一个动作缓解腰椎压迫|人体科学|https://i0.hdslb.com/bfs/archive/0fca668846f75f3e5e9b5711865b9e9c42234670.jpg
+micro-waist|28|BV136mEBRE2K|腰椎间盘康复拉伸运动|人体科学|https://i2.hdslb.com/bfs/archive/aa02d61283998657c30e2b4a3b4550ea930cdd8b.jpg
+micro-waist|29|BV1nh41177ab|3个动作缓解下背部劳损，骶髂关节紧张|A光运动康复|https://i0.hdslb.com/bfs/archive/f1dd110bbcbf20b390c215a7758786987e64d244.jpg
+micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https://i0.hdslb.com/bfs/archive/994ee68f078eea476a829f413b0958eddbb3968c.jpg
+`.trim();
+
+    const longPhaseLabels = ['基础计划', '进阶计划', '强化计划', '巩固计划', '耐力计划'];
+    const longVideoThemes = [
+      {
+        id: 'long_tabata',
+        type: 'fat',
+        title: 'Tabata 全身燃脂训练',
+        description: '高强度间歇，节奏清晰，适合想快速进入燃脂状态的人群。',
+        duration: 30,
+        calories: 400,
+        difficulty: 3,
+        bvid: 'BV1oQTnzXEDr',
+        poster: 'https://i2.hdslb.com/bfs/archive/b0865ee32908b9417b195a1dcf1f27966d767ff7.jpg',
+        chips: ['燃脂', '高效训练'],
+      },
+      {
+        id: 'long_dance_fat',
+        type: 'fat',
+        title: '舞蹈有氧燃脂跟练',
+        description: '节奏轻快，动作易跟，适合做日常有氧打卡。',
+        duration: 15,
+        calories: 200,
+        difficulty: 2,
+        bvid: 'BV13g4y1q7pt',
+        poster: 'https://i1.hdslb.com/bfs/archive/77d9a7ba73c5f5e91bf27822738a5094bf02e146.jpg',
+        chips: ['燃脂', '新手友好'],
+      },
+      {
+        id: 'long_baduanjin',
+        type: 'taichi',
+        title: '国家体育总局八段锦',
+        description: '传统养生功法，呼吸与动作节律平稳，适合恢复型练习。',
+        duration: 12,
+        calories: 100,
+        difficulty: 1,
+        bvid: 'BV1VsDpYXEqD',
+        poster: 'https://i0.hdslb.com/bfs/archive/e89074784b5dddaacde109e8c3bd4528e4a85138.jpg',
+        chips: ['传统养生', '低门槛'],
+      },
+      {
+        id: 'long_yoga_beginner',
+        type: 'yoga',
+        title: '初学者入门瑜伽',
+        description: '完整基础序列，改善僵硬，适合作为恢复日课程。',
+        duration: 50,
+        calories: 120,
+        difficulty: 1,
+        bvid: 'BV1xV411y7c2',
+        poster: 'https://i0.hdslb.com/bfs/archive/edea56107a1650c834ef1aec9435b4c76fb38400.jpg',
+        chips: ['瑜伽', '舒缓减压'],
+      },
+      {
+        id: 'long_core_strength',
+        type: 'strength',
+        title: '核心力量稳定训练',
+        description: '强化腹部与躯干稳定，帮助提升基础体能与姿态控制。',
+        duration: 20,
+        calories: 200,
+        difficulty: 3,
+        bvid: 'BV1k94y1f7Vr',
+        poster: 'https://i1.hdslb.com/bfs/archive/0526b5a209bb9eb98c271a8bbd4282fcd92e7dc6.jpg',
+        chips: ['力量', '核心稳定'],
+      },
+      {
+        id: 'long_neck_shoulder',
+        type: 'yoga',
+        title: '肩颈舒缓拉伸',
+        description: '低头族与久坐人群友好，适合办公间隙或晚间恢复。',
+        duration: 10,
+        calories: 40,
+        difficulty: 1,
+        bvid: 'BV1vu411e7fC',
+        poster: 'https://i0.hdslb.com/bfs/archive/a902b9961903db6d795ba9e62ad191ed7d6fa6da.jpg',
+        chips: ['拉伸', '肩颈放松'],
+      },
+      {
+        id: 'long_sleep_meditation',
+        type: 'yoga',
+        title: '助眠冥想放松',
+        description: '以呼吸与身体扫描放空思绪，适合睡前恢复。',
+        duration: 10,
+        calories: 25,
+        difficulty: 1,
+        bvid: 'BV1tG411d7a4',
+        poster: 'https://i2.hdslb.com/bfs/archive/884651feedc6f942117daee1df3c87d3ffe5fb89.jpg',
+        chips: ['冥想', '助眠放松'],
+      },
+      {
+        id: 'long_full_stretch',
+        type: 'yoga',
+        title: '全身拉伸恢复',
+        description: '运动前后都可练，帮助快速缓解肌肉紧张与僵硬。',
+        duration: 10,
+        calories: 50,
+        difficulty: 1,
+        bvid: 'BV1ga411w7i3',
+        poster: 'https://i2.hdslb.com/bfs/archive/64a46fcd19aeb36e08ccf9ef2f544f624dc83a7d.jpg',
+        chips: ['拉伸', '日常恢复'],
+      },
+      {
+        id: 'long_posture_reset',
+        type: 'yoga',
+        title: '久坐体态回正训练',
+        description: '重点关注头前伸与圆肩问题，适合办公室人群长期练。',
+        duration: 14,
+        calories: 70,
+        difficulty: 2,
+        bvid: 'BV1vu411e7fC',
+        poster: 'https://i0.hdslb.com/bfs/archive/a902b9961903db6d795ba9e62ad191ed7d6fa6da.jpg',
+        chips: ['体态', '久坐恢复'],
+      },
+      {
+        id: 'long_back_release',
+        type: 'taichi',
+        title: '腰背减压舒展',
+        description: '通勤或久坐后的背部舒展课程，动作连贯且温和。',
+        duration: 16,
+        calories: 90,
+        difficulty: 1,
+        bvid: 'BV1ga411w7i3',
+        poster: 'https://i2.hdslb.com/bfs/archive/64a46fcd19aeb36e08ccf9ef2f544f624dc83a7d.jpg',
+        chips: ['腰背', '舒展恢复'],
+      },
+    ];
+
+    function normalizeClipTitle(title) {
+      const cleaned = String(title || '')
+        .split('#')[0]
+        .replace(/[｜|]/g, '·')
+        .replace(/\s+/g, '')
+        .replace(/[！!。]+$/g, '');
+      return cleaned.length > 26 ? `${cleaned.slice(0, 26)}...` : cleaned;
+    }
+
+    function addGoalTypeIfMatch(goalTypes, type, titleText, patterns) {
+      const matched = patterns.some(function(pattern) {
+        return pattern.test(titleText);
       });
-    });
-    
-    // 点击播放 - 在弹窗中嵌入播放
-    document.querySelectorAll('.card').forEach(card => {
-      card.addEventListener('click', function() {
-        const bvid = this.dataset.bvid;
-        const title = this.dataset.title || '视频播放';
-        showVideoModal(bvid, title);
+      if (matched && !goalTypes.includes(type)) {
+        goalTypes.push(type);
+      }
+    }
+
+    function getGoalTypesForClip(microType, sourceTitle) {
+      const titleText = String(sourceTitle || '');
+      const goalTypes = [];
+
+      addGoalTypeIfMatch(goalTypes, 'goal-posture', titleText, [/体态/, /矫正/, /驼背/, /头前伸/, /圆肩/, /骨盆/, /对齐/, /回正/]);
+      addGoalTypeIfMatch(goalTypes, 'goal-rehab', titleText, [/康复/, /缓解/, /恢复/, /不适/, /疼/, /劳损/, /腱鞘炎/, /间盘/]);
+      addGoalTypeIfMatch(goalTypes, 'goal-relax', titleText, [/放松/, /睡前/, /助眠/, /舒缓/, /轻柔/]);
+      addGoalTypeIfMatch(goalTypes, 'goal-flexibility', titleText, [/拉伸/, /柔韧/, /瑜伽/, /开龙脊/, /脊柱/, /灵活性/]);
+      addGoalTypeIfMatch(goalTypes, 'goal-strength', titleText, [/力量/, /核心/, /强化/, /臀腿训练/, /能力训练/, /肩袖/]);
+      addGoalTypeIfMatch(goalTypes, 'goal-cardio', titleText, [/循环/, /唤醒/, /动态/, /激活/, /能力训练/, /核心肌群能力训练/, /臀腿训练/]);
+
+      (MICRO_GOAL_BASE_TYPES[microType] || ['goal-rehab']).forEach(function(type) {
+        if (!goalTypes.includes(type)) {
+          goalTypes.push(type);
+        }
       });
-    });
-    
-    function showVideoModal(bvid, title) {
-      const existing = document.querySelector('.video-modal');
-      if (existing) existing.remove();
-      
-      const modal = document.createElement('div');
-      modal.className = 'video-modal';
-      // 使用B站iframe嵌入地址
-      const embedUrl = `https://player.bilibili.com/player.html?bvid=${bvid}&autoplay=1&as_wide=1`;
-      
-      modal.innerHTML = `
-        <div class="video-container">
-          <div class="video-header">
-            <h3>${title}</h3>
-            <button class="video-close" onclick="this.closest('.video-modal').remove()">✕</button>
-          </div>
-          <div class="video-frame">
-            <iframe src="${embedUrl}" allowfullscreen></iframe>
-          </div>
-          <div class="video-tip">如果视频无法播放，请点击上方视频前往B站观看</div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      
-      modal.addEventListener('click', function(e) {
-        if (e.target === modal) modal.remove();
+
+      return goalTypes;
+    }
+
+    function parseMicroVideoCatalog() {
+      return REAL_MICRO_VIDEOS_RAW.split('\n').filter(Boolean).map(function(line, index) {
+        const parts = line.split('|');
+        const microType = parts[0] || 'micro-neck';
+        const duration = toPositiveNumber(parts[1]);
+        const bvid = parts[2] || '';
+        const sourceTitle = parts[3] || '短视频片段';
+        const owner = parts[4] || '哔哩哔哩';
+        const poster = parts[5] || '';
+        const meta = MICRO_TYPE_META[microType] || MICRO_TYPE_META['micro-neck'];
+        const goalTypes = getGoalTypesForClip(microType, sourceTitle);
+        const primaryGoalType = goalTypes[0] || 'goal-rehab';
+        const primaryGoalMeta = GOAL_TYPE_META[primaryGoalType] || GOAL_TYPE_META['goal-rehab'];
+
+        return {
+          id: `micro_real_${String(index + 1).padStart(3, '0')}`,
+          title: normalizeClipTitle(sourceTitle),
+          description: meta.description,
+          duration,
+          calories: Math.max(4, Math.round(duration * meta.calorieFactor)),
+          difficulty: meta.difficulty,
+          bvid,
+          poster,
+          chips: [primaryGoalMeta.chip, meta.chip],
+          mainType: primaryGoalType,
+          types: Array.from(new Set(['micro', ...goalTypes])),
+          isMicro: true,
+          sourceTitle,
+          owner,
+        };
       });
     }
+
+    const realMicroVideos = parseMicroVideoCatalog();
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function buildLevelDots(level) {
+      const safeLevel = Math.max(1, Math.min(3, Number(level || 1)));
+      const dots = [];
+      for (let i = 1; i <= 3; i += 1) {
+        dots.push(`<span class="level-dot${i <= safeLevel ? '' : ' off'}"></span>`);
+      }
+      return dots.join('');
+    }
+
+    function buildLongVideos(targetCount) {
+      const videos = [];
+      for (let phaseIndex = 0; phaseIndex < longPhaseLabels.length; phaseIndex += 1) {
+        const phase = longPhaseLabels[phaseIndex];
+        for (const theme of longVideoThemes) {
+          if (videos.length >= targetCount) {
+            return videos;
+          }
+          const durationDelta = phaseIndex === 0 ? 0 : (theme.duration >= 20 ? phaseIndex * 2 : phaseIndex);
+          videos.push({
+            id: `${theme.id}_${phaseIndex + 1}`,
+            title: `${theme.title}·${phase}`,
+            description: theme.description,
+            duration: theme.duration + durationDelta,
+            calories: theme.calories + phaseIndex * 18,
+            difficulty: theme.difficulty,
+            bvid: theme.bvid,
+            poster: theme.poster,
+            chips: [theme.chips[0], phase],
+            mainType: theme.type,
+            types: [theme.type],
+            isMicro: false,
+          });
+        }
+      }
+      return videos;
+    }
+
+    function buildMicroVideos(targetCount) {
+      return realMicroVideos.slice(0, targetCount);
+    }
+
+    function buildCourseCardHtml(item) {
+      const chips = (item.chips || []).slice(0, 2);
+      const durationLabel = item.isMicro ? `${item.duration} 秒` : `${item.duration} 分钟`;
+      const typesText = (item.types || []).join(',');
+      const title = escapeHtml(item.title);
+      const sourceTitle = escapeHtml(item.sourceTitle || item.title);
+
+      return `
+        <article class="feed-card course-card card"
+          data-id="${escapeHtml(item.id)}"
+          data-type="${escapeHtml(item.mainType)}"
+          data-types="${escapeHtml(typesText)}"
+          data-bvid="${escapeHtml(item.bvid)}"
+          data-duration="${escapeHtml(item.duration)}"
+          data-is-micro="${item.isMicro ? '1' : '0'}"
+          data-title="${title}"
+          data-source-title="${sourceTitle}"
+          data-poster="${escapeHtml(item.poster)}">
+          <div class="feed-media card-img" style="background-image: url('${escapeHtml(item.poster)}')">
+            <span class="play-trigger">▶</span>
+          </div>
+          <div class="feed-content">
+            <div class="chip-row">
+              ${chips.map(function(chip, index) {
+                return `<span class="chip${index === 1 ? ' chip-muted' : ''}">${escapeHtml(chip)}</span>`;
+              }).join('')}
+            </div>
+            <div class="feed-title" style="margin-top: 12px;">${title}</div>
+            <div class="feed-desc">${escapeHtml(item.description)}</div>
+            <div class="feed-meta">
+              <span>${durationLabel}</span>
+              <span>约 ${escapeHtml(item.calories)} 千卡</span>
+            </div>
+            <div class="level-row">
+              <span>难度</span>
+              ${buildLevelDots(item.difficulty)}
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderCourseCards(cards) {
+      const feed = document.getElementById('exerciseFeed');
+      if (!feed) return;
+      feed.innerHTML = cards.map(buildCourseCardHtml).join('');
+    }
+
+    function getProxyPosterUrl(rawUrl) {
+      return `/acp/media/bili-cover?src=${encodeURIComponent(rawUrl)}`;
+    }
+
+    function getBvidPosterUrl(bvid) {
+      return `/acp/media/bili-cover?bvid=${encodeURIComponent(bvid)}`;
+    }
+
+    function initCardPosters() {
+      document.querySelectorAll('.course-card').forEach(function(card) {
+        const bvid = card.dataset.bvid;
+        const poster = card.dataset.poster;
+        const cardImg = card.querySelector('.card-img');
+        if (!cardImg) return;
+
+        const applyPoster = function(url) {
+          cardImg.style.backgroundImage = `url('${url}')`;
+        };
+
+        const clearPoster = function() {
+          cardImg.style.backgroundImage = 'none';
+        };
+
+        const tryLoad = function(url, onError) {
+          const img = new Image();
+          img.onload = function() {
+            applyPoster(url);
+          };
+          img.onerror = onError;
+          img.src = url;
+        };
+
+        if (poster) {
+          tryLoad(getProxyPosterUrl(poster), function() {
+            tryLoad(poster, function() {
+              if (bvid) {
+                tryLoad(getBvidPosterUrl(bvid), clearPoster);
+                return;
+              }
+              clearPoster();
+            });
+          });
+          return;
+        }
+
+        if (bvid) {
+          tryLoad(getBvidPosterUrl(bvid), clearPoster);
+          return;
+        }
+
+        clearPoster();
+      });
+    }
+
+    function cardHasType(card, type) {
+      const raw = card.dataset.types || card.dataset.type || '';
+      const set = raw.split(',').map(function(item) { return item.trim(); }).filter(Boolean);
+      return type === 'all' || set.includes(type);
+    }
+
+    function applyTypeFilter(type) {
+      document.querySelectorAll('.course-card').forEach(function(card) {
+        card.style.display = cardHasType(card, type) ? 'block' : 'none';
+      });
+    }
+
+    function setActiveTab(type) {
+      document.querySelectorAll('.tab').forEach(function(item) {
+        item.classList.remove('active');
+        item.classList.remove('is-active');
+      });
+
+      const active = document.querySelector(`.tab[data-type="${type}"]`);
+      if (active) {
+        active.classList.add('active');
+        active.classList.add('is-active');
+      }
+    }
+
+    function toPositiveNumber(value) {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric) || numeric <= 0) {
+        return 0;
+      }
+      return Math.round(numeric);
+    }
+
+    function isTruthyFlag(value) {
+      const text = String(value || '').trim().toLowerCase();
+      return text === '1' || text === 'true' || text === 'yes';
+    }
+
+    const videoQueryParamsToClear = ['bvid', 'isMicro', 'clipSeconds', 'contentId', 'source', 'returnTo'];
+
+    function navigateBack(fallbackUrl) {
+      const fallback = fallbackUrl || '/chat.html';
+      const referrer = document.referrer;
+      let shouldUseHistory = false;
+
+      if (referrer) {
+        try {
+          const referrerUrl = new URL(referrer);
+          shouldUseHistory = referrerUrl.origin === window.location.origin;
+        } catch (error) {
+          // Ignore malformed referrer and fallback to default page.
+        }
+      }
+
+      if (shouldUseHistory) {
+        const currentUrl = window.location.href;
+        window.history.back();
+        window.setTimeout(function() {
+          if (window.location.href === currentUrl) {
+            window.location.href = fallback;
+          }
+        }, 220);
+        return;
+      }
+
+      window.location.href = fallback;
+    }
+
+    function isChatReferrer() {
+      if (!document.referrer) {
+        return false;
+      }
+
+      try {
+        const referrerUrl = new URL(document.referrer);
+        return referrerUrl.origin === window.location.origin && referrerUrl.pathname === '/chat.html';
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function getRecommendationReturnUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const rawReturnTo = String(params.get('returnTo') || '').trim();
+
+      if (!rawReturnTo) {
+        return '/chat.html';
+      }
+
+      try {
+        const parsed = new URL(rawReturnTo, window.location.origin);
+        if (parsed.origin !== window.location.origin) {
+          return '/chat.html';
+        }
+        return `${parsed.pathname}${parsed.search}${parsed.hash}` || '/chat.html';
+      } catch (error) {
+        return '/chat.html';
+      }
+    }
+
+    function shouldCloseVideoToChat() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('source') === 'chat' || isChatReferrer();
+    }
+
+    function clearVideoRecommendationQuery() {
+      const url = new URL(window.location.href);
+      let changed = false;
+
+      videoQueryParamsToClear.forEach(function(key) {
+        if (url.searchParams.has(key)) {
+          url.searchParams.delete(key);
+          changed = true;
+        }
+      });
+
+      if (!changed) {
+        return;
+      }
+
+      const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+      window.history.replaceState({}, '', nextUrl);
+    }
+
+    function removeVideoModal(modal) {
+      if (!modal) return;
+      modal.remove();
+    }
+
+    function dismissVideoModal(modal, options) {
+      if (!modal) return;
+
+      const opts = options || {};
+      if (opts.origin === 'query' && shouldCloseVideoToChat()) {
+        navigateBack(getRecommendationReturnUrl());
+        return;
+      }
+
+      removeVideoModal(modal);
+      if (opts.origin === 'query') {
+        clearVideoRecommendationQuery();
+      }
+    }
+
+    function showVideoModal(bvid, title, options) {
+      if (!bvid) return;
+      const opts = options || {};
+      const clipSeconds = toPositiveNumber(opts.clipSeconds);
+      const isMicro = Boolean(opts.isMicro) && clipSeconds > 0;
+
+      const existing = document.querySelector('.video-modal');
+      if (existing) removeVideoModal(existing);
+
+      const modal = document.createElement('div');
+      modal.className = 'video-modal';
+      modal.innerHTML = `
+        <div class="video-dialog">
+          <div class="video-header">
+            <div class="video-header-main">
+              <h3>${escapeHtml(title || '视频播放')}</h3>
+            </div>
+            <button class="video-close" type="button" aria-label="关闭">✕</button>
+          </div>
+          <div class="video-frame">
+            <iframe src="https://player.bilibili.com/player.html?bvid=${bvid}&autoplay=1" allow="autoplay; fullscreen" allowfullscreen></iframe>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const closeBtn = modal.querySelector('.video-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+          dismissVideoModal(modal, opts);
+        });
+      }
+
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          dismissVideoModal(modal, opts);
+        }
+      });
+    }
+
+    function bindCourseCardClicks() {
+      const feed = document.getElementById('exerciseFeed');
+      if (!feed) return;
+      feed.addEventListener('click', function(event) {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const card = target.closest('.course-card');
+        if (!card) return;
+        const isMicro = card.dataset.isMicro === '1';
+        const clipSeconds = isMicro ? toPositiveNumber(card.dataset.duration) : 0;
+        showVideoModal(card.dataset.bvid, card.dataset.sourceTitle || card.dataset.title || '视频播放', {
+          origin: 'list',
+          isMicro,
+          clipSeconds,
+        });
+      });
+    }
+
+    const longVideos = buildLongVideos(LONG_VIDEO_COUNT);
+    const microVideos = buildMicroVideos(MICRO_VIDEO_COUNT);
+    const allVideos = longVideos.concat(microVideos);
+
+    renderCourseCards(allVideos);
+    initCardPosters();
+    bindCourseCardClicks();
+
+    document.querySelectorAll('.tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        const nextType = this.dataset.type || 'all';
+        setActiveTab(nextType);
+        applyTypeFilter(nextType);
+      });
+    });
+
+    setActiveTab('all');
+    applyTypeFilter('all');
+
+    (function consumeQueryBvid() {
+      const params = new URLSearchParams(window.location.search);
+      const bvid = params.get('bvid');
+      if (!bvid) return;
+      const preferMicro = isTruthyFlag(params.get('isMicro'));
+      const clipSecondsFromQuery = toPositiveNumber(params.get('clipSeconds'));
+
+      const cards = Array.from(document.querySelectorAll('.course-card')).filter(function(card) {
+        return card && card.dataset && card.dataset.bvid === bvid;
+      });
+      if (cards.length === 0) {
+        showVideoModal(bvid, '视频播放', {
+          origin: 'query',
+          isMicro: preferMicro,
+          clipSeconds: clipSecondsFromQuery,
+        });
+        return;
+      }
+
+      let matched = null;
+      if (preferMicro) {
+        matched = cards.find(function(card) {
+          if (card.dataset.isMicro !== '1') return false;
+          if (clipSecondsFromQuery <= 0) return true;
+          return toPositiveNumber(card.dataset.duration) === clipSecondsFromQuery;
+        }) || cards.find(function(card) {
+          return card.dataset.isMicro === '1';
+        });
+      } else {
+        matched = cards.find(function(card) {
+          return card.dataset.isMicro !== '1';
+        });
+      }
+
+      if (!matched && clipSecondsFromQuery > 0) {
+        matched = cards.find(function(card) {
+          return toPositiveNumber(card.dataset.duration) === clipSecondsFromQuery;
+        });
+      }
+      if (!matched) {
+        matched = cards[0];
+      }
+
+      const title =
+        (matched && (matched.dataset.sourceTitle || matched.dataset.title || matched.getAttribute('data-title'))) ||
+        '视频播放';
+      const isMicro = matched ? matched.dataset.isMicro === '1' : preferMicro;
+      const clipSeconds = isMicro ? toPositiveNumber(matched.dataset.duration) : clipSecondsFromQuery;
+      if (matched) {
+        const matchedTypes = (matched.dataset.types || '').split(',').map(function(item) {
+          return item.trim();
+        }).filter(Boolean);
+        const preferredTab = isMicro
+          ? matchedTypes.find(function(type) { return type.indexOf('micro-') === 0; }) || matchedTypes.find(function(type) { return type !== 'micro'; }) || 'all'
+          : matchedTypes[0] || 'all';
+        setActiveTab(preferredTab);
+        applyTypeFilter(preferredTab);
+      }
+
+      if (matched && typeof matched.scrollIntoView === 'function') {
+        matched.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      showVideoModal(matched && matched.dataset ? matched.dataset.bvid : bvid, title, {
+        origin: 'query',
+        isMicro,
+        clipSeconds,
+      });
+    })();
   </script>
 </body>
 </html>

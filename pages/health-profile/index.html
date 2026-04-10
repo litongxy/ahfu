@@ -6,472 +6,562 @@
   <title>精准健康 - 同仁堂</title>
   <link rel="stylesheet" href="/styles/common.css">
   <style>
-    body { padding: 0; background: transparent; }
-    .header { 
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%); 
-      padding: 24px 20px; 
-      border-radius: 0 0 28px 28px; 
-      margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(196, 30, 58, 0.3);
+    .hero-matrix {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
     }
-    .header h1 { font-size: 22px; margin-bottom: 6px; }
-    .header p { font-size: 13px; opacity: 0.9; }
-    .back-btn { 
-      background: rgba(255,255,255,0.2); 
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: white; 
-      padding: 10px 18px; 
-      border-radius: 20px; 
-      font-size: 14px; 
-      cursor: pointer; 
-      margin-bottom: 12px;
-      transition: all 0.3s ease;
+
+    .hero-step {
+      padding: 10px 8px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      text-align: center;
     }
-    .back-btn:hover { background: rgba(255,255,255,0.3); transform: translateX(-4px); }
-    .card { 
-      background: white; 
-      border-radius: 16px; 
-      padding: 20px; 
-      margin-bottom: 16px; 
-      margin: 0 16px 16px 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08); 
+
+    .hero-step strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
     }
-    .card-title { 
-      font-size: 17px; 
-      font-weight: 600; 
-      margin-bottom: 18px; 
-      color: #212121; 
-      display: flex; 
-      align-items: center; 
+
+    .hero-step span {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      color: rgba(248, 255, 246, 0.78);
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
     }
-    .card-title::before {
-      content: '';
-      width: 4px;
-      height: 20px;
-      background: linear-gradient(180deg, #c41e3a 0%, #d32f2f 100%);
-      border-radius: 2px;
+
+    .insight-card {
+      padding: 13px;
+      border-radius: 16px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border-soft);
     }
-    .form-group { margin-bottom: 20px; }
-    .form-label { 
-      display: block; 
-      font-size: 14px; 
-      font-weight: 500;
-      color: #616161; 
-      margin-bottom: 10px; 
+
+    .insight-card strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
     }
-    .form-input { 
-      width: 100%; 
-      padding: 14px 16px; 
-      border: 2px solid #e0e0e0; 
-      border-radius: 12px; 
-      font-size: 15px; 
-      transition: all 0.3s ease;
-      background: #fafafa;
+
+    .insight-card span {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
     }
-    .form-input:focus { 
-      outline: none; 
-      border-color: #c41e3a; 
-      background: white;
-      box-shadow: 0 0 0 4px rgba(196, 30, 58, 0.1);
+
+    .sticky-copy {
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-align: center;
     }
-    .form-select { 
-      width: 100%; 
-      padding: 14px 16px; 
-      border: 2px solid #e0e0e0; 
-      border-radius: 12px; 
-      font-size: 15px; 
-      background: #fafafa;
-      transition: all 0.3s ease;
+
+    .page-shell-with-bottom-cta {
+      padding-bottom: calc(72px + env(safe-area-inset-bottom));
     }
-    .form-select:focus {
-      outline: none;
-      border-color: #c41e3a;
-      background: white;
-      box-shadow: 0 0 0 4px rgba(196, 30, 58, 0.1);
+
+    .sticky-cta-inline {
+      position: static;
+      margin-top: 4px;
+      margin-bottom: 0;
+      box-shadow: none;
+      backdrop-filter: none;
     }
-    .btn { 
-      margin: 0 16px;
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%);
-      color: white; 
-      border: none; 
-      padding: 16px 24px; 
-      border-radius: 28px; 
-      font-size: 16px;
-      font-weight: 500;
-      width: calc(100% - 32px);
-      cursor: pointer; 
-      box-shadow: 0 6px 20px rgba(196, 30, 58, 0.35);
-      transition: all 0.3s ease;
+
+    .uni-toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(96px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      z-index: 20;
+      min-width: 160px;
+      max-width: calc(100% - 28px);
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(23, 31, 24, 0.86);
+      color: #f5fff0;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(14px);
     }
-    .btn:hover { 
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(196, 30, 58, 0.45);
-    }
-    .checkbox-group { 
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 10px; 
-    }
-    .checkbox-item { 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-      font-size: 14px;
-      padding: 10px 16px;
-      background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
-      border-radius: 20px;
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-    .checkbox-item:hover { background: #e0e0e0; }
-    .checkbox-item input { 
-      width: 18px;
-      height: 18px;
-      margin: 0; 
-      accent-color: #c41e3a;
-    }
-    /* Uniapp 弹窗样式 */
+
     .uni-modal {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
+      inset: 0;
+      z-index: 30;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 9999;
-      animation: fadeIn 0.3s ease;
+      padding: 14px;
+      background: rgba(20, 25, 20, 0.42);
+      backdrop-filter: blur(10px);
     }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
+
     .uni-modal-dialog {
-      background: white;
-      border-radius: 16px;
-      width: 70%;
-      max-width: 300px;
-      overflow: hidden;
-      animation: scaleIn 0.3s ease;
+      width: min(100%, 340px);
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-lg);
     }
-    @keyframes scaleIn {
-      from { transform: scale(0.8); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
+
     .uni-modal-title {
-      padding: 20px 16px 10px;
-      text-align: center;
-      font-size: 17px;
-      font-weight: 600;
-      color: #333;
+      font-size: 18px;
+      font-weight: 700;
     }
+
     .uni-modal-content {
-      padding: 0 20px 20px;
-      text-align: center;
-      font-size: 14px;
-      color: #666;
+      margin-top: 10px;
+      font-size: 13px;
       line-height: 1.6;
+      color: var(--text-secondary);
     }
+
+    .uni-modal-content ul {
+      margin: 10px 0 0 16px;
+    }
+
+    .uni-modal-content li + li {
+      margin-top: 6px;
+    }
+
     .uni-modal-btn-group {
-      display: flex;
-      border-top: 1px solid #eee;
+      margin-top: 14px;
     }
-    .uni-modal-btn {
-      flex: 1;
-      padding: 14px 0;
-      text-align: center;
-      font-size: 16px;
-      border: none;
-      background: white;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .uni-modal-btn:active {
-      background: #f5f5f5;
-    }
-    .uni-modal-btn-primary {
-      color: #c41e3a;
-      font-weight: 500;
-      border-left: 1px solid #eee;
-    }
-    .uni-modal-btn-primary:active {
-      background: #ffebee;
-    }
-    .uni-toast {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.75);
-      color: white;
-      padding: 16px 24px;
-      border-radius: 10px;
-      font-size: 14px;
-      z-index: 10000;
-      animation: toastIn 0.3s ease;
-      max-width: 80%;
-      text-align: center;
-    }
-    @keyframes toastIn {
-      from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+    @media (max-width: 480px) {
+      .page-shell-with-bottom-cta {
+        padding-bottom: calc(68px + env(safe-area-inset-bottom));
+      }
+
+      .insight-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
-<body>
-  <div class="header">
-    <a href="/chat.html" class="back-btn" style="text-decoration:none;display:inline-block;">← 返回</a>
-    <h1>📋 精准健康档案</h1>
-    <p>建立您的个人健康档案，获得个性化建议</p>
-  </div>
+<body class="is-transparent">
+  <div class="page-shell page-shell-with-bottom-cta">
+    <div class="page-body page-stack">
+      <header class="page-hero">
+        <div class="topbar">
+          <a href="/chat.html" class="back-link" id="profileBackLink" aria-label="返回上一页">
+            <span aria-hidden="true">‹</span>
+            <span>返回</span>
+          </a>
+          <a href="/pages/report-analysis/index.html" class="hero-action">查看报告</a>
+        </div>
 
-  <div class="card">
-    <div class="card-title">👤 基本信息</div>
-    <div class="form-group">
-      <label class="form-label">姓名</label>
-      <input type="text" class="form-input" id="name" placeholder="请输入姓名">
-    </div>
-    <div class="form-group">
-      <label class="form-label">年龄</label>
-      <input type="number" class="form-input" id="age" placeholder="请输入年龄">
-    </div>
-    <div class="form-group">
-      <label class="form-label">性别</label>
-      <select class="form-select" id="gender">
-        <option value="">请选择</option>
-        <option value="男">男</option>
-        <option value="女">女</option>
-      </select>
-    </div>
-  </div>
+        <div class="hero-copy">
+          <div class="eyebrow">Health Profile Setup</div>
+          <h1 class="hero-title">建立你的健康底稿</h1>
+          <p class="hero-subtitle">把基础资料、病史和生活方式一次补齐，后续问诊、推荐和报告分析都会更准确。</p>
+        </div>
 
-  <div class="card">
-    <div class="card-title">🏥 健康信息</div>
-    <div class="form-group">
-      <label class="form-label">慢性病（可多选）</label>
-      <div class="checkbox-group" id="chronicDiseaseGroup">
-        <label class="checkbox-item"><input type="checkbox" value="高血压"> 高血压</label>
-        <label class="checkbox-item"><input type="checkbox" value="糖尿病"> 糖尿病</label>
-        <label class="checkbox-item"><input type="checkbox" value="高血脂"> 高血脂</label>
-        <label class="checkbox-item"><input type="checkbox" value="冠心病"> 冠心病</label>
-        <label class="checkbox-item"><input type="checkbox" value="胃溃疡"> 胃溃疡</label>
-        <label class="checkbox-item"><input type="checkbox" value="哮喘"> 哮喘</label>
-        <label class="checkbox-item"><input type="checkbox" value="肾功能不全"> 肾功能不全</label>
-        <label class="checkbox-item"><input type="checkbox" value="无"> 无</label>
+        <div class="hero-matrix">
+          <div class="hero-step">
+            <strong>01</strong>
+            <span>基本资料</span>
+          </div>
+          <div class="hero-step">
+            <strong>02</strong>
+            <span>健康信号</span>
+          </div>
+          <div class="hero-step">
+            <strong>03</strong>
+            <span>生活方式</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="section-card">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Benefits</div>
+            <div class="section-title">填写后会发生什么</div>
+          </div>
+        </div>
+
+        <div class="insight-grid">
+          <div class="insight-card">
+            <strong>推荐更准</strong>
+            <span>饮食、运动、睡眠与心理内容会优先匹配你的真实需求。</span>
+          </div>
+          <div class="insight-card">
+            <strong>问诊更快</strong>
+            <span>咨询时能直接带入档案信息，减少重复描述。</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Basic Info</div>
+            <div class="section-title">基本信息</div>
+            <div class="section-subtitle">先补齐身份与基础资料，作为后续健康判断的基线。</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="name">姓名 <span class="field-required" aria-hidden="true">*</span></label>
+          <input type="text" class="input" id="name" placeholder="请输入姓名" required aria-required="true">
+        </div>
+        <div class="field">
+          <label class="field-label" for="age">年龄 <span class="field-required" aria-hidden="true">*</span></label>
+          <input type="number" class="input" id="age" placeholder="请输入年龄" required aria-required="true">
+        </div>
+        <div class="field">
+          <label class="field-label" for="gender">性别 <span class="field-required" aria-hidden="true">*</span></label>
+          <select class="select" id="gender" required aria-required="true">
+            <option value="">请选择</option>
+            <option value="男">男</option>
+            <option value="女">女</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Health Signals</div>
+            <div class="section-title">健康信息</div>
+            <div class="section-subtitle">记录慢性病、近期症状和过敏史，帮助系统规避不合适建议。</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">慢性病史</label>
+          <div class="checkbox-grid" id="chronicDiseaseGroup">
+            <label class="check-chip"><input type="checkbox" value="高血压"> 高血压</label>
+            <label class="check-chip"><input type="checkbox" value="糖尿病"> 糖尿病</label>
+            <label class="check-chip"><input type="checkbox" value="高血脂"> 高血脂</label>
+            <label class="check-chip"><input type="checkbox" value="冠心病"> 冠心病</label>
+            <label class="check-chip"><input type="checkbox" value="胃溃疡"> 胃溃疡</label>
+            <label class="check-chip"><input type="checkbox" value="哮喘"> 哮喘</label>
+            <label class="check-chip"><input type="checkbox" value="肾功能不全"> 肾功能不全</label>
+            <label class="check-chip"><input type="checkbox" value="无"> 无</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="lastCheckup">最近一次体检</label>
+          <select class="select" id="lastCheckup">
+            <option value="">请选择</option>
+            <option value="一年内">一年内</option>
+            <option value="1-2年">1-2年</option>
+            <option value="2年以上">2年以上</option>
+            <option value="从未">从未</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="allergy">过敏史</label>
+          <input type="text" class="input" id="allergy" placeholder="如：青霉素、海鲜、粉尘">
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="symptoms">近期症状</label>
+          <input type="text" class="input" id="symptoms" placeholder="如：失眠、胃胀、乏力">
+          <div class="field-help">多个症状可用中文顿号、逗号分隔。</div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Lifestyle</div>
+            <div class="section-title">生活方式</div>
+            <div class="section-subtitle">饮食、睡眠和运动习惯会直接影响推荐链路和随访建议。</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="diet">饮食偏好</label>
+          <select class="select" id="diet">
+            <option value="">请选择</option>
+            <option value="清淡">清淡饮食</option>
+            <option value="辣">喜辣</option>
+            <option value="油腻">喜油腻</option>
+            <option value="素食">素食</option>
+            <option value="均衡">均衡饮食</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="sleep">每日睡眠时间</label>
+          <select class="select" id="sleep">
+            <option value="">请选择</option>
+            <option value="<6">不足 6 小时</option>
+            <option value="6-7">6-7 小时</option>
+            <option value="7-8">7-8 小时</option>
+            <option value=">8">8 小时以上</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="exercise">运动频率</label>
+          <select class="select" id="exercise">
+            <option value="">请选择</option>
+            <option value="从不">几乎不运动</option>
+            <option value="偶尔">每周 1-2 次</option>
+            <option value="经常">每周 3-5 次</option>
+            <option value="每天">每天运动</option>
+          </select>
+        </div>
+      </section>
+
+      <div class="sticky-cta sticky-cta-inline">
+        <div class="sticky-copy">档案会用于生成更贴近你的推荐与咨询建议。</div>
+        <button class="btn" id="saveBtn">保存健康档案</button>
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">是否做过体检？</label>
-      <select class="form-select" id="体检">
-        <option value="">请选择</option>
-        <option value="一年内">一年内</option>
-        <option value="1-2年">1-2年</option>
-        <option value="2年以上">2年以上</option>
-        <option value="从未">从未</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">过敏史</label>
-      <input type="text" class="form-input" id="allergy" placeholder="如：青霉素、虾等">
-    </div>
-    <div class="form-group">
-      <label class="form-label">近期症状</label>
-      <input type="text" class="form-input" id="symptoms" placeholder="如：头痛、失眠、胃痛等">
-    </div>
   </div>
 
-  <div class="card">
-    <div class="card-title">🍽️ 饮食偏好</div>
-    <div class="form-group">
-      <label class="form-label">饮食偏好</label>
-      <select class="form-select" id="diet">
-        <option value="">请选择</option>
-        <option value="清淡">清淡饮食</option>
-        <option value="辣">喜辣</option>
-        <option value="油腻">喜油腻</option>
-        <option value="素食">素食</option>
-        <option value="均衡">均衡饮食</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">每日睡眠时间</label>
-      <select class="form-select" id="sleep">
-        <option value="">请选择</option>
-        <option value="<6">不足6小时</option>
-        <option value="6-7">6-7小时</option>
-        <option value="7-8">7-8小时</option>
-        <option value=">8">8小时以上</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">运动频率</label>
-      <select class="form-select" id="exercise">
-        <option value="">请选择</option>
-        <option value="从不">几乎不运动</option>
-        <option value="偶尔">每周1-2次</option>
-        <option value="经常">每周3-5次</option>
-        <option value="每天">每天运动</option>
-      </select>
-    </div>
-  </div>
+  <nav class="bottom-nav">
+    <a href="/chat.html" class="nav-item">
+      <span class="nav-icon">咨</span>
+      <span>咨询</span>
+    </a>
+    <a href="/pages/health-profile/index.html" class="nav-item active">
+      <span class="nav-icon">康</span>
+      <span>健康</span>
+    </a>
+    <a href="/pages/recipe/list.html" class="nav-item">
+      <span class="nav-icon">食</span>
+      <span>食谱</span>
+    </a>
+    <a href="/pages/exercise/list.html" class="nav-item">
+      <span class="nav-icon">练</span>
+      <span>课程</span>
+    </a>
+    <a href="/pages/profile/index.html" class="nav-item">
+      <span class="nav-icon">我</span>
+      <span>我的</span>
+    </a>
+  </nav>
 
-  <button class="btn" id="saveBtn">💾 保存健康档案</button>
-  
-  <div style="height: 30px;"></div>
-
+  <script src="/scripts/auth-client.js"></script>
   <script>
+    const API_BASE = '/acp';
+
+    async function fetchWithAuth(url, options) {
+      if (window.AcpAuth && typeof window.AcpAuth.fetchWithAuth === 'function') {
+        return window.AcpAuth.fetchWithAuth(url, options);
+      }
+      return fetch(url, options);
+    }
+
+    function isPhoneLoggedIn() {
+      if (!window.AcpAuth || typeof window.AcpAuth.getLoginType !== 'function') {
+        return false;
+      }
+      return window.AcpAuth.getLoginType() === 'phone';
+    }
+
+    function redirectToPhoneLogin() {
+      const current = window.location.pathname + window.location.search + window.location.hash;
+      window.location.href = '/pages/login/index.html?redirect=' + encodeURIComponent(current);
+    }
+
+    function setupBackLink() {
+      const backLink = document.getElementById('profileBackLink');
+      if (!backLink) return;
+
+      backLink.addEventListener('click', function(event) {
+        if (window.history.length > 1) {
+          event.preventDefault();
+          window.history.back();
+        }
+      });
+    }
+
     function showToast(message, duration) {
-      duration = duration || 2000;
+      const timeout = duration || 2200;
       const existing = document.querySelector('.uni-toast');
-      if (existing) existing.remove();
-      
+      if (existing) {
+        existing.remove();
+      }
+
       const toast = document.createElement('div');
       toast.className = 'uni-toast';
       toast.textContent = message;
       document.body.appendChild(toast);
-      
-      setTimeout(() => toast.remove(), duration);
+
+      window.setTimeout(() => {
+        toast.remove();
+      }, timeout);
     }
-    
+
     function showModal(options) {
-      const { title, content, confirmText, onConfirm } = options;
-      
       const modal = document.createElement('div');
       modal.className = 'uni-modal';
       modal.innerHTML = `
         <div class="uni-modal-dialog">
-          <div class="uni-modal-title">${title}</div>
-          <div class="uni-modal-content">${content}</div>
+          <div class="uni-modal-title">${options.title}</div>
+          <div class="uni-modal-content">${options.content}</div>
           <div class="uni-modal-btn-group">
-            <button class="uni-modal-btn uni-modal-btn-primary" id="modalConfirm">${confirmText || '确定'}</button>
+            <button class="btn" id="modalConfirm">${options.confirmText || '确定'}</button>
           </div>
         </div>
       `;
-      
+
       document.body.appendChild(modal);
-      
+
       modal.addEventListener('click', function(e) {
         if (e.target === modal) {
           modal.remove();
         }
       });
-      
+
       document.getElementById('modalConfirm').addEventListener('click', function() {
         modal.remove();
-        if (onConfirm) onConfirm();
+        if (typeof options.onConfirm === 'function') {
+          options.onConfirm();
+        }
       });
     }
-    function getUserId() {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get('userId') || 'anonymous';
-    }
-    
+
     async function loadProfile() {
-      const userId = getUserId();
-      try {
-        const res = await fetch('//localhost:3000/acp/health/profile?userId=' + userId);
-        const data = await res.json();
-        if (data.code === 0 && data.data) {
-          const p = data.data;
-          if (p.name) document.getElementById('name').value = p.name;
-          if (p.age) document.getElementById('age').value = p.age;
-          if (p.gender) document.getElementById('gender').value = p.gender;
-          if (p.chronicDisease && p.chronicDisease.length > 0) {
-            const checkboxes = document.querySelectorAll('#chronicDiseaseGroup input[type="checkbox"]');
-            checkboxes.forEach(function(cb) {
-              cb.checked = p.chronicDisease.includes(cb.value);
-            });
-          }
-          if (p.lastCheckup) document.getElementById('体检').value = p.lastCheckup;
-          if (p.allergy) document.getElementById('allergy').value = p.allergy.join('、');
-          if (p.symptoms) document.getElementById('symptoms').value = p.symptoms.join('、');
-          if (p.dietHabit) document.getElementById('diet').value = p.dietHabit;
-          if (p.sleepInfo) document.getElementById('sleep').value = p.sleepInfo;
-          if (p.exerciseHabit) document.getElementById('exercise').value = p.exerciseHabit;
-        }
-      } catch (e) {
-        console.log('加载档案失败', e);
-      }
-    }
-    
-    function getSelectedChronicDiseases() {
-      const checkboxes = document.querySelectorAll('#chronicDiseaseGroup input[type="checkbox"]:checked');
-      const values = Array.from(checkboxes).map(function(cb) { return cb.value; });
-      if (values.includes('无')) return [];
-      return values;
-    }
-    
-    async function saveProfile() {
-      var name = document.getElementById('name').value;
-      var age = document.getElementById('age').value;
-      var gender = document.getElementById('gender').value;
-      var chronicDiseases = getSelectedChronicDiseases();
-      var lastCheckup = document.getElementById('体检').value;
-      var allergy = document.getElementById('allergy').value;
-      var symptoms = document.getElementById('symptoms').value;
-      var diet = document.getElementById('diet').value;
-      var sleep = document.getElementById('sleep').value;
-      var exercise = document.getElementById('exercise').value;
-      
-      if (!name || !age || !gender) {
-        alert('请填写完整基本信息');
+      if (!isPhoneLoggedIn()) {
+        redirectToPhoneLogin();
         return;
       }
-      
-      var userId = getUserId();
-      
-      var profileData = {
-        userId: userId,
-        name: name,
-        age: parseInt(age),
-        gender: gender,
-        chronicDisease: chronicDiseases,
-        lastCheckup: lastCheckup,
-        allergy: allergy ? allergy.split(/[,，、]/).filter(function(s) { return s.trim(); }) : [],
-        symptoms: symptoms ? symptoms.split(/[,，、]/).filter(function(s) { return s.trim(); }) : [],
-        dietHabit: diet,
-        sleepInfo: sleep,
-        exerciseHabit: exercise,
-      };
-      
+
       try {
-        console.log('保存数据:', profileData);
-        var res = await fetch('//localhost:3000/acp/health/profile', {
+        const res = await fetchWithAuth(`${API_BASE}/health/profile`);
+        const data = await res.json();
+        if (data.code !== 0 || !data.data) {
+          return;
+        }
+
+        const profile = data.data;
+        if (profile.name) document.getElementById('name').value = profile.name;
+        if (profile.age) document.getElementById('age').value = profile.age;
+        if (profile.gender) document.getElementById('gender').value = profile.gender;
+        if (profile.lastCheckup) document.getElementById('lastCheckup').value = profile.lastCheckup;
+        if (profile.allergy) document.getElementById('allergy').value = profile.allergy.join('、');
+        if (profile.symptoms) document.getElementById('symptoms').value = profile.symptoms.join('、');
+        if (profile.dietHabit) document.getElementById('diet').value = profile.dietHabit;
+        if (profile.sleepInfo) document.getElementById('sleep').value = profile.sleepInfo;
+        if (profile.exerciseHabit) document.getElementById('exercise').value = profile.exerciseHabit;
+
+        const selectedDiseases = profile.chronicDisease || [];
+        document.querySelectorAll('#chronicDiseaseGroup input[type="checkbox"]').forEach(function(input) {
+          input.checked = selectedDiseases.includes(input.value);
+        });
+      } catch (error) {
+        console.error('加载档案失败', error);
+      }
+    }
+
+    function getSelectedChronicDiseases() {
+      const selected = Array.from(
+        document.querySelectorAll('#chronicDiseaseGroup input[type="checkbox"]:checked')
+      ).map(function(input) {
+        return input.value;
+      });
+
+      return selected.includes('无') ? [] : selected;
+    }
+
+    async function saveProfile() {
+      if (!isPhoneLoggedIn()) {
+        redirectToPhoneLogin();
+        return;
+      }
+
+      const name = document.getElementById('name').value.trim();
+      const age = document.getElementById('age').value.trim();
+      const gender = document.getElementById('gender').value;
+      const chronicDisease = getSelectedChronicDiseases();
+      const lastCheckup = document.getElementById('lastCheckup').value;
+      const allergy = document.getElementById('allergy').value.trim();
+      const symptoms = document.getElementById('symptoms').value.trim();
+      const dietHabit = document.getElementById('diet').value;
+      const sleepInfo = document.getElementById('sleep').value;
+      const exerciseHabit = document.getElementById('exercise').value;
+
+      if (!name || !age || !gender) {
+        showToast('请先补齐姓名、年龄和性别');
+        return;
+      }
+
+      const profileData = {
+        name,
+        age: parseInt(age, 10),
+        gender,
+        chronicDisease,
+        lastCheckup,
+        allergy: allergy ? allergy.split(/[,，、]/).map(s => s.trim()).filter(Boolean) : [],
+        symptoms: symptoms ? symptoms.split(/[,，、]/).map(s => s.trim()).filter(Boolean) : [],
+        dietHabit,
+        sleepInfo,
+        exerciseHabit
+      };
+
+      try {
+        const res = await fetchWithAuth(`${API_BASE}/health/profile`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(profileData)
         });
-        console.log('响应状态:', res.status);
-        var data = await res.json();
-        console.log('响应数据:', data);
-        
-        if (data.code === 0) {
-          showModal({
-            title: '✅ 保存成功',
-            content: '根据您的信息，我们为您推荐：<br>• 体检报告分析<br>• 个性化食谱<br>• 运动课程',
-            confirmText: '我知道了',
-            onConfirm: function() {
-              window.location.href = '/chat.html';
-            }
-          });
-        } else {
-          showToast('保存失败: ' + data.message);
+
+        const data = await res.json();
+        if (data.code !== 0) {
+          showToast(`保存失败：${data.message || '请稍后重试'}`);
+          return;
         }
-      } catch (e) {
-        console.error('保存出错:', e);
+
+        showModal({
+          title: '健康档案已保存',
+          content: `
+            你的档案已经更新，接下来可以继续：
+            <ul>
+              <li>上传体检报告，生成更细的异常解读</li>
+              <li>回到元气助手，获取更精准的推荐内容</li>
+            </ul>
+          `,
+          confirmText: '返回咨询',
+          onConfirm: function() {
+            window.location.href = '/chat.html';
+          }
+        });
+      } catch (error) {
+        console.error('保存失败', error);
         showToast('保存失败，请稍后重试');
       }
     }
-    
-    document.getElementById('saveBtn').addEventListener('click', function() {
-      saveProfile();
-    });
-    
-    loadProfile();
+
+    document.getElementById('saveBtn').addEventListener('click', saveProfile);
+    async function bootstrap() {
+      setupBackLink();
+
+      if (window.AcpAuth && typeof window.AcpAuth.ensurePhoneLogin === 'function') {
+        try {
+          await window.AcpAuth.ensurePhoneLogin();
+        } catch (error) {
+          console.warn('需要先手机号登录后才能查看档案', error);
+          return;
+        }
+      }
+
+      await loadProfile();
+    }
+
+    bootstrap();
   </script>
 </body>
 </html>

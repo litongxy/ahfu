@@ -1,434 +1,2861 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>同仁堂元气助手</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <link rel="stylesheet" href="/styles/common.css">
+  <link rel="stylesheet" href="/styles/common.css?v=20260409-chat-polish">
   <style>
-    body {
-      padding: 0;
-      background: transparent;
+    body.is-transparent {
+      --chat-page-bg: #eef5e8;
+      --chat-page-mist: rgba(234, 243, 225, 0.72);
+      --chat-surface-bg:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 251, 244, 0.96));
+      --chat-surface-border: rgba(113, 144, 96, 0.16);
+      --chat-outline: rgba(255, 255, 255, 0.72);
+      --chat-soft-shadow: 0 24px 52px rgba(56, 82, 47, 0.1);
+      --chat-assistant-bg:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(246, 250, 242, 0.96));
+      --chat-user-bg:
+        linear-gradient(135deg, #6eae4f 0%, #609b46 56%, #4d8738 100%);
+      --chat-chip-bg:
+        linear-gradient(180deg, rgba(251, 252, 247, 0.98), rgba(237, 243, 231, 0.92));
+      --chat-chip-border: rgba(117, 150, 98, 0.18);
+      --chat-input-shell:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 251, 244, 0.96));
+      --chat-card-bg:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 249, 239, 0.94));
+      --chat-bottom-bg:
+        linear-gradient(180deg, rgba(249, 252, 246, 0.98), rgba(243, 248, 238, 0.98));
+      --chat-nav-bg:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 251, 245, 0.98));
+      background:
+        radial-gradient(circle at top left, rgba(141, 188, 106, 0.2), transparent 28%),
+        radial-gradient(circle at top right, rgba(240, 205, 131, 0.14), transparent 30%),
+        radial-gradient(circle at 50% 32%, rgba(221, 235, 210, 0.42), transparent 40%),
+        linear-gradient(180deg, #fcfdf9 0%, var(--chat-page-bg) 52%, #f7faf4 100%);
     }
-    .chat-header {
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%);
-      padding: 20px;
-      border-radius: 0 0 24px 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 20px rgba(196, 30, 58, 0.3);
+
+    .page-shell {
+      position: relative;
+      isolation: isolate;
     }
-    .chat-header h1 {
-      color: white;
-      text-align: left;
-      margin-bottom: 4px;
-      font-size: 24px;
+
+    .page-body.page-stack {
+      gap: 14px;
     }
-    .chat-header .subtitle {
-      color: rgba(255,255,255,0.85);
-      font-size: 13px;
-    }
-    .status {
-      text-align: center;
-      padding: 10px 16px;
-      margin-bottom: 12px;
-      border-radius: 20px;
-      font-size: 13px;
-      background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    .status.error {
-      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-      color: #c62828;
-    }
-    .status.success {
-      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-      color: #2e7d32;
-    }
-    .chat-container {
-      background: white;
-      border-radius: 20px;
+
+
+
+    .chat-surface {
+      position: relative;
       overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
-      margin: 0 16px;
-    }
-    .messages {
-      height: calc(100vh - 320px);
-      min-height: 350px;
-      overflow-y: auto;
-      padding: 20px;
-      background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
-    }
-    .message {
-      margin-bottom: 16px;
-      padding: 14px 18px;
-      border-radius: 18px;
-      max-width: 85%;
-      line-height: 1.6;
-      font-size: 15px;
-      animation: messageIn 0.3s ease;
-    }
-    @keyframes messageIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .message.user {
-      background: linear-gradient(135deg, #c41e3a 0%, #d32f2f 100%);
-      color: white;
-      margin-left: auto;
-      border-bottom-right-radius: 4px;
-      box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
-    }
-    .message.assistant {
-      background: white;
-      color: #333;
-      border-bottom-left-radius: 4px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      border: 1px solid #f0f0f0;
-    }
-    .message.assistant h3 {
-      font-size: 16px;
-      color: #c41e3a;
-      margin: 16px 0 10px 0;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #ffebee;
-    }
-    .message.assistant h4 {
-      font-size: 15px;
-      color: #c41e3a;
-      margin: 14px 0 8px 0;
-    }
-    .message.assistant p {
-      margin: 10px 0;
-    }
-    .message.assistant ul, .message.assistant ol {
-      margin: 10px 0;
-      padding-left: 20px;
-    }
-    .message.assistant li {
-      margin: 6px 0;
-    }
-    .message.assistant strong {
-      color: #c41e3a;
-      font-weight: 600;
-    }
-    .message.assistant hr {
-      border: none;
-      border-top: 1px dashed #e0e0e0;
-      margin: 16px 0;
-    }
-    .message .scene {
-      font-size: 12px;
-      color: #9e9e9e;
-      margin-bottom: 8px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid #f0f0f0;
-      display: inline-block;
-    }
-    .message .recommendations {
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 2px solid #f5f5f5;
-    }
-    .message .recommendations h4 {
-      font-size: 13px;
-      color: #c41e3a;
-      margin-bottom: 10px;
+      padding: 0;
       display: flex;
-      align-items: center;
-      gap: 6px;
+      flex: 1 1 auto;
+      flex-direction: column;
+      min-height: 0;
+      background: var(--chat-surface-bg);
+      border: 1px solid var(--chat-surface-border);
+      border-radius: 32px 32px 28px 28px;
+      box-shadow: var(--chat-soft-shadow);
+      backdrop-filter: blur(14px);
+      isolation: isolate;
     }
-    .message .recommendations a {
+
+    .chat-surface.is-idle {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .chat-surface::before,
+    .chat-surface::after {
+      content: '';
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .chat-surface::before {
+      width: 180px;
+      height: 180px;
+      top: -96px;
+      right: -66px;
+      background: radial-gradient(circle, rgba(173, 208, 143, 0.18), transparent 68%);
+    }
+
+    .chat-surface::after {
+      width: 160px;
+      height: 160px;
+      bottom: 72px;
+      left: -78px;
+      background: radial-gradient(circle, rgba(242, 231, 189, 0.12), transparent 70%);
+    }
+
+    .chat-page-hero {
+      padding-bottom: 18px;
+      background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.16), transparent 34%),
+        linear-gradient(145deg, rgba(109, 166, 79, 0.99), rgba(93, 151, 67, 0.97) 46%, rgba(71, 125, 50, 0.99));
+      box-shadow: 0 26px 48px rgba(57, 92, 44, 0.2);
+    }
+
+    .chat-page-hero .topbar {
+      margin-bottom: 18px;
+    }
+
+    .chat-page-hero .hero-copy {
+      max-width: 72%;
+    }
+
+    .chat-page-hero .eyebrow {
+      letter-spacing: 0.11em;
+      opacity: 0.84;
+    }
+
+    .chat-page-hero .hero-action {
+      min-height: 36px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      box-shadow: 0 10px 22px rgba(39, 78, 29, 0.12);
+    }
+
+    .hero-history-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.14);
+      color: var(--text-on-brand);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 22px rgba(39, 78, 29, 0.12);
+      transition:
+        transform var(--duration-fast) var(--ease-out),
+        background-color var(--duration-base) var(--ease-out),
+        border-color var(--duration-base) var(--ease-out),
+        box-shadow var(--duration-base) var(--ease-out);
+    }
+
+    .hero-history-btn:active {
+      transform: translateY(1px);
+    }
+
+    .hero-history-icon {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .hero-history-icon span {
       display: block;
-      padding: 12px 16px;
-      margin: 8px 0;
-      background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-      border-radius: 12px;
-      color: #e65100;
-      text-decoration: none;
-      font-size: 14px;
-      transition: all 0.3s ease;
-      border: 1px solid #ffe0b2;
+      width: 18px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.96);
     }
-    .message .recommendations a:hover {
-      background: linear-gradient(135deg, #ffe0b2 0%, #ffb74d 100%);
-      transform: translateX(4px);
+
+    .chat-page-hero .hero-title {
+      margin-top: 6px;
+      font-size: 28px;
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      text-shadow: 0 6px 20px rgba(46, 79, 35, 0.18);
     }
-    .input-area {
+
+    .chat-page-hero::before {
+      width: 110px;
+      height: 110px;
+      top: -54px;
+      right: -20px;
+    }
+
+    .chat-page-hero::after {
+      width: 72px;
+      height: 72px;
+      bottom: -38px;
+      left: 10px;
+    }
+
+    .messages {
       display: flex;
-      padding: 16px 20px;
-      background: white;
-      border-top: 1px solid #f0f0f0;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: 20px 18px 22px;
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+      position: relative;
+      z-index: 1;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 14%),
+        linear-gradient(180deg, rgba(253, 255, 250, 0.72), rgba(245, 249, 240, 0.96));
+    }
+
+    .chat-surface.is-idle .messages {
+      flex: 1 1 auto;
+      min-height: 0;
+      padding-bottom: 0;
+    }
+
+    .chat-surface.is-idle .messages:empty {
+      display: none;
+    }
+
+    .message {
+      position: relative;
+      max-width: 85%;
+      padding: 15px 17px;
+      border-radius: 26px;
+      line-height: 1.68;
+      font-size: 13.5px;
+      box-shadow: 0 16px 30px rgba(49, 75, 41, 0.08);
+      animation: messageIn 0.24s ease;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      max-width: 89%;
+      padding: 12px 16px;
+      line-height: 1.54;
+      background: var(--chat-user-bg);
+      border: 1px solid rgba(95, 146, 66, 0.16);
+      color: var(--text-on-brand);
+      box-shadow: 0 20px 32px rgba(76, 123, 52, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      border-bottom-right-radius: 12px;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+      background: var(--chat-assistant-bg);
+      border: 1px solid rgba(120, 156, 101, 0.14);
+      color: var(--text-primary);
+      border-bottom-left-radius: 12px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 16px 30px rgba(53, 79, 46, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    }
+
+    .message.assistant h3,
+    .message.assistant h4 {
+      color: var(--brand-700);
+      margin: 14px 0 8px;
+    }
+
+    .message.assistant p+p,
+    .message.assistant ul,
+    .message.assistant ol {
+      margin-top: 10px;
+    }
+
+    .message.assistant ul,
+    .message.assistant ol {
+      padding-left: 18px;
+    }
+
+    .message.assistant strong {
+      color: var(--brand-700);
+    }
+
+    .history-drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: flex;
+      justify-content: flex-start;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--duration-base) var(--ease-out);
+    }
+
+    .history-drawer[hidden] {
+      display: none;
+    }
+
+    .history-drawer.is-open {
+      pointer-events: auto;
+      opacity: 1;
+    }
+
+    .history-drawer-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(18, 24, 19, 0.28);
+      backdrop-filter: blur(4px);
+    }
+
+    .history-drawer-panel {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      width: min(86vw, 340px);
+      max-width: calc(100% - 30px);
+      height: 100%;
+      padding: calc(16px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
+      background:
+        linear-gradient(180deg, rgba(248, 252, 245, 0.98), rgba(255, 255, 255, 0.98)),
+        #ffffff;
+      border-right: 1px solid rgba(126, 151, 109, 0.14);
+      border-radius: 0 26px 26px 0;
+      box-shadow: 16px 0 36px rgba(30, 47, 26, 0.16);
+      transform: translateX(-100%);
+      transition: transform var(--duration-base) var(--ease-out);
+    }
+
+    .history-drawer.is-open .history-drawer-panel {
+      transform: translateX(0);
+    }
+
+    .history-drawer-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
       gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .history-drawer-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.25;
+    }
+
+    .history-drawer-meta {
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .history-drawer-tools {
+      margin-top: 12px;
+    }
+
+    .history-new-btn {
+      display: inline-flex;
       align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: rgba(95, 159, 69, 0.1);
+      color: var(--brand-700);
+      font-size: 13px;
+      font-weight: 700;
+      transition:
+        background-color var(--duration-base) var(--ease-out),
+        color var(--duration-base) var(--ease-out),
+        transform var(--duration-fast) var(--ease-out);
     }
-    .input-area input {
-      flex: 1;
-      padding: 14px 20px;
-      border: 2px solid #e0e0e0;
-      border-radius: 25px;
-      font-size: 15px;
-      outline: none;
-      transition: all 0.3s ease;
-      background: #fafafa;
+
+    .history-drawer-close {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.88);
+      color: var(--text-secondary);
+      font-size: 20px;
+      line-height: 1;
     }
-    .input-area input:focus {
-      border-color: #c41e3a;
-      background: white;
-      box-shadow: 0 0 0 4px rgba(196, 30, 58, 0.1);
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 4px;
     }
-    .input-area input::placeholder {
-      color: #bdbdbd;
+
+    .history-section + .history-section {
+      margin-top: 18px;
     }
-    .input-area button {
-      padding: 14px 28px;
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%);
-      color: white;
-      border: none;
-      border-radius: 25px;
-      font-size: 15px;
-      font-weight: 500;
+
+    .history-section-label {
+      margin: 0 0 10px;
+      color: var(--text-tertiary);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .history-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .history-row + .history-row {
+      margin-top: 6px;
+    }
+
+    .history-row-main {
+      flex: 1 1 auto;
+      min-width: 0;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 16px;
+      text-align: left;
+      color: var(--text-primary);
+      transition:
+        transform var(--duration-fast) var(--ease-out),
+        color var(--duration-base) var(--ease-out),
+        background-color var(--duration-base) var(--ease-out);
+    }
+
+    .history-row.is-active .history-row-main {
+      background: rgba(95, 159, 69, 0.08);
+      color: var(--brand-700);
+    }
+
+    .history-row-title {
+      display: block;
+      width: 100%;
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-empty {
+      padding: 18px 12px;
+      border-radius: 18px;
+      background: rgba(246, 250, 242, 0.88);
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .status-banner {
+      border-radius: 16px;
+      border-color: rgba(118, 151, 101, 0.14);
+      box-shadow: 0 12px 24px rgba(55, 77, 46, 0.06);
+    }
+
+    .scene {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #f5f8f0, #e9f0e1);
+      color: #6e8164;
+      border: 1px solid rgba(129, 159, 113, 0.12);
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .recommendations {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(127, 156, 111, 0.12);
+    }
+
+    .recommendations h4 {
+      margin: 0 0 8px;
+      font-size: 12px;
+    }
+
+    .rec-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .rec-section-head h4 {
+      margin: 0;
+    }
+
+    .rec-more-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      color: var(--brand-700);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .message.assistant .recommendations a,
+    .message.assistant .recommendations a:hover,
+    .message.assistant .recommendations a:focus,
+    .message.assistant .recommendations a:visited {
+      text-decoration: none;
+    }
+
+    .recommendations a.rec-content-card,
+    .recommendations a.rec-page-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 12px;
+      padding: 14px 15px;
+      border-radius: 20px;
+      background: var(--chat-card-bg);
+      border: 1px solid rgba(127, 156, 111, 0.14);
+      box-shadow: 0 12px 24px rgba(72, 94, 63, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.76);
+      color: var(--text-primary);
+      transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out);
+    }
+
+    .recommendations a.rec-content-card {
+      align-items: flex-start;
+    }
+
+    .rec-content-copy {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .rec-content-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .rec-content-tags {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .rec-content-tags::-webkit-scrollbar {
+      display: none;
+    }
+
+    .rec-content-tags.rec-content-tags-scrollable {
+      padding-right: 28px;
+      scroll-snap-type: x proximity;
+      -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+      mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+    }
+
+    .rec-content-tags .chip {
+      flex: 0 0 auto;
+      min-height: 24px;
+      padding: 0 8px;
+      font-size: 10px;
+      scroll-snap-align: start;
+      white-space: nowrap;
+    }
+
+    .rec-link-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 13px;
+      background: linear-gradient(180deg, rgba(235, 244, 229, 0.98), rgba(220, 236, 209, 0.88));
+      color: var(--brand-700);
+      font-size: 12px;
+      font-weight: 700;
+      flex: 0 0 auto;
+    }
+
+    body.is-rec-modal-open {
+      overflow: hidden;
+    }
+
+    .rec-detail-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 20px 14px calc(20px + env(safe-area-inset-bottom));
+    }
+
+    .rec-detail-modal[hidden] {
+      display: none;
+    }
+
+    .rec-detail-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(20, 28, 18, 0.42);
+      backdrop-filter: blur(4px);
+    }
+
+    .rec-detail-panel {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 680px);
+      max-height: min(84vh, 720px);
+      border-radius: 28px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(245, 250, 239, 0.98));
+      border: 1px solid rgba(122, 154, 105, 0.2);
+      box-shadow: 0 24px 56px rgba(39, 58, 32, 0.28);
+      display: flex;
+      flex-direction: column;
+      transform: translateY(18px) scale(0.985);
+      opacity: 0;
+      transition: transform var(--duration-base) var(--ease-out), opacity var(--duration-base) var(--ease-out);
+    }
+
+    .rec-detail-modal.is-open .rec-detail-panel {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .rec-detail-hero {
+      position: relative;
+      min-height: 220px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-end;
+      background:
+        radial-gradient(circle at top right, rgba(191, 222, 160, 0.34), transparent 38%),
+        linear-gradient(150deg, #5f9548 0%, #4c7d39 52%, #3c6730 100%);
+    }
+
+    .rec-detail-hero-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    .rec-detail-hero-mask {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(180deg, rgba(18, 24, 16, 0.08) 0%, rgba(18, 24, 16, 0.72) 82%);
+      pointer-events: none;
+    }
+
+    .rec-detail-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 3;
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      border: 1px solid rgba(240, 250, 235, 0.5);
+      background: rgba(70, 110, 57, 0.92);
+      color: #eff8ea;
+      font-size: 46px;
+      line-height: 1;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 14px 28px rgba(26, 46, 22, 0.28);
     }
-    .input-area button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(196, 30, 58, 0.4);
+
+    .rec-detail-close:active {
+      transform: scale(0.97);
     }
-    .input-area button:disabled {
-      background: #bdbdbd;
-      box-shadow: none;
-      transform: none;
+
+    .rec-detail-copy {
+      position: relative;
+      z-index: 2;
+      color: #f4fbf1;
+      max-width: calc(100% - 72px);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
     }
-    .quick-questions {
-      padding: 14px 20px;
+
+    .rec-detail-type {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(238, 248, 230, 0.24);
+      border: 1px solid rgba(238, 248, 230, 0.42);
+      font-size: 12px;
+      font-weight: 700;
+      color: #f3faef;
+      margin-bottom: 10px;
+    }
+
+    .rec-detail-title {
+      font-size: 38px;
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .rec-detail-desc {
+      margin-top: 8px;
+      font-size: 15px;
+      line-height: 1.65;
+      color: rgba(245, 252, 240, 0.92);
+      word-break: break-word;
+    }
+
+    .rec-detail-body {
+      padding: 16px 16px 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 120px;
+    }
+
+    .rec-detail-tags {
       display: flex;
       flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .rec-detail-actions {
+      display: flex;
       gap: 10px;
-      background: white;
-      border-top: 1px solid #f0f0f0;
     }
-    .quick-questions button {
-      padding: 10px 18px;
-      background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
-      border: 1px solid #e0e0e0;
-      border-radius: 20px;
+
+    .rec-detail-actions .btn {
+      width: auto;
+      min-width: 152px;
+      padding: 0 20px;
+    }
+
+    @media (max-width: 480px) {
+      .rec-detail-modal {
+        padding: 12px 10px calc(12px + env(safe-area-inset-bottom));
+      }
+
+      .rec-detail-panel {
+        border-radius: 24px;
+      }
+
+      .rec-detail-hero {
+        min-height: 180px;
+      }
+
+      .rec-detail-close {
+        width: 48px;
+        height: 48px;
+        font-size: 38px;
+      }
+
+      .rec-detail-title {
+        font-size: 30px;
+      }
+    }
+
+    .rec-link-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .rec-link-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .rec-link-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .rec-link-arrow {
+      display: inline-flex;
+      align-items: center;
+      color: var(--text-tertiary);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
+    .quick-questions-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 18px 6px;
+    }
+
+    .quick-questions-title {
       font-size: 13px;
+      font-weight: 700;
+      color: #6c7764;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .quick-questions-refresh {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      padding: 0 18px;
+      border-radius: 999px;
+      background: var(--chat-chip-bg);
+      border: 1px solid var(--chat-chip-border);
+      box-shadow: none;
+      color: #687560;
+      font-size: 12px;
+      font-weight: 700;
+      transition: transform 160ms var(--ease-out), box-shadow var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out);
+    }
+
+    .quick-questions-refresh:active {
+      transform: translateY(1px);
+    }
+
+    .quick-questions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 0 18px;
+    }
+
+    .quick-questions button {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      width: 100%;
+      min-height: 40px;
+      padding: 0 16px;
+      border-radius: 20px;
+      background: var(--chat-chip-bg);
+      color: #707c68;
+      border: 1px solid var(--chat-chip-border);
+      box-shadow: none;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out), background-color var(--duration-base) var(--ease-out);
+    }
+
+    .quick-question-label {
+      display: block;
+      min-width: 0;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .composer {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 0 18px;
+      box-sizing: border-box;
+      background: transparent;
+      border-top: none;
+      box-shadow: none;
+    }
+
+    .composer::before {
+      content: none;
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(232, 238, 227, 0), rgba(232, 238, 227, 1) 12%, rgba(232, 238, 227, 1) 88%, rgba(232, 238, 227, 0));
+    }
+
+    .composer-input-wrap {
+      position: relative;
+      width: 100%;
+      padding: 0;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid #d6e2ca;
+      box-shadow: 0 0 0 2px rgba(236, 242, 229, 0.92);
+      backdrop-filter: none;
+      transition: border-color var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
+    }
+
+    .composer-input-wrap:focus-within {
+      border-color: #b8d09b;
+      box-shadow: 0 0 0 2px rgba(226, 237, 214, 0.98);
+    }
+
+    .composer input {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 46px 0 20px;
+      border-radius: 22px;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      outline: none;
+      box-shadow: none;
+      transition: box-shadow var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out), background-color var(--duration-base) var(--ease-out);
+    }
+
+    .composer input:focus {
+      box-shadow: none;
+    }
+
+    .composer input::placeholder {
+      color: #97a38f;
+      font-size: 12px;
+    }
+
+    .composer .stop-btn-icon {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 17px;
+      border: 1px solid #dbe5d1;
+      background: #f6f9f1;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1;
       cursor: pointer;
-      transition: all 0.3s ease;
-      color: #616161;
+      box-shadow: 0 6px 12px rgba(77, 100, 66, 0.05);
+      transition: all 0.2s ease;
     }
-    .quick-questions button:hover {
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%);
-      color: white;
-      border-color: #c41e3a;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+
+    .composer .stop-btn-icon .stop-glyph {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      background: currentColor;
+      display: block;
     }
+
+    .composer .stop-btn-icon:hover {
+      color: var(--danger-600);
+      border-color: rgba(201, 88, 67, 0.32);
+      background: var(--danger-50);
+    }
+
+    .composer .stop-btn-icon[hidden] {
+      display: none;
+    }
+
     .loading {
-      text-align: center;
-      padding: 30px 20px;
-      color: #c41e3a;
-      background: white;
-      border-radius: 16px;
-      margin: 10px 20px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      align-self: flex-start;
+      width: min(86%, 320px);
+      padding: 13px 15px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 244, 0.94));
+      border: 1px solid rgba(120, 156, 101, 0.14);
+      box-shadow: 0 14px 28px rgba(51, 78, 43, 0.08);
     }
+
     .thinking {
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 10px;
-      margin-bottom: 8px;
     }
+
     .thinking-text {
-      font-size: 15px;
-      font-weight: 500;
+      font-size: 13px;
+      font-weight: 700;
+      color: #42563a;
     }
+
     .thinking-dots {
       display: inline-flex;
       gap: 5px;
     }
+
     .thinking-dots span {
-      width: 8px;
-      height: 8px;
-      background: #c41e3a;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
+      background: var(--brand-600);
       animation: dotPulse 1.4s infinite ease-in-out both;
     }
-    .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
-    .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
-    .thinking-dots span:nth-child(3) { animation-delay: 0s; }
-    @keyframes dotPulse {
-      0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
-      40% { transform: scale(1); opacity: 1; }
+
+    .thinking-dots span:nth-child(1) {
+      animation-delay: -0.32s;
     }
+
+    .thinking-dots span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
     .thinking-steps {
-      font-size: 13px;
-      color: #9e9e9e;
-      margin-top: 10px;
+      margin-top: 9px;
+      font-size: 11px;
+      color: #7f8d77;
     }
-    .error-msg {
-      text-align: center;
-      color: #c62828;
-      padding: 20px;
+
+    @keyframes dotPulse {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0.6);
+        opacity: 0.5;
+      }
+
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
+
+    @keyframes messageIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chat-bottom {
+      position: relative;
+      display: flex;
+      flex: 0 0 auto;
+      flex-direction: column;
+      gap: 14px;
+      padding: 10px 0 16px;
+      background: var(--chat-bottom-bg);
+      border-top: 1px solid rgba(129, 153, 112, 0.12);
+      backdrop-filter: none;
+      z-index: 1;
+    }
+
+    .bottom-nav {
+      background: rgba(255, 255, 255, 0.96);
+      border-color: rgba(211, 223, 202, 0.92);
+      box-shadow: 0 -8px 18px rgba(73, 90, 63, 0.06);
+      backdrop-filter: blur(12px);
+    }
+
+    .bottom-nav .nav-item {
+      min-height: 34px;
+      padding: 5px 4px;
+      border-radius: 14px;
+      color: #8b9682;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .bottom-nav .nav-item.active {
+      background: #eef7e8;
+      color: #719057;
+    }
+
+    .quick-questions-section {
+      position: relative;
+      padding-top: 0;
+      padding-bottom: 0;
+      background: transparent;
+      z-index: 1;
+    }
+
+    .chat-surface.is-idle .quick-questions-section {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    .chat-surface.is-idle .chat-bottom {
+      margin-top: auto;
+      padding-top: 6px;
+    }
+
+    .quick-questions-section::before {
+      content: none;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 118px;
+      height: 92px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.82) 44%, #ffffff 100%);
+      pointer-events: none;
+    }
+
+    .quick-questions-section::after {
+      content: none;
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 132px;
+      height: 1px;
+      background: #e8eee3;
+      pointer-events: none;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .hero-history-btn:hover {
+        background: rgba(255, 255, 255, 0.18);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 14px 28px rgba(39, 78, 29, 0.18);
+      }
+
+      .history-new-btn:hover {
+        background: rgba(95, 159, 69, 0.16);
+        color: var(--brand-700);
+      }
+
+      .recommendations a.rec-content-card:hover,
+      .recommendations a.rec-page-card:hover {
+        transform: translateY(-1px);
+        border-color: rgba(95, 159, 69, 0.22);
+        box-shadow: 0 18px 32px rgba(72, 94, 63, 0.09);
+      }
+
+      .quick-questions-refresh:hover {
+        border-color: rgba(95, 159, 69, 0.28);
+        box-shadow: none;
+      }
+
+      .quick-questions button:hover {
+        border-color: rgba(95, 159, 69, 0.24);
+        box-shadow: none;
+        transform: translateY(-1px);
+      }
+
+      .nav-item:hover {
+        color: var(--brand-700);
+      }
+
+      .history-row-main:hover {
+        color: var(--brand-700);
+      }
+
+    }
+
+    .quick-questions button:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+
     @media (max-width: 480px) {
-      .message {
-        max-width: 92%;
-        padding: 12px 14px;
+      .message.user {
+        max-width: 91%;
+        padding: 11px 15px;
       }
-      .input-area {
-        padding: 12px 16px;
+
+      .messages {
+        padding: 16px 14px 18px;
       }
-      .input-area button {
-        padding: 12px 20px;
+
+      .chat-surface.is-idle .messages {
+        padding-bottom: 0;
+      }
+
+      .hero-history-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+      }
+
+      .chat-page-hero .hero-copy {
+        max-width: 76%;
+      }
+
+      .chat-page-hero .hero-title {
+        font-size: 26px;
+      }
+
+      .history-drawer-panel {
+        width: min(90vw, 320px);
+        max-width: calc(100% - 20px);
+        padding: calc(14px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom));
+      }
+
+      .quick-questions-toolbar {
+        padding: 6px 14px 6px;
+      }
+
+      .quick-questions {
+        gap: 8px;
+        padding: 0 14px;
+      }
+
+      .composer {
+        padding: 0 14px;
+      }
+
+      .chat-bottom {
+        gap: 12px;
+        padding: 8px 0 14px;
       }
     }
   </style>
 </head>
-<body>
-  <div class="chat-header">
-    <h1>🏥 同仁堂元气助手</h1>
-    <div class="subtitle">您的私人健康顾问</div>
-  </div>
-  
-  <div id="status" class="status"></div>
-  
-  <div class="chat-container">
-    <div class="messages" id="messages">
-      <div class="message assistant">
-        你好！我是同仁堂AI健康助手，有什么健康问题可以问我哦～
+
+<body class="is-transparent">
+  <div class="page-shell">
+    <div class="page-body page-stack">
+      <header class="page-hero chat-page-hero">
+        <div class="topbar">
+          <button class="hero-history-btn" type="button" id="historyBtn" aria-label="查看历史消息" title="历史消息" onclick="toggleHistoryDrawer(true)">
+            <span class="hero-history-icon" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </button>
+          <a href="/pages/health-profile/index.html" class="hero-action">完善档案</a>
+        </div>
+
+        <div class="hero-copy">
+          <div class="eyebrow">Tong Ren Tang Assistant</div>
+          <h1 class="hero-title">元气助手</h1>
+        </div>
+      </header>
+
+      <div id="status" class="status-banner"></div>
+
+      <div class="history-drawer" id="historyDrawer" hidden aria-hidden="true">
+        <div class="history-drawer-backdrop" onclick="toggleHistoryDrawer(false)"></div>
+        <aside class="history-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="historyDrawerTitle">
+          <div class="history-drawer-head">
+            <div>
+              <div class="history-drawer-title" id="historyDrawerTitle">历史记录</div>
+              <div class="history-drawer-meta" id="historyDrawerMeta">按时间倒序查看最近搜索过的话题</div>
+              <div class="history-drawer-tools">
+                <button class="history-new-btn" type="button" onclick="startNewConversation()">+ 新建会话</button>
+              </div>
+            </div>
+            <button class="history-drawer-close" type="button" aria-label="关闭历史消息" onclick="toggleHistoryDrawer(false)">×</button>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </aside>
       </div>
-    </div>
-    
-    <div class="quick-questions" id="quickQuestions">
-    </div>
-    
-    <div class="input-area">
-      <input type="text" id="input" placeholder="输入您的问题..." onkeypress="handleKeyPress(event)">
-      <button onclick="sendMessage()" id="sendBtn">发送</button>
+
+      <div class="rec-detail-modal" id="recDetailModal" hidden aria-hidden="true">
+        <div class="rec-detail-backdrop" data-rec-close="true"></div>
+        <article class="rec-detail-panel" role="dialog" aria-modal="true" aria-labelledby="recDetailTitle">
+          <div class="rec-detail-hero">
+            <img class="rec-detail-hero-image" id="recDetailImage" alt="" hidden>
+            <div class="rec-detail-hero-mask"></div>
+            <button class="rec-detail-close" type="button" id="recDetailCloseBtn" aria-label="关闭推荐详情">×</button>
+            <div class="rec-detail-copy">
+              <span class="rec-detail-type" id="recDetailType">推荐</span>
+              <h3 class="rec-detail-title" id="recDetailTitle">推荐详情</h3>
+              <p class="rec-detail-desc" id="recDetailDesc">点击推荐卡片后，会在这里展示摘要信息。</p>
+            </div>
+          </div>
+          <div class="rec-detail-body">
+            <div class="rec-detail-tags" id="recDetailTags"></div>
+            <div class="rec-detail-actions">
+              <a class="btn" id="recDetailAction" href="#" target="_self">去查看</a>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <section class="chat-surface">
+        <div class="messages" id="messages"></div>
+
+        <div class="chat-bottom">
+          <div class="quick-questions-section" id="quickQuestionsSection" hidden>
+            <div class="quick-questions-toolbar" id="quickQuestionsToolbar" hidden>
+              <span class="quick-questions-title">猜你想问</span>
+              <button class="quick-questions-refresh" type="button" id="refreshQuestionsBtn" hidden>换一批</button>
+            </div>
+
+            <div class="quick-questions" id="quickQuestions"></div>
+          </div>
+
+          <div class="composer">
+            <div class="composer-input-wrap">
+              <input type="text" id="input" placeholder="例如：最近总是睡不好怎么办" onkeypress="handleKeyPress(event)">
+              <button class="stop-btn-icon" onclick="stopAsking()" id="stopBtn" hidden title="停止提问" aria-label="停止提问">
+                <span class="stop-glyph" aria-hidden="true"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 
-  <script>
-    const API_BASE = '//localhost:3000/acp';
-    let sessionId = null;
+  <nav class="bottom-nav">
+    <a href="/chat.html" class="nav-item active">
+      <span class="nav-icon">咨</span>
+      <span>咨询</span>
+    </a>
+    <a href="/pages/health-profile/index.html" class="nav-item">
+      <span class="nav-icon">康</span>
+      <span>健康</span>
+    </a>
+    <a href="/pages/recipe/list.html" class="nav-item">
+      <span class="nav-icon">食</span>
+      <span>食谱</span>
+    </a>
+    <a href="/pages/exercise/list.html" class="nav-item">
+      <span class="nav-icon">练</span>
+      <span>课程</span>
+    </a>
+    <a href="/pages/profile/index.html" class="nav-item">
+      <span class="nav-icon">我</span>
+      <span>我的</span>
+    </a>
+  </nav>
 
-    function showStatus(msg, isError = false) {
+  <script src="/scripts/auth-client.js"></script>
+  <script>
+    const API_BASE = '/acp';
+    const CHAT_STATE_KEY = 'trt-chat-state-v2';
+    const CHAT_STATE_VERSION = 2;
+    const CHAT_HISTORY_KEY = 'trt-chat-history-v1';
+    const CHAT_VIEW_STATE_KEY = 'trt-chat-view-state-v1';
+    const CHAT_VIEW_STATE_TTL = 10 * 60 * 1000;
+    const LEGACY_CHAT_STATE_KEY = 'trt-chat-state-v1';
+    const MAX_STORED_MESSAGES = 80;
+    const MAX_HISTORY_TOPICS = 80;
+    const DEFAULT_WELCOME_MESSAGE = {
+      role: 'assistant',
+      scene: '欢迎使用',
+      content: '你好，我是同仁堂元气助手。你可以直接问我健康问题，也可以让我根据你的情况推荐食谱、课程或继续分析报告。也支持按食材提问，比如“我有西红柿和鸡蛋可以做什么菜？”',
+      recommendations: null
+    };
+    const LOCAL_QUICK_QUESTIONS = [
+      { id: 'fallback-q1', question: '健康饮食的误区有哪些？', scene: 'diet' },
+      { id: 'fallback-q2', question: '晚上总是睡不着怎么办？', scene: 'sleep' },
+      { id: 'fallback-q3', question: '如何缓解压力？', scene: 'psychology' },
+      { id: 'fallback-q4', question: '运动后肌肉酸痛怎么办？', scene: 'exercise' },
+      { id: 'fallback-q5', question: '三餐怎么搭配才能控糖？', scene: 'diet' },
+      { id: 'fallback-q6', question: '吃糖真的能助眠吗？', scene: 'sleep' }
+    ];
+    const LEGACY_CHAT_STATE_SESSION_KEY = LEGACY_CHAT_STATE_KEY;
+
+    let sessionId = null;
+    let currentRequestController = null;
+    let isRequesting = false;
+    let chatMessages = [];
+    let historyTopics = [];
+    let activeHistoryTopicId = null;
+    let pendingNewConversation = false;
+    let smoothScrollRafId = null;
+    let followScrollRafId = null;
+    let quickQuestionsPool = [];
+    let lastQuickQuestionKeys = [];
+    const QUICK_QUESTION_BATCH_SIZE = 4;
+    let recommendationDetailSeq = 0;
+    const recommendationDetailStore = new Map();
+
+    function getAuthClient() {
+      return window.AcpAuth || null;
+    }
+
+    function getCurrentUserId() {
+      const auth = getAuthClient();
+      const userId = auth && typeof auth.getUserId === 'function' ? auth.getUserId() : null;
+      return userId || 'anonymous';
+    }
+
+    async function fetchWithAuth(url, options) {
+      const auth = getAuthClient();
+      if (auth && typeof auth.fetchWithAuth === 'function') {
+        return auth.fetchWithAuth(url, options);
+      }
+      return fetch(url, options);
+    }
+
+    function safeStorageGetFrom(type, key) {
+      try {
+        const storage = type === 'local' ? window.localStorage : window.sessionStorage;
+        return storage.getItem(key);
+      } catch (error) {
+        console.warn('读取缓存失败：', error);
+        return null;
+      }
+    }
+
+    function safeStorageSetTo(type, key, value) {
+      try {
+        const storage = type === 'local' ? window.localStorage : window.sessionStorage;
+        storage.setItem(key, value);
+      } catch (error) {
+        console.warn('写入缓存失败：', error);
+      }
+    }
+
+    function safeStorageRemoveFrom(type, key) {
+      try {
+        const storage = type === 'local' ? window.localStorage : window.sessionStorage;
+        storage.removeItem(key);
+      } catch (error) {
+        console.warn('移除缓存失败：', error);
+      }
+    }
+
+    function isChatReturnTargetPath(pathname) {
+      return pathname === '/pages/recipe/list.html' || pathname === '/pages/exercise/list.html';
+    }
+
+    function shouldPreserveChatViewForHref(rawUrl) {
+      if (!rawUrl) {
+        return false;
+      }
+
+      let parsed;
+      try {
+        parsed = new URL(rawUrl, window.location.origin);
+      } catch (error) {
+        return false;
+      }
+
+      return parsed.origin === window.location.origin && isChatReturnTargetPath(parsed.pathname);
+    }
+
+    function rememberChatViewForReturn() {
+      const container = document.getElementById('messages');
+      if (!container) {
+        return;
+      }
+
+      const payload = {
+        createdAt: Date.now(),
+        sessionId: sessionId || null,
+        activeHistoryTopicId: activeHistoryTopicId || null,
+        messageCount: Array.isArray(chatMessages) ? chatMessages.length : 0,
+        messageScrollTop: Math.max(0, Math.round(container.scrollTop)),
+        messageBottomOffset: Math.max(0, Math.round(container.scrollHeight - container.clientHeight - container.scrollTop)),
+        windowScrollY: Math.max(0, Math.round(window.scrollY || window.pageYOffset || 0))
+      };
+
+      safeStorageSetTo('session', CHAT_VIEW_STATE_KEY, JSON.stringify(payload));
+    }
+
+    function consumePendingChatViewState() {
+      const raw = safeStorageGetFrom('session', CHAT_VIEW_STATE_KEY);
+      if (!raw) {
+        return null;
+      }
+
+      safeStorageRemoveFrom('session', CHAT_VIEW_STATE_KEY);
+
+      try {
+        const data = JSON.parse(raw);
+        const createdAt = typeof data?.createdAt === 'number' ? data.createdAt : 0;
+        if (!createdAt || Date.now() - createdAt > CHAT_VIEW_STATE_TTL) {
+          return null;
+        }
+        return data;
+      } catch (error) {
+        console.warn('读取聊天视图快照失败：', error);
+        return null;
+      }
+    }
+
+    function restoreChatViewState(snapshot) {
+      if (!snapshot) {
+        return;
+      }
+
+      const container = document.getElementById('messages');
+      if (!container) {
+        return;
+      }
+
+      const rawTop = Number(snapshot.messageScrollTop);
+      const rawBottomOffset = Number(snapshot.messageBottomOffset);
+      const savedWindowScrollY = Number(snapshot.windowScrollY);
+      const shouldPreferBottomOffset = Number.isFinite(rawBottomOffset)
+        && snapshot.messageCount === chatMessages.length
+        && Math.abs(Math.max(0, container.scrollHeight - container.clientHeight) - rawTop) <= 2;
+
+      function applySnapshot() {
+        const maxTop = Math.max(0, container.scrollHeight - container.clientHeight);
+        let targetTop = Number.isFinite(rawTop) ? rawTop : maxTop;
+        if (shouldPreferBottomOffset) {
+          targetTop = Math.max(0, maxTop - rawBottomOffset);
+        }
+
+        container.scrollTop = Math.max(0, Math.min(targetTop, maxTop));
+        if (Number.isFinite(savedWindowScrollY)) {
+          window.scrollTo(0, Math.max(0, savedWindowScrollY));
+        }
+      }
+
+      applySnapshot();
+      window.requestAnimationFrame(function() {
+        applySnapshot();
+        window.requestAnimationFrame(applySnapshot);
+      });
+      window.setTimeout(applySnapshot, 120);
+      window.setTimeout(applySnapshot, 280);
+    }
+
+    function restorePendingChatViewState() {
+      const snapshot = consumePendingChatViewState();
+      if (!snapshot) {
+        return;
+      }
+      restoreChatViewState(snapshot);
+    }
+
+    function bindChatReturnSnapshotLinks() {
+      const container = document.getElementById('messages');
+      if (!container) {
+        return;
+      }
+
+      container.addEventListener('click', function(event) {
+        if (event.defaultPrevented) {
+          return;
+        }
+
+        const target = event.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+
+        const anchor = target.closest('a[href]');
+        if (!anchor) {
+          return;
+        }
+
+        const href = anchor.getAttribute('href');
+        if (!shouldPreserveChatViewForHref(href)) {
+          return;
+        }
+
+        rememberChatViewForReturn();
+      });
+    }
+
+    function normalizeMessageForState(item) {
+      if (!item || (item.role !== 'user' && item.role !== 'assistant')) {
+        return null;
+      }
+
+      if (typeof item.content !== 'string' || !item.content.trim()) {
+        return null;
+      }
+
+      return {
+        role: item.role,
+        content: item.content,
+        scene: typeof item.scene === 'string' && item.scene ? item.scene : null,
+        recommendations: item.recommendations || null,
+        historyExcluded: Boolean(item.historyExcluded)
+      };
+    }
+
+    function normalizeTimestamp(value) {
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return value;
+      }
+      if (typeof value === 'string' && value.trim()) {
+        const parsed = new Date(value).getTime();
+        if (Number.isFinite(parsed)) {
+          return parsed;
+        }
+      }
+      return null;
+    }
+
+    function createDefaultMessages() {
+      return [{ ...DEFAULT_WELCOME_MESSAGE }];
+    }
+
+    function isDefaultWelcomeMessage(item) {
+      return Boolean(
+        item
+        && item.role === 'assistant'
+        && typeof item.content === 'string'
+        && item.content.trim() === DEFAULT_WELCOME_MESSAGE.content
+      );
+    }
+
+    function isWelcomeOnlyState() {
+      if (!Array.isArray(chatMessages) || chatMessages.length === 0) {
+        return true;
+      }
+      if (chatMessages.length !== 1) {
+        return false;
+      }
+
+      const item = chatMessages[0];
+      if (!item) {
+        return false;
+      }
+
+      return isDefaultWelcomeMessage(item);
+    }
+
+    function updateChatSurfaceMode() {
+      const surface = document.querySelector('.chat-surface');
+      if (!surface) {
+        return;
+      }
+
+      const loading = Boolean(document.getElementById('loading'));
+      surface.classList.toggle('is-idle', isWelcomeOnlyState() && !loading);
+    }
+
+    function getMessagesForHistoryRecord(messages) {
+      return (Array.isArray(messages) ? messages : [])
+        .map(normalizeMessageForState)
+        .filter(Boolean)
+        .filter(function(item) {
+          return !item.historyExcluded && !isDefaultWelcomeMessage(item);
+        })
+        .slice(-MAX_STORED_MESSAGES);
+    }
+
+    function deriveTopicTitleFromMessages(messages) {
+      const list = Array.isArray(messages) ? messages : [];
+      const firstUser = list.find(function(item) {
+        return item && item.role === 'user' && typeof item.content === 'string' && item.content.trim();
+      });
+      return firstUser ? firstUser.content.trim() : '未命名话题';
+    }
+
+    function buildTopicRecord(partial) {
+      const now = Date.now();
+      const rawMessages = Array.isArray(partial?.messages) ? partial.messages : [];
+      const messages = getMessagesForHistoryRecord(rawMessages);
+      const createdAt = normalizeTimestamp(partial?.createdAt) || normalizeTimestamp(partial?.updatedAt) || now;
+      const updatedAt = normalizeTimestamp(partial?.updatedAt) || createdAt;
+      const id = typeof partial?.id === 'string' && partial.id.trim()
+        ? partial.id.trim()
+        : `topic_${updatedAt}_${Math.random().toString(36).slice(2, 8)}`;
+      const title = typeof partial?.title === 'string' && partial.title.trim()
+        ? partial.title.trim()
+        : deriveTopicTitleFromMessages(messages);
+
+      return {
+        id,
+        title,
+        createdAt,
+        updatedAt,
+        sessionId: typeof partial?.sessionId === 'string' && partial.sessionId.trim() ? partial.sessionId.trim() : null,
+        messages,
+        customTitle: Boolean(partial?.customTitle)
+      };
+    }
+
+    function normalizeHistoryTopic(item) {
+      if (!item) {
+        return null;
+      }
+      const topic = buildTopicRecord(item);
+      if (!topic.messages.length) {
+        return null;
+      }
+      return topic;
+    }
+
+    function saveChatState() {
+      const payload = {
+        version: CHAT_STATE_VERSION,
+        sessionId,
+        messages: chatMessages.slice(-MAX_STORED_MESSAGES),
+        activeHistoryTopicId: activeHistoryTopicId || null
+      };
+      safeStorageSetTo('local', CHAT_STATE_KEY, JSON.stringify(payload));
+    }
+
+    function saveHistoryTopics() {
+      const payload = {
+        version: 1,
+        topics: historyTopics.slice(0, MAX_HISTORY_TOPICS)
+      };
+      safeStorageSetTo('local', CHAT_HISTORY_KEY, JSON.stringify(payload));
+    }
+
+    function loadHistoryTopics() {
+      const raw = safeStorageGetFrom('local', CHAT_HISTORY_KEY);
+      if (!raw) {
+        historyTopics = [];
+        return;
+      }
+
+      try {
+        const data = JSON.parse(raw);
+        historyTopics = Array.isArray(data?.topics)
+          ? data.topics.map(normalizeHistoryTopic).filter(Boolean).sort(function(a, b) {
+            return b.updatedAt - a.updatedAt;
+          }).slice(0, MAX_HISTORY_TOPICS)
+          : [];
+      } catch (error) {
+        console.warn('读取历史话题失败：', error);
+        historyTopics = [];
+      }
+    }
+
+    function migrateLegacyStateToHistory(messages, legacySessionId) {
+      if (!Array.isArray(messages) || !messages.length || historyTopics.length > 0) {
+        return;
+      }
+
+      const lastUserMessage = messages.slice().reverse().find(function(item) {
+        return item && item.role === 'user' && typeof item.content === 'string' && item.content.trim();
+      });
+
+      if (!lastUserMessage) {
+        return;
+      }
+
+      historyTopics = [
+        buildTopicRecord({
+          title: lastUserMessage.content.trim(),
+          sessionId: legacySessionId,
+          messages,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        })
+      ];
+      saveHistoryTopics();
+    }
+
+    function restoreChatState() {
+      let raw = safeStorageGetFrom('local', CHAT_STATE_KEY);
+      if (!raw) {
+        const legacyRaw = safeStorageGetFrom('session', LEGACY_CHAT_STATE_SESSION_KEY);
+        if (legacyRaw) {
+          safeStorageRemoveFrom('session', LEGACY_CHAT_STATE_SESSION_KEY);
+          raw = legacyRaw;
+        }
+      }
+      if (!raw) {
+        raw = safeStorageGetFrom('local', LEGACY_CHAT_STATE_KEY);
+      }
+
+      if (!raw) {
+        return false;
+      }
+
+      try {
+        const data = JSON.parse(raw);
+        const messages = Array.isArray(data?.messages)
+          ? data.messages.map(normalizeMessageForState).filter(Boolean)
+          : [];
+
+        if (messages.length === 0) {
+          return false;
+        }
+
+        chatMessages = messages.slice(-MAX_STORED_MESSAGES);
+        sessionId = typeof data?.sessionId === 'string' && data.sessionId ? data.sessionId : null;
+        activeHistoryTopicId = typeof data?.activeHistoryTopicId === 'string' && data.activeHistoryTopicId ? data.activeHistoryTopicId : null;
+        if (data?.version !== CHAT_STATE_VERSION) {
+          migrateLegacyStateToHistory(chatMessages, sessionId);
+          saveChatState();
+        }
+        return true;
+      } catch (error) {
+        console.warn('恢复会话失败：', error);
+        return false;
+      }
+    }
+
+    function initializeChatMessages() {
+      loadHistoryTopics();
+      const restored = restoreChatState();
+      if (!restored) {
+        chatMessages = createDefaultMessages();
+        saveChatState();
+      }
+      if (activeHistoryTopicId && !historyTopics.some(function(item) { return item.id === activeHistoryTopicId; })) {
+        activeHistoryTopicId = null;
+      }
+      renderMessages();
+    }
+
+    function renderMessages() {
+      const container = document.getElementById('messages');
+      if (!container) return;
+      stopSmoothScrollToBottom();
+      stopFollowLatestAnswer();
+      recommendationDetailStore.clear();
+      recommendationDetailSeq = 0;
+
+      container.innerHTML = '';
+      chatMessages.forEach(function (item, index) {
+        addMessage(item.content, item.role, item.scene, item.recommendations, {
+          messageIndex: index,
+          skipStore: true,
+          skipScroll: true,
+          skipLayoutSync: true
+        });
+      });
+      updateChatSurfaceMode();
+      container.scrollTop = container.scrollHeight;
+      updateHistoryDrawer();
+    }
+
+    function isAbortError(error) {
+      if (!error) {
+        return false;
+      }
+
+      if (typeof error === 'object' && (error.name === 'AbortError' || error.code === 'ABORT_ERR')) {
+        return true;
+      }
+
+      const message = typeof error === 'string'
+        ? error
+        : (typeof error.message === 'string' ? error.message : '');
+      return /abort/i.test(message);
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function shouldRenderRecommendationDesc(type, desc) {
+      const normalizedDesc = typeof desc === 'string'
+        ? desc.replace(/\s+/g, '').trim()
+        : '';
+      if (!normalizedDesc) {
+        return false;
+      }
+      if (/^(为你精选|为你推荐|精选推荐|推荐内容|推荐食谱)$/.test(normalizedDesc)) {
+        return false;
+      }
+      return true;
+    }
+
+    function getRecommendationTypeLabel(type) {
+      const labels = {
+        recipe: '食谱推荐',
+        exercise: '课程推荐',
+        sleep: '睡眠建议',
+        psychology: '心理建议'
+      };
+      return labels[type] || '智能推荐';
+    }
+
+    function getRecommendationActionText(type) {
+      if (type === 'exercise') {
+        return '去看课程';
+      }
+      if (type === 'recipe') {
+        return '去看食谱';
+      }
+      return '前往查看';
+    }
+
+    function registerRecommendationDetail(item, link) {
+      const recId = `rec_${Date.now()}_${recommendationDetailSeq += 1}`;
+      const type = item && typeof item.type === 'string' ? item.type : '';
+      const title = item && typeof item.title === 'string' && item.title.trim()
+        ? item.title.trim()
+        : '推荐内容';
+      const description = item && typeof item.description === 'string' ? item.description.trim() : '';
+      const reason = item && typeof item.reason === 'string' ? item.reason.trim() : '';
+      const summary = reason || description || '基于当前对话为你推荐，可点击继续查看。';
+      const imageUrl = item && typeof item.imageUrl === 'string' && item.imageUrl.trim()
+        ? item.imageUrl.trim()
+        : (item && typeof item.img === 'string' && item.img.trim() ? item.img.trim() : '');
+      const tags = item && Array.isArray(item.tags)
+        ? item.tags
+          .map(function(tag) { return String(tag).trim(); })
+          .filter(Boolean)
+          .slice(0, 12)
+        : [];
+
+      recommendationDetailStore.set(recId, {
+        recId,
+        type,
+        title,
+        summary,
+        imageUrl,
+        link: typeof link === 'string' ? link : '#',
+        tags
+      });
+      return recId;
+    }
+
+    function isRecommendationModalOpen() {
+      const modal = document.getElementById('recDetailModal');
+      return Boolean(modal && modal.classList.contains('is-open'));
+    }
+
+    function closeRecommendationModal() {
+      const modal = document.getElementById('recDetailModal');
+      if (!modal) {
+        return;
+      }
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('is-rec-modal-open');
+      window.setTimeout(function() {
+        if (!modal.classList.contains('is-open')) {
+          modal.hidden = true;
+        }
+      }, 220);
+    }
+
+    function openRecommendationModal(recId) {
+      const detail = recommendationDetailStore.get(recId);
+      if (!detail) {
+        return;
+      }
+
+      const modal = document.getElementById('recDetailModal');
+      const titleNode = document.getElementById('recDetailTitle');
+      const typeNode = document.getElementById('recDetailType');
+      const descNode = document.getElementById('recDetailDesc');
+      const tagsNode = document.getElementById('recDetailTags');
+      const imageNode = document.getElementById('recDetailImage');
+      const actionNode = document.getElementById('recDetailAction');
+
+      if (!modal || !titleNode || !typeNode || !descNode || !tagsNode || !imageNode || !actionNode) {
+        return;
+      }
+
+      typeNode.textContent = getRecommendationTypeLabel(detail.type);
+      titleNode.textContent = detail.title;
+      descNode.textContent = detail.summary;
+
+      if (detail.imageUrl) {
+        imageNode.src = detail.imageUrl;
+        imageNode.hidden = false;
+      } else {
+        imageNode.hidden = true;
+        imageNode.removeAttribute('src');
+      }
+
+      if (Array.isArray(detail.tags) && detail.tags.length > 0) {
+        tagsNode.innerHTML = detail.tags
+          .map(function(tag) { return `<span class=\"chip chip-muted\">${escapeHtml(tag)}</span>`; })
+          .join('');
+        tagsNode.hidden = false;
+      } else {
+        tagsNode.innerHTML = '';
+        tagsNode.hidden = true;
+      }
+
+      if (detail.link && detail.link !== '#') {
+        actionNode.href = detail.link;
+        actionNode.textContent = getRecommendationActionText(detail.type);
+        actionNode.hidden = false;
+      } else {
+        actionNode.href = '#';
+        actionNode.textContent = '知道了';
+        actionNode.hidden = true;
+      }
+
+      modal.hidden = false;
+      window.requestAnimationFrame(function() {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('is-rec-modal-open');
+      });
+    }
+
+    function bindRecommendationDetailModal() {
+      const messages = document.getElementById('messages');
+      const modal = document.getElementById('recDetailModal');
+      const closeBtn = document.getElementById('recDetailCloseBtn');
+      const actionBtn = document.getElementById('recDetailAction');
+
+      if (messages) {
+        messages.addEventListener('click', function(event) {
+          const target = event.target;
+          if (!(target instanceof Element)) {
+            return;
+          }
+          const card = target.closest('.rec-content-card[data-rec-id]');
+          if (!card) {
+            return;
+          }
+          event.preventDefault();
+          const recId = card.getAttribute('data-rec-id');
+          if (!recId) {
+            return;
+          }
+          openRecommendationModal(recId);
+        });
+      }
+
+      if (modal) {
+        modal.addEventListener('click', function(event) {
+          const target = event.target;
+          if (!(target instanceof Element)) {
+            return;
+          }
+          if (target.hasAttribute('data-rec-close')) {
+            closeRecommendationModal();
+          }
+        });
+      }
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+          closeRecommendationModal();
+        });
+      }
+
+      if (actionBtn) {
+        actionBtn.addEventListener('click', function() {
+          rememberChatViewForReturn();
+          closeRecommendationModal();
+        });
+      }
+    }
+
+    function appendChatRecommendationContext(rawUrl) {
+      if (!rawUrl || rawUrl === '#') {
+        return rawUrl || '#';
+      }
+
+      let parsed;
+      try {
+        parsed = new URL(rawUrl, window.location.origin);
+      } catch (error) {
+        return rawUrl;
+      }
+
+      if (parsed.origin !== window.location.origin) {
+        return rawUrl;
+      }
+
+      if (parsed.pathname !== '/pages/recipe/list.html' && parsed.pathname !== '/pages/exercise/list.html') {
+        return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+      }
+
+      parsed.searchParams.set('source', 'chat');
+      if (!parsed.searchParams.get('returnTo')) {
+        parsed.searchParams.set('returnTo', '/chat.html');
+      }
+
+      return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    }
+
+    function buildRecipeRecommendationLink(item) {
+      const params = new URLSearchParams();
+      const recipeId = item && typeof item.id === 'string' ? item.id.trim() : '';
+      const recipeTitle = item && typeof item.title === 'string' ? item.title.trim() : '';
+      const recipeDesc = item && typeof item.description === 'string' ? item.description.trim() : '';
+      const recipeCalories = item && Number.isFinite(Number(item.calories)) ? String(Number(item.calories)) : '';
+      const recipeImage = item && typeof item.imageUrl === 'string' && item.imageUrl.trim()
+        ? item.imageUrl.trim()
+        : (item && typeof item.img === 'string' && item.img.trim() ? item.img.trim() : '');
+      const recipeTags = item && Array.isArray(item.tags)
+        ? item.tags
+          .map(function(tag) { return String(tag).trim(); })
+          .filter(Boolean)
+          .slice(0, 5)
+          .join(',')
+        : '';
+
+      if (recipeId) params.set('recipeId', recipeId);
+      if (recipeTitle) params.set('recipeTitle', recipeTitle);
+      if (recipeDesc) params.set('recipeDesc', recipeDesc);
+      if (recipeCalories) params.set('recipeCalories', recipeCalories);
+      if (recipeImage) params.set('recipeImage', recipeImage);
+      if (recipeTags) params.set('recipeTags', recipeTags);
+      params.set('source', 'chat');
+      params.set('returnTo', '/chat.html');
+
+      const query = params.toString();
+      return query ? `/pages/recipe/list.html?${query}` : '/pages/recipe/list.html';
+    }
+
+    function buildExerciseRecommendationLink(item) {
+      const rawUrl = item && typeof item.url === 'string' && item.url.trim()
+        ? item.url.trim()
+        : '/pages/exercise/list.html';
+      let parsed;
+      try {
+        parsed = new URL(rawUrl, window.location.origin);
+      } catch (error) {
+        parsed = new URL('/pages/exercise/list.html', window.location.origin);
+      }
+
+      const bvid = item && typeof item.bvid === 'string' ? item.bvid.trim() : '';
+      if (bvid && !parsed.searchParams.get('bvid')) {
+        parsed.searchParams.set('bvid', bvid);
+      }
+
+      const durationSeconds = item && Number.isFinite(Number(item.durationSeconds))
+        ? Number(item.durationSeconds)
+        : NaN;
+      const hasShortClipTag = item && Array.isArray(item.tags)
+        ? item.tags.some(function(tag) {
+          const text = String(tag || '');
+          return text.includes('10-30秒') || text.includes('动作片段');
+        })
+        : false;
+      const descriptionText = item && typeof item.description === 'string' ? item.description : '';
+      const isShortClip = (Number.isFinite(durationSeconds) && durationSeconds > 0 && durationSeconds <= 120)
+        || hasShortClipTag
+        || /单次\s*\d+\s*秒/.test(descriptionText);
+
+      if (isShortClip) {
+        parsed.searchParams.set('isMicro', '1');
+      }
+      if (Number.isFinite(durationSeconds) && durationSeconds > 0 && durationSeconds <= 120) {
+        parsed.searchParams.set('clipSeconds', String(Math.round(durationSeconds)));
+      }
+
+      const contentId = item && typeof item.id === 'string' ? item.id.trim() : '';
+      if (contentId) {
+        parsed.searchParams.set('contentId', contentId);
+      }
+
+      parsed.searchParams.set('source', 'chat');
+      if (!parsed.searchParams.get('returnTo')) {
+        parsed.searchParams.set('returnTo', '/chat.html');
+      }
+
+      return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    }
+
+    function buildRecommendationLink(item) {
+      const type = item && item.type ? String(item.type) : '';
+      if (type === 'exercise') {
+        return buildExerciseRecommendationLink(item);
+      }
+
+      if (item && typeof item.url === 'string' && item.url.trim()) {
+        if (type !== 'recipe') {
+          return item.url;
+        }
+        if (/[?&](recipeId|recipeTitle|id|title)=/i.test(item.url)) {
+          return appendChatRecommendationContext(item.url);
+        }
+        if (item.url !== '/pages/recipe/list.html') {
+          return item.url;
+        }
+      }
+
+      if (type === 'recipe') {
+        return buildRecipeRecommendationLink(item);
+      }
+      return '#';
+    }
+
+    function showStatus(msg, isError) {
       const status = document.getElementById('status');
+      if (!msg) {
+        status.className = 'status-banner';
+        status.textContent = '';
+        return;
+      }
+
       status.textContent = msg;
-      status.className = 'status ' + (isError ? 'error' : 'success');
+      status.className = `status-banner ${isError ? 'error' : 'success'}`;
+    }
+
+    function requestFrame(callback) {
+      if (window && typeof window.requestAnimationFrame === 'function') {
+        return window.requestAnimationFrame(callback);
+      }
+      return window.setTimeout(function() { callback(Date.now()); }, 16);
+    }
+
+    function cancelFrame(frameId) {
+      if (!frameId) {
+        return;
+      }
+      if (window && typeof window.cancelAnimationFrame === 'function') {
+        window.cancelAnimationFrame(frameId);
+      } else {
+        window.clearTimeout(frameId);
+      }
+    }
+
+    function stopSmoothScrollToBottom() {
+      if (!smoothScrollRafId) {
+        return;
+      }
+      cancelFrame(smoothScrollRafId);
+      smoothScrollRafId = null;
+    }
+
+    function smoothScrollToBottom(container, duration) {
+      if (!container) {
+        return;
+      }
+
+      stopSmoothScrollToBottom();
+      const startTop = container.scrollTop;
+      const targetTop = Math.max(0, container.scrollHeight - container.clientHeight);
+      const delta = targetTop - startTop;
+      if (Math.abs(delta) < 1) {
+        container.scrollTop = targetTop;
+        return;
+      }
+
+      const total = Math.min(Math.max(Number(duration) || 320, 180), 720);
+      let startAt = null;
+
+      function step(timestamp) {
+        if (startAt === null) {
+          startAt = timestamp;
+        }
+
+        const progress = Math.min((timestamp - startAt) / total, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        container.scrollTop = startTop + delta * eased;
+
+        if (progress < 1) {
+          smoothScrollRafId = requestFrame(step);
+        } else {
+          smoothScrollRafId = null;
+        }
+      }
+
+      smoothScrollRafId = requestFrame(step);
+    }
+
+    function stopFollowLatestAnswer() {
+      if (!followScrollRafId) {
+        return;
+      }
+      cancelFrame(followScrollRafId);
+      followScrollRafId = null;
+    }
+
+    function startFollowLatestAnswer() {
+      stopFollowLatestAnswer();
+      const container = document.getElementById('messages');
+      if (!container) {
+        return;
+      }
+
+      function tick() {
+        if (!isRequesting) {
+          followScrollRafId = null;
+          return;
+        }
+
+        const targetTop = Math.max(0, container.scrollHeight - container.clientHeight);
+        const gap = targetTop - container.scrollTop;
+        if (gap > 0.5) {
+          const step = Math.min(Math.max(2, gap * 0.16), 28);
+          container.scrollTop += step;
+        }
+
+        followScrollRafId = requestFrame(tick);
+      }
+
+      followScrollRafId = requestFrame(tick);
+    }
+
+    function resolveMoreLinkFromContents(contents) {
+      const list = Array.isArray(contents) ? contents : [];
+      let recipeCount = 0;
+      let exerciseCount = 0;
+
+      list.forEach(function(item) {
+        const type = item && item.type;
+        if (type === 'recipe') recipeCount += 1;
+        if (type === 'exercise') exerciseCount += 1;
+      });
+
+      if (recipeCount !== exerciseCount) {
+        return exerciseCount > recipeCount ? '/pages/exercise/list.html' : '/pages/recipe/list.html';
+      }
+
+      if (recipeCount > 0) {
+        const firstMatched = list.find(function(item) {
+          return item && (item.type === 'recipe' || item.type === 'exercise');
+        });
+        if (firstMatched && firstMatched.type === 'exercise') {
+          return '/pages/exercise/list.html';
+        }
+        return '/pages/recipe/list.html';
+      }
+
+      const firstPageUrl = list
+        .map(function(item) { return item && typeof item.url === 'string' ? item.url : ''; })
+        .find(function(url) { return url.startsWith('/pages/'); });
+
+      if (firstPageUrl) {
+        return firstPageUrl.split('?')[0];
+      }
+
+      return '/pages/recipe/list.html';
+    }
+
+    function setRequestingState(requesting) {
+      isRequesting = requesting;
+      const stopBtn = document.getElementById('stopBtn');
+      if (stopBtn) {
+        stopBtn.hidden = !requesting;
+      }
+
+      if (requesting) {
+        startFollowLatestAnswer();
+      } else {
+        stopFollowLatestAnswer();
+      }
+    }
+
+    function extractHistoryPreview(text) {
+      return String(text || '')
+        .replace(/```[\s\S]*?```/g, ' ')
+        .replace(/`([^`]+)`/g, '$1')
+        .replace(/[*#>\-]+/g, ' ')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function getHistoryTopicById(topicId) {
+      return historyTopics.find(function(item) { return item.id === topicId; }) || null;
+    }
+
+    function formatHistoryGroupLabel(timestamp) {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const itemStart = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+      const diffDays = Math.floor((todayStart - itemStart) / 86400000);
+
+      if (diffDays <= 0) return '今天';
+      if (diffDays === 1) return '昨天';
+      if (diffDays < 7) return '7天内';
+      if (diffDays < 30) return '30天内';
+      return `${date.getFullYear()}年${date.getMonth() + 1}月`;
+    }
+
+    function groupHistoryTopics(list) {
+      return list
+        .slice()
+        .sort(function(a, b) { return b.updatedAt - a.updatedAt; })
+        .reduce(function(groups, topic) {
+          const label = formatHistoryGroupLabel(topic.updatedAt);
+          const lastGroup = groups[groups.length - 1];
+          if (!lastGroup || lastGroup.label !== label) {
+            groups.push({ label, items: [topic] });
+          } else {
+            lastGroup.items.push(topic);
+          }
+          return groups;
+        }, []);
+    }
+
+    function syncActiveHistoryTopic() {
+      const messages = getMessagesForHistoryRecord(chatMessages);
+      if (!messages.length) {
+        return;
+      }
+
+      const computedTitle = deriveTopicTitleFromMessages(messages);
+      const existing = activeHistoryTopicId ? getHistoryTopicById(activeHistoryTopicId) : null;
+      const now = Date.now();
+
+      if (existing) {
+        historyTopics = historyTopics.map(function(item) {
+          if (item.id !== existing.id) {
+            return item;
+          }
+
+          return {
+            ...item,
+            title: item.customTitle ? item.title : computedTitle,
+            sessionId,
+            messages,
+            updatedAt: now
+          };
+        }).sort(function(a, b) {
+          return b.updatedAt - a.updatedAt;
+        }).slice(0, MAX_HISTORY_TOPICS);
+      } else {
+        const record = buildTopicRecord({
+          title: computedTitle,
+          sessionId,
+          messages,
+          createdAt: now,
+          updatedAt: now
+        });
+        historyTopics = [record].concat(historyTopics).sort(function(a, b) {
+          return b.updatedAt - a.updatedAt;
+        }).slice(0, MAX_HISTORY_TOPICS);
+        activeHistoryTopicId = record.id;
+      }
+
+      saveHistoryTopics();
+      saveChatState();
+      updateHistoryDrawer();
+    }
+
+    function updateHistoryDrawer() {
+      const list = document.getElementById('historyList');
+      const meta = document.getElementById('historyDrawerMeta');
+      if (!list || !meta) {
+        return;
+      }
+
+      const total = historyTopics.length;
+      meta.textContent = total > 0
+        ? `共 ${total} 条历史话题，按时间倒序展示`
+        : '按时间倒序查看最近搜索过的话题';
+
+      if (total === 0) {
+        list.innerHTML = '<div class="history-empty">暂时还没有历史话题。手动输入问题后，会自动记录在这里。</div>';
+        return;
+      }
+
+      const groups = groupHistoryTopics(historyTopics);
+      list.innerHTML = groups.map(function(group) {
+        return `
+          <section class="history-section">
+            <h3 class="history-section-label">${escapeHtml(group.label)}</h3>
+            ${group.items.map(function(topic) {
+              const title = extractHistoryPreview(topic.title).trim() || '未命名话题';
+              const activeClass = topic.id === activeHistoryTopicId ? ' is-active' : '';
+              return `
+                <div class="history-row${activeClass}">
+                  <button class="history-row-main" type="button" onclick='openHistoryTopic(${JSON.stringify(topic.id)})'>
+                    <span class="history-row-title">${escapeHtml(title)}</span>
+                  </button>
+                </div>
+              `;
+            }).join('')}
+          </section>
+        `;
+      }).join('');
+    }
+
+    function openHistoryTopic(topicId) {
+      const topic = getHistoryTopicById(topicId);
+      if (!topic) {
+        return;
+      }
+
+      syncActiveHistoryTopic();
+      activeHistoryTopicId = topic.id;
+      sessionId = topic.sessionId || null;
+      chatMessages = topic.messages.map(normalizeMessageForState).filter(Boolean).slice(-MAX_STORED_MESSAGES);
+      if (!chatMessages.length) {
+        chatMessages = createDefaultMessages();
+      }
+      saveChatState();
+      renderMessages();
+      toggleHistoryDrawer(false);
+    }
+
+    function resetConversationState() {
+      stopSmoothScrollToBottom();
+      stopFollowLatestAnswer();
+      sessionId = null;
+      activeHistoryTopicId = null;
+      chatMessages = createDefaultMessages();
+      saveChatState();
+      renderMessages();
+      toggleHistoryDrawer(false);
+
+      window.setTimeout(function() {
+        document.getElementById('input')?.focus();
+      }, 120);
+    }
+
+    function startNewConversation() {
+      if (isRequesting && currentRequestController) {
+        pendingNewConversation = true;
+        currentRequestController.abort();
+        return;
+      }
+
+      syncActiveHistoryTopic();
+      resetConversationState();
+    }
+
+    function toggleHistoryDrawer(forceOpen) {
+      const drawer = document.getElementById('historyDrawer');
+      if (!drawer) {
+        return;
+      }
+
+      const nextOpen = typeof forceOpen === 'boolean'
+        ? forceOpen
+        : !drawer.classList.contains('is-open');
+
+      if (nextOpen) {
+        updateHistoryDrawer();
+        drawer.hidden = false;
+        window.requestAnimationFrame(function() {
+          drawer.classList.add('is-open');
+          drawer.setAttribute('aria-hidden', 'false');
+        });
+        return;
+      }
+
+      drawer.classList.remove('is-open');
+      drawer.setAttribute('aria-hidden', 'true');
+      window.setTimeout(function() {
+        if (!drawer.classList.contains('is-open')) {
+          drawer.hidden = true;
+        }
+      }, 220);
+    }
+
+    function renderAssistantContent(rawText) {
+      if (window.marked && typeof window.marked.parse === 'function') {
+        try {
+          return window.marked.parse(rawText);
+        } catch (error) {
+          console.warn('Markdown 渲染失败，使用纯文本回退：', error);
+        }
+      }
+
+      return escapeHtml(rawText).replace(/\n/g, '<br>');
     }
 
     async function loadQuickQuestions() {
       try {
         const res = await fetch(`${API_BASE}/config/quick-questions`);
-        if (!res.ok) throw new Error('Failed to load');
+        if (!res.ok) {
+          throw new Error(`请求失败：${res.status}`);
+        }
+
         const data = await res.json();
-        
-        const container = document.getElementById('quickQuestions');
-        data.data.forEach(q => {
-          const btn = document.createElement('button');
-          btn.textContent = q.question;
-          btn.onclick = () => sendMessage(q.question);
-          container.appendChild(btn);
-        });
-        showStatus('✅ 已连接到服务器');
-      } catch (e) {
-        console.error(e);
-        showStatus('❌ 连接失败: ' + e.message, true);
+        quickQuestionsPool = Array.isArray(data.data) ? data.data.filter(Boolean) : [];
+        lastQuickQuestionKeys = [];
+        renderQuickQuestions();
+
+        showStatus('已连接到推荐与问答服务', false);
+      } catch (error) {
+        console.error('猜你想问加载失败：', error);
+        quickQuestionsPool = LOCAL_QUICK_QUESTIONS.slice();
+        lastQuickQuestionKeys = [];
+        renderQuickQuestions();
+        showStatus('推荐服务连接失败，已切换本地问题', true);
       }
     }
 
-    function handleKeyPress(e) {
-      if (e.key === 'Enter') sendMessage();
+    function getQuickQuestionKey(item, index) {
+      if (item && typeof item.id === 'string' && item.id.trim()) {
+        return item.id.trim();
+      }
+      if (item && typeof item.question === 'string' && item.question.trim()) {
+        return item.question.trim();
+      }
+      return `fallback-${index}`;
     }
 
-    async function sendMessage(text) {
+    function shuffleArray(list) {
+      const arr = Array.isArray(list) ? list.slice() : [];
+      for (let i = arr.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+      }
+      return arr;
+    }
+
+    function pickRandomQuickQuestions(list, count, excludeKeys) {
+      const safeList = Array.isArray(list) ? list.filter(function(item) { return item && item.question; }) : [];
+      if (safeList.length === 0 || count <= 0) {
+        return [];
+      }
+
+      const keySet = new Set(Array.isArray(excludeKeys) ? excludeKeys : []);
+      const primary = safeList.filter(function(item, index) {
+        return !keySet.has(getQuickQuestionKey(item, index));
+      });
+
+      let source = primary;
+      if (primary.length < count) {
+        source = safeList;
+      }
+
+      return shuffleArray(source).slice(0, Math.min(count, source.length));
+    }
+
+    function renderQuickQuestions() {
+      const section = document.getElementById('quickQuestionsSection');
+      const toolbar = document.getElementById('quickQuestionsToolbar');
+      const refreshBtn = document.getElementById('refreshQuestionsBtn');
+      const container = document.getElementById('quickQuestions');
+
+      if (!container || !toolbar || !refreshBtn || !section) {
+        return;
+      }
+
+      const total = quickQuestionsPool.length;
+      const showRefresh = total > QUICK_QUESTION_BATCH_SIZE;
+      const batchSize = Math.min(QUICK_QUESTION_BATCH_SIZE, total);
+      const batch = pickRandomQuickQuestions(quickQuestionsPool, batchSize, lastQuickQuestionKeys);
+
+      section.hidden = total === 0;
+      toolbar.hidden = total === 0;
+      refreshBtn.hidden = !showRefresh;
+
+      container.innerHTML = '';
+      batch.forEach(function (item) {
+        if (!item || !item.question) return;
+        const btn = document.createElement('button');
+        const label = document.createElement('span');
+        btn.type = 'button';
+        btn.title = item.question;
+        label.className = 'quick-question-label';
+        label.textContent = item.question;
+        btn.appendChild(label);
+        btn.onclick = function () {
+          sendMessage(item.question, { source: 'preset' });
+        };
+        container.appendChild(btn);
+      });
+      lastQuickQuestionKeys = batch.map(function(item, index) {
+        return getQuickQuestionKey(item, index);
+      });
+    }
+
+    function refreshQuickQuestions() {
+      if (quickQuestionsPool.length === 0) {
+        return;
+      }
+      renderQuickQuestions();
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    async function sendMessage(text, options) {
+      if (isRequesting) {
+        return;
+      }
+
+      const opts = options || {};
       const input = document.getElementById('input');
       const message = text || input.value.trim();
       if (!message) return;
 
-      addMessage(message, 'user');
+      const shouldTrackHistory = opts.trackHistory !== false;
+      const historyExcluded = opts.historyExcluded === true;
+      const controller = new AbortController();
+      currentRequestController = controller;
+
+      addMessage(message, 'user', null, null, { historyExcluded });
+      if (shouldTrackHistory) {
+        syncActiveHistoryTopic();
+      }
       input.value = '';
-      
-      const sendBtn = document.getElementById('sendBtn');
-      sendBtn.disabled = true;
+      setRequestingState(true);
       showLoading();
 
       try {
-        const res = await fetch(`${API_BASE}/chat`, {
+        const res = await fetchWithAuth(`${API_BASE}/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
             protocol: 'acp',
             version: '1.0',
-            sessionId: sessionId,
+            sessionId,
             message: { type: 'text', content: message },
-            context: { userId: 'test-user' }
+            context: { userId: getCurrentUserId() }
           })
         });
 
         if (!res.ok) {
-          throw new Error('Network error: ' + res.status);
+          throw new Error(`Network error: ${res.status}`);
         }
 
         const data = await res.json();
-        
-        hideLoading();
-        
+
         if (data.sessionId) {
           sessionId = data.sessionId;
+          saveChatState();
         }
-        
+
         if (data.error) {
-          addMessage('抱歉，出了点问题：' + data.error.message, 'assistant');
+          addMessage(`抱歉，出了点问题：${data.error.message}`, 'assistant', null, null, { historyExcluded });
         } else {
-          addMessage(data.message.content, 'assistant', data.scene, data.recommendations);
+          addMessage(data.message.content, 'assistant', data.scene, data.recommendations, { historyExcluded });
         }
-      } catch (e) {
+        if (shouldTrackHistory) {
+          syncActiveHistoryTopic();
+        }
+      } catch (error) {
+        if (isAbortError(error)) {
+          if (pendingNewConversation) {
+            if (shouldTrackHistory) {
+              syncActiveHistoryTopic();
+            }
+          } else {
+            addMessage('已停止本次提问。你可以继续输入新的问题。', 'assistant', null, null, { historyExcluded });
+            if (shouldTrackHistory) {
+              syncActiveHistoryTopic();
+            }
+          }
+        } else {
+          console.error('Error:', error);
+          addMessage(`网络错误，请检查服务是否运行：${error.message}`, 'assistant', null, null, { historyExcluded });
+          if (shouldTrackHistory) {
+            syncActiveHistoryTopic();
+          }
+        }
+      } finally {
+        const shouldResetConversation = pendingNewConversation && currentRequestController === controller;
         hideLoading();
-        console.error('Error:', e);
-        addMessage('网络错误，请检查服务器是否运行: ' + e.message, 'assistant');
+        if (currentRequestController === controller) {
+          currentRequestController = null;
+        }
+        setRequestingState(false);
+        if (shouldResetConversation) {
+          pendingNewConversation = false;
+          resetConversationState();
+        }
       }
-      
-      sendBtn.disabled = false;
     }
 
-    function addMessage(content, role, scene, recommendations) {
+    function addMessage(content, role, scene, recommendations, options) {
+      const opts = options || {};
       const container = document.getElementById('messages');
+      if (!container) return;
+
+      const safeContent = typeof content === 'string' ? content : String(content ?? '');
       const div = document.createElement('div');
       div.className = `message ${role}`;
-      
+      const messageIndex = Number.isInteger(opts.messageIndex) ? opts.messageIndex : chatMessages.length;
+      div.dataset.messageIndex = String(messageIndex);
+
       let html = '';
       if (scene && role === 'assistant') {
         const sceneNames = {
-          diet: '🍽️ 饮食健康', exercise: '💪 运动健身', psychology: '🧠 心理健康',
-          sleep: '😴 睡眠健康', antiaging: '✨ 抗衰养生', brand: '🏛️ 同仁堂文化',
-          report: '📋 报告分析', tcm: '🌿 中医养生', chat: '💬 闲聊'
+          diet: '饮食健康',
+          exercise: '运动健身',
+          psychology: '心理健康',
+          sleep: '睡眠健康',
+          antiaging: '抗衰养生',
+          brand: '同仁堂文化',
+          report: '报告分析',
+          tcm: '中医养生',
+          chat: '闲聊'
         };
-        html += `<div class="scene">${sceneNames[scene] || scene}</div>`;
+        html += `<div class="scene">${sceneNames[scene] || escapeHtml(scene)}</div>`;
       }
-      
+
       if (role === 'assistant') {
-        html += marked.parse(content);
+        html += renderAssistantContent(safeContent);
       } else {
-        html += content;
+        html += escapeHtml(safeContent);
       }
-      
-      if (recommendations && recommendations.pages && recommendations.pages.length > 0) {
-        html += '<div class="recommendations"><h4>📋 为您推荐</h4>';
-        recommendations.pages.forEach(p => {
-          html += `<a href="${p.url}" target="_self">${p.name}</a>`;
-        });
+
+      if (recommendations && ((recommendations.contents && recommendations.contents.length > 0) || (recommendations.pages && recommendations.pages.length > 0))) {
+        html += '<div class="recommendations">';
+
+        if (recommendations.contents && recommendations.contents.length > 0) {
+          const moreLink = resolveMoreLinkFromContents(recommendations.contents);
+          html += `<div class="rec-section-head"><h4>为你推荐</h4><a class="rec-more-link" href="${escapeHtml(moreLink)}" target="_self">更多</a></div>`;
+          recommendations.contents.forEach(function (item) {
+            const type = item.type || '';
+            const iconMap = { recipe: '食', exercise: '练', sleep: '睡', psychology: '心' };
+            const icon = iconMap[type] || '荐';
+            const link = buildRecommendationLink(item);
+            const recId = registerRecommendationDetail(item, link);
+            const title = item.title || '';
+            const desc = item.reason || item.description || '';
+            const showDesc = shouldRenderRecommendationDesc(type, desc);
+            const tags = Array.isArray(item.tags)
+              ? item.tags
+                .map(function (tag) { return String(tag).trim(); })
+                .filter(Boolean)
+              : [];
+            const tagRowClass = tags.length > 2 ? 'rec-content-tags rec-content-tags-scrollable' : 'rec-content-tags';
+
+            html += `
+              <a class="rec-content-card" href="${escapeHtml(link)}" target="_self" data-rec-id="${escapeHtml(recId)}">
+                <span class="rec-link-main">
+                  <span class="rec-link-icon">${escapeHtml(icon)}</span>
+                  <span class="rec-content-copy">
+                    <span class="rec-link-title">${escapeHtml(title)}</span>
+                    ${showDesc ? `<span class="rec-content-desc">${escapeHtml(desc)}</span>` : ''}
+                    ${tags.length > 0 ? `
+                      <span class="${tagRowClass}">
+                        ${tags.map(function (tag) { return `<span class="chip chip-muted">${escapeHtml(tag)}</span>`; }).join('')}
+                      </span>
+                    ` : ''}
+                  </span>
+                </span>
+                <span class="rec-link-arrow">›</span>
+              </a>
+            `;
+          });
+        }
+
+        if (recommendations.pages && recommendations.pages.length > 0) {
+          html += `<h4 style="margin-top:${recommendations.contents && recommendations.contents.length > 0 ? '12px' : '0'};">推荐继续查看</h4>`;
+          recommendations.pages.forEach(function (page) {
+            html += `<a class="rec-page-card" href="${page.url}" target="_self"><span class="rec-link-main"><span class="rec-link-icon">荐</span><span class="rec-link-title">${escapeHtml(page.name)}</span><span class="rec-link-sub">进入</span></span><span class="rec-link-arrow">›</span></a>`;
+          });
+        }
+
         html += '</div>';
       }
-      
+
       div.innerHTML = html;
       container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
+      if (!opts.skipScroll) {
+        if (role === 'assistant') {
+          smoothScrollToBottom(container, isRequesting ? 520 : 320);
+        } else {
+          container.scrollTop = container.scrollHeight;
+        }
+      }
+
+      if (!opts.skipStore) {
+        const messageData = normalizeMessageForState({
+          content: safeContent,
+          role,
+          scene,
+          recommendations,
+          historyExcluded: opts.historyExcluded === true
+        });
+        if (messageData) {
+          chatMessages.push(messageData);
+          if (chatMessages.length > MAX_STORED_MESSAGES) {
+            chatMessages = chatMessages.slice(-MAX_STORED_MESSAGES);
+          }
+          saveChatState();
+          updateHistoryDrawer();
+        }
+      }
+
+      if (!opts.skipLayoutSync) {
+        updateChatSurfaceMode();
+      }
     }
 
     function showLoading() {
@@ -446,40 +2873,101 @@
         <div class="thinking-steps" id="thinkingSteps">正在查阅知识库...</div>
       `;
       container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
-      
+      updateChatSurfaceMode();
+      smoothScrollToBottom(container, 260);
+
       const steps = [
         '正在查阅知识库...',
         '正在分析问题类型...',
         '正在匹配专业内容...',
         '正在生成调理建议...',
-        '即将为您解答...'
+        '即将为你整理答案...'
       ];
       let stepIndex = 0;
-      const stepInterval = setInterval(() => {
+      const intervalId = window.setInterval(function () {
         const stepsDiv = document.getElementById('thinkingSteps');
         if (!stepsDiv) {
-          clearInterval(stepInterval);
+          clearInterval(intervalId);
           return;
         }
         stepIndex = (stepIndex + 1) % steps.length;
         stepsDiv.textContent = steps[stepIndex];
       }, 1500);
-      
-      div.dataset.stepInterval = stepInterval;
+
+      div.dataset.stepInterval = String(intervalId);
     }
 
     function hideLoading() {
       const loading = document.getElementById('loading');
-      if (loading) {
-        if (loading.dataset.stepInterval) {
-          clearInterval(parseInt(loading.dataset.stepInterval));
-        }
-        loading.remove();
+      if (!loading) return;
+
+      if (loading.dataset.stepInterval) {
+        clearInterval(parseInt(loading.dataset.stepInterval, 10));
+      }
+      loading.remove();
+      updateChatSurfaceMode();
+      const container = document.getElementById('messages');
+      if (container) {
+        smoothScrollToBottom(container, 220);
       }
     }
 
-    loadQuickQuestions();
+    function stopAsking() {
+      if (currentRequestController) {
+        currentRequestController.abort();
+      }
+    }
+
+    function consumeQueryAsk() {
+      const params = new URLSearchParams(window.location.search);
+      const ask = params.get('ask');
+      if (!ask) {
+        return;
+      }
+
+      sendMessage(ask);
+      params.delete('ask');
+      const query = params.toString();
+      const nextUrl = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;
+      window.history.replaceState({}, '', nextUrl);
+    }
+
+    document.getElementById('refreshQuestionsBtn')?.addEventListener('click', refreshQuickQuestions);
+    bindChatReturnSnapshotLinks();
+    bindRecommendationDetailModal();
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        if (isRecommendationModalOpen()) {
+          closeRecommendationModal();
+          return;
+        }
+        toggleHistoryDrawer(false);
+      }
+    });
+
+    window.addEventListener('pageshow', function() {
+      restorePendingChatViewState();
+    });
+
+    async function bootstrap() {
+      initializeChatMessages();
+      restorePendingChatViewState();
+
+      const auth = getAuthClient();
+      if (auth && typeof auth.ensureLogin === 'function') {
+        try {
+          await auth.ensureLogin({ devFallback: true });
+        } catch (error) {
+          console.warn('登录初始化失败，将继续以匿名模式请求接口', error);
+        }
+      }
+
+      await loadQuickQuestions();
+      consumeQueryAsk();
+    }
+
+    bootstrap();
   </script>
 </body>
+
 </html>

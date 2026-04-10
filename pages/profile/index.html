@@ -6,202 +6,509 @@
   <title>我的 - 同仁堂</title>
   <link rel="stylesheet" href="/styles/common.css">
   <style>
-    body { background: transparent; }
-    .header { 
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%); 
-      color: white; 
-      padding: 36px 20px; 
-      border-radius: 0 0 32px 32px;
-      box-shadow: 0 4px 20px rgba(196, 30, 58, 0.3);
-      position: relative;
-      overflow: hidden;
+    .profile-hero {
+      padding-bottom: 14px;
     }
-    .header::before {
-      content: '';
-      position: absolute;
-      top: -30%;
-      right: -20%;
-      width: 150px;
-      height: 150px;
-      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-      border-radius: 50%;
-    }
-    .avatar { 
-      width: 80px; 
-      height: 80px; 
-      background: linear-gradient(135deg, #fff 0%, #f5f5f5 100%);
-      border-radius: 50%; 
-      margin: 0 auto 16px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      font-size: 36px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-      position: relative;
-    }
-    .header h1 { text-align: center; font-size: 20px; margin-bottom: 6px; font-weight: 600; }
-    .header p { text-align: center; font-size: 13px; opacity: 0.9; }
-    .stats { 
-      display: flex; 
-      justify-content: space-around; 
-      padding: 24px 20px; 
-      background: white; 
-      margin: 16px; 
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-    }
-    .stat { text-align: center; }
-    .stat-num { font-size: 24px; font-weight: 700; color: #c41e3a; }
-    .stat-label { font-size: 13px; color: #9e9e9e; margin-top: 4px; }
-    .menu { 
-      background: white; 
-      margin: 0 16px;
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      overflow: hidden;
-    }
-    .menu-item { 
-      display: flex; 
-      align-items: center; 
-      padding: 18px 20px; 
-      border-bottom: 1px solid #f5f5f5; 
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .menu-item:hover { background: #fafafa; }
-    .menu-item:last-child { border-bottom: none; }
-    .menu-icon { 
-      font-size: 22px; 
-      margin-right: 16px; 
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-      border-radius: 12px;
+
+    .profile-main {
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 12px;
     }
-    .menu-text { flex: 1; font-size: 16px; font-weight: 500; }
-    .menu-arrow { color: #bdbdbd; font-size: 18px; }
-    .logout-btn { 
-      display: block; 
-      width: calc(100% - 32px); 
-      margin: 20px 16px; 
-      padding: 16px; 
-      background: white; 
-      border: 2px solid #c41e3a; 
-      color: #c41e3a; 
-      border-radius: 28px; 
-      text-align: center; 
-      font-size: 16px;
-      font-weight: 500;
+
+    .profile-main.login-entry {
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-base) var(--ease-out);
     }
-    .logout-btn:hover { 
-      background: linear-gradient(135deg, #c41e3a 0%, #b71c1c 100%);
-      color: white;
+
+    .profile-main.login-entry:active {
+      transform: translateY(1px);
     }
-    .section-title { 
-      padding: 20px 20px 12px; 
-      font-size: 14px; 
-      color: #9e9e9e; 
-      font-weight: 500;
+
+    .profile-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 26px;
+      font-weight: 700;
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .profile-avatar-image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .hero-shortcut {
+      padding: 11px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .hero-shortcut-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .hero-shortcut-meta {
+      margin-top: 4px;
+      font-size: 11px;
+      color: rgba(248, 255, 246, 0.76);
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .quick-card {
+      padding: 13px;
+      border-radius: 16px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border-soft);
+    }
+
+    .quick-card-label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .quick-card-title {
+      margin-top: 6px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .quick-card-desc {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 480px) {
+      .profile-main {
+        align-items: flex-start;
+      }
+
+      .profile-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        font-size: 22px;
+      }
+
+      .hero-actions,
+      .quick-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
-<body>
-  <div class="header">
-    <div class="avatar">👤</div>
-    <h1>游客用户</h1>
-    <p>欢迎来到同仁堂健康中心</p>
+<body class="is-transparent">
+  <div class="page-shell">
+    <div class="page-body page-stack">
+      <header class="page-hero profile-hero">
+        <div class="topbar">
+          <span class="chip chip-hero">账户中心</span>
+          <a href="/chat.html" class="hero-action">前往咨询</a>
+        </div>
+
+        <div class="profile-main" id="heroLoginEntry" role="button" tabindex="-1" aria-label="点击登录">
+          <div class="profile-avatar" id="profileAvatar" aria-label="随机头像"></div>
+          <div class="hero-copy">
+            <h1 class="hero-title" id="profileTitle">游客用户</h1>
+            <p class="hero-subtitle" id="profileSubtitle">请先手机号登录，登录后可查看你自己填写的档案与报告。</p>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <a href="/pages/health-profile/index.html" class="hero-shortcut">
+            <div class="hero-shortcut-title">完善健康档案</div>
+            <div class="hero-shortcut-meta">补齐基础信息，解锁精准推荐</div>
+          </a>
+          <a href="/pages/report-analysis/index.html" class="hero-shortcut">
+            <div class="hero-shortcut-title">上传体检报告</div>
+            <div class="hero-shortcut-meta">查看异常指标与调理建议</div>
+          </a>
+        </div>
+      </header>
+
+      <section class="section-card">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Overview</div>
+            <div class="section-title">账户总览</div>
+            <div class="section-subtitle">高频信息做成轻量概览，进入详情前先给用户明确反馈。</div>
+          </div>
+        </div>
+
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-value" id="metricProfileValue">0</div>
+            <div class="metric-label">健康档案</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="metricReportValue">0</div>
+            <div class="metric-label">体检报告</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">0</div>
+            <div class="metric-label">收藏内容</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Shortcuts</div>
+            <div class="section-title">常用入口</div>
+          </div>
+        </div>
+
+        <div class="quick-grid">
+          <a href="/pages/health-profile/index.html" class="quick-card">
+            <div class="quick-card-label">资料维护</div>
+            <div class="quick-card-title">健康档案</div>
+            <div class="quick-card-desc">维护基础体征、病史和生活方式。</div>
+          </a>
+          <a href="/pages/report-analysis/index.html" class="quick-card">
+            <div class="quick-card-label">智能服务</div>
+            <div class="quick-card-title">报告分析</div>
+            <div class="quick-card-desc">上传体检报告，获取 AI 解释。</div>
+          </a>
+        </div>
+      </section>
+
+      <section class="list-group">
+        <a href="/pages/health-profile/index.html" class="list-row">
+          <span class="row-icon">档</span>
+          <span class="row-body">
+            <span class="row-title">健康档案</span>
+            <span class="row-meta">查看或更新个人健康资料</span>
+          </span>
+          <span class="row-trailing">进入</span>
+        </a>
+        <a href="/pages/report-analysis/index.html" class="list-row">
+          <span class="row-icon">报</span>
+          <span class="row-body">
+            <span class="row-title">体检报告</span>
+            <span class="row-meta">上传报告并查看分析结果</span>
+          </span>
+          <span class="row-trailing">进入</span>
+        </a>
+        <a href="/chat.html" class="list-row">
+          <span class="row-icon">问</span>
+          <span class="row-body">
+            <span class="row-title">问诊记录</span>
+            <span class="row-meta">继续咨询，保留上下文会话</span>
+          </span>
+          <span class="row-trailing">查看</span>
+        </a>
+        <a href="/pages/recipe/list.html" class="list-row">
+          <span class="row-icon">藏</span>
+          <span class="row-body">
+            <span class="row-title">我的收藏</span>
+            <span class="row-meta">沉淀已感兴趣的食谱与课程</span>
+          </span>
+          <span class="row-trailing">查看</span>
+        </a>
+      </section>
+
+      <div class="sticky-cta">
+        <button class="btn btn-danger-outline" id="logoutBtn">退出登录</button>
+      </div>
+    </div>
   </div>
-      <div class="stat-num">0</div>
-      <div class="stat-label">健康档案</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">0</div>
-      <div class="stat-label">体检报告</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">0</div>
-      <div class="stat-label">收藏</div>
-    </div>
-  </div>
 
-  <div class="menu">
-    <div class="section-title">健康管理</div>
-    <div class="menu-item">
-      <span class="menu-icon">📋</span>
-      <span class="menu-text">健康档案</span>
-      <span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item">
-      <span class="menu-icon">📊</span>
-      <span class="menu-text">体检报告</span>
-      <span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item">
-      <span class="menu-icon">📝</span>
-      <span class="menu-text">问诊记录</span>
-      <span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item">
-      <span class="menu-icon">❤️</span>
-      <span class="menu-text">我的收藏</span>
-      <span class="menu-arrow">›</span>
-    </div>
-  </div>
-
-  <div class="menu">
-    <div class="section-title">设置</div>
-    <div class="menu-item">
-      <span class="menu-icon">🔔</span>
-      <span class="menu-text">消息通知</span>
-      <span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item">
-      <span class="menu-icon">⚙️</span>
-      <span class="menu-text">设置</span>
-      <span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item">
-      <span class="menu-icon">❓</span>
-      <span class="menu-text">帮助与反馈</span>
-      <span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item">
-      <span class="menu-icon">ℹ️</span>
-      <span class="menu-text">关于我们</span>
-      <span class="menu-arrow">›</span>
-    </div>
-  </div>
-
-  <button class="logout-btn" onclick="alert('请先登录')">退出登录</button>
-
-  <div style="height: 70px;"></div>
-
-  <div class="bottom-nav">
+  <nav class="bottom-nav">
     <a href="/chat.html" class="nav-item">
-      <span class="nav-icon">💬</span>
-      咨询
+      <span class="nav-icon">咨</span>
+      <span>咨询</span>
     </a>
     <a href="/pages/health-profile/index.html" class="nav-item">
-      <span class="nav-icon">📋</span>
-      健康
+      <span class="nav-icon">康</span>
+      <span>健康</span>
     </a>
     <a href="/pages/recipe/list.html" class="nav-item">
-      <span class="nav-icon">🍽️</span>
-      食谱
+      <span class="nav-icon">食</span>
+      <span>食谱</span>
     </a>
     <a href="/pages/exercise/list.html" class="nav-item">
-      <span class="nav-icon">🏃</span>
-      运动
+      <span class="nav-icon">练</span>
+      <span>课程</span>
     </a>
     <a href="/pages/profile/index.html" class="nav-item active">
-      <span class="nav-icon">👤</span>
-      我的
+      <span class="nav-icon">我</span>
+      <span>我的</span>
     </a>
-  </div>
+  </nav>
+
+  <script src="/scripts/auth-client.js"></script>
+  <script>
+    const API_BASE = '/acp';
+
+    function setText(id, text) {
+      const node = document.getElementById(id);
+      if (node) {
+        node.textContent = text;
+      }
+    }
+
+    function maskPhone(phone) {
+      if (!phone || phone.length !== 11) {
+        return phone || '';
+      }
+      return phone.slice(0, 3) + '****' + phone.slice(7);
+    }
+
+    function getAuthState() {
+      const auth = window.AcpAuth || null;
+      const loginType = auth && typeof auth.getLoginType === 'function' ? auth.getLoginType() : null;
+      const phone = auth && typeof auth.getPhone === 'function' ? auth.getPhone() : null;
+      return {
+        hasAuth: !!auth,
+        loginType: loginType,
+        phone: phone,
+      };
+    }
+
+    function getLoginUrl() {
+      const current = window.location.pathname + window.location.search + window.location.hash;
+      return '/pages/login/index.html?redirect=' + encodeURIComponent(current);
+    }
+
+    function hashToUint32(input) {
+      let hash = 2166136261;
+      for (let i = 0; i < input.length; i += 1) {
+        hash ^= input.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return hash >>> 0;
+    }
+
+    function getGuestAvatarSeed() {
+      try {
+        const key = 'profile_guest_avatar_seed';
+        const cached = window.sessionStorage.getItem(key);
+        if (cached) {
+          const parsed = Number(cached);
+          if (Number.isFinite(parsed)) {
+            return parsed >>> 0;
+          }
+        }
+        const seed = Math.floor(Math.random() * 0x100000000) >>> 0;
+        window.sessionStorage.setItem(key, String(seed));
+        return seed;
+      } catch (_error) {
+        return Math.floor(Math.random() * 0x100000000) >>> 0;
+      }
+    }
+
+    function seededPick(list, seed, offset) {
+      return list[(seed + offset) % list.length];
+    }
+
+    function createAvatarDataUrl(seed) {
+      const palettes = [
+        ['#7fc979', '#4d9f5f'],
+        ['#6aa3ff', '#4f7de6'],
+        ['#f4a261', '#e76f51'],
+        ['#5fb7a1', '#2d8f89'],
+        ['#f6bd60', '#e77a59'],
+        ['#8d89ff', '#5e60ce'],
+        ['#70b2d9', '#4f84c4'],
+      ];
+      const skins = ['#f7d4bf', '#efc3a2', '#e6b38b', '#d79a74'];
+      const hairs = ['#2f2a28', '#4f3c2f', '#734f3d', '#1f2530', '#4a3a5e'];
+      const shirts = ['#ffffff', '#f6f9ff', '#ffe8d6', '#e8f6ef', '#eef1ff'];
+      const eyes = ['M34 44a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0 -5 0', 'M34 44h5', 'M34 44c1-2 4-2 5 0'];
+      const mouths = ['M42 57c2 3 6 3 8 0', 'M42 57c2-2 6-2 8 0', 'M42 58h8'];
+      const blushes = ['#ffc8b9', '#ffb7a5', '#ffcabf'];
+
+      const palette = seededPick(palettes, seed, 3);
+      const skin = seededPick(skins, seed, 11);
+      const hair = seededPick(hairs, seed, 19);
+      const shirt = seededPick(shirts, seed, 23);
+      const eyePath = seededPick(eyes, seed, 29);
+      const mouthPath = seededPick(mouths, seed, 37);
+      const blush = seededPick(blushes, seed, 41);
+      const tilt = ((seed % 9) - 4) * 1.2;
+
+      const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="随机头像">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${palette[0]}"/>
+      <stop offset="100%" stop-color="${palette[1]}"/>
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="26" fill="url(#bg)"/>
+  <circle cx="74" cy="24" r="18" fill="rgba(255,255,255,0.17)"/>
+  <g transform="rotate(${tilt} 50 50)">
+    <ellipse cx="50" cy="74" rx="24" ry="16" fill="${shirt}" opacity="0.95"/>
+    <ellipse cx="50" cy="45" rx="21" ry="23" fill="${skin}"/>
+    <path d="M30 41c0-14 9-23 20-23s20 9 20 23v5H30z" fill="${hair}"/>
+    <path d="M33 39c2-7 9-11 17-11 8 0 15 4 17 11" fill="none" stroke="${hair}" stroke-width="4" stroke-linecap="round"/>
+    <path d="${eyePath}" fill="none" stroke="#25313d" stroke-width="2.3" stroke-linecap="round"/>
+    <path d="${eyePath.replace('34', '61').replace('39', '66')}" fill="none" stroke="#25313d" stroke-width="2.3" stroke-linecap="round"/>
+    <ellipse cx="38" cy="52" rx="3.5" ry="2" fill="${blush}" opacity="0.6"/>
+    <ellipse cx="62" cy="52" rx="3.5" ry="2" fill="${blush}" opacity="0.6"/>
+    <path d="${mouthPath}" fill="none" stroke="#7d3a34" stroke-width="2.2" stroke-linecap="round"/>
+  </g>
+</svg>`.trim();
+
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    function setRandomAvatar(seedHint) {
+      const container = document.getElementById('profileAvatar');
+      if (!container) {
+        return;
+      }
+
+      const seed = seedHint ? hashToUint32(String(seedHint)) : getGuestAvatarSeed();
+      const src = createAvatarDataUrl(seed);
+
+      container.textContent = '';
+      const image = document.createElement('img');
+      image.className = 'profile-avatar-image';
+      image.alt = '随机头像';
+      image.src = src;
+      container.appendChild(image);
+    }
+
+    function setHeroLoginEntryEnabled(enabled) {
+      const entry = document.getElementById('heroLoginEntry');
+      if (!entry) {
+        return;
+      }
+
+      entry.classList.toggle('login-entry', enabled);
+      entry.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+      entry.setAttribute('tabindex', enabled ? '0' : '-1');
+    }
+
+    function triggerHeroLoginEntry() {
+      const authState = getAuthState();
+      if (authState.loginType === 'phone' && authState.phone) {
+        return;
+      }
+      window.location.href = getLoginUrl();
+    }
+
+    function applyGuestState() {
+      setRandomAvatar();
+      setText('profileTitle', '游客用户');
+      setText('profileSubtitle', '请先手机号登录，登录后可查看你自己填写的档案与报告。');
+      setText('metricProfileValue', '0');
+      setText('metricReportValue', '0');
+      setHeroLoginEntryEnabled(true);
+    }
+
+    function applyPhoneState(phone) {
+      const masked = maskPhone(phone);
+      setRandomAvatar(phone || masked || 'user');
+      setText('profileTitle', masked || '已登录用户');
+      setText('profileSubtitle', '你可以查看并维护当前手机号下的健康档案和体检报告。');
+      setHeroLoginEntryEnabled(false);
+    }
+
+    async function fetchWithAuth(url, options) {
+      if (window.AcpAuth && typeof window.AcpAuth.fetchWithAuth === 'function') {
+        return window.AcpAuth.fetchWithAuth(url, options);
+      }
+      return fetch(url, options);
+    }
+
+    async function loadMySummary() {
+      try {
+        const profileRes = await fetchWithAuth(API_BASE + '/health/profile');
+        const profileData = await profileRes.json();
+        setText('metricProfileValue', profileData.code === 0 && profileData.data ? '1' : '0');
+      } catch (error) {
+        setText('metricProfileValue', '0');
+      }
+
+      try {
+        const reportRes = await fetchWithAuth(API_BASE + '/report/history?page=1&pageSize=1');
+        const reportData = await reportRes.json();
+        if (reportData.code === 0 && reportData.data && typeof reportData.data.total === 'number') {
+          setText('metricReportValue', String(reportData.data.total));
+          return;
+        }
+        setText('metricReportValue', '0');
+      } catch (error) {
+        setText('metricReportValue', '0');
+      }
+    }
+
+    function bindEvents() {
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function () {
+          if (window.AcpAuth && typeof window.AcpAuth.logout === 'function') {
+            window.AcpAuth.logout({
+              redirectTo: getLoginUrl(),
+            });
+            return;
+          }
+
+          if (window.AcpAuth && typeof window.AcpAuth.clearToken === 'function') {
+            window.AcpAuth.clearToken();
+          }
+          applyGuestState();
+          window.location.href = getLoginUrl();
+        });
+      }
+
+      const heroLoginEntry = document.getElementById('heroLoginEntry');
+      if (heroLoginEntry) {
+        heroLoginEntry.addEventListener('click', function () {
+          triggerHeroLoginEntry();
+        });
+
+        heroLoginEntry.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            triggerHeroLoginEntry();
+          }
+        });
+      }
+    }
+
+    async function bootstrap() {
+      bindEvents();
+      const authState = getAuthState();
+
+      if (authState.loginType !== 'phone' || !authState.phone) {
+        applyGuestState();
+        return;
+      }
+
+      applyPhoneState(authState.phone);
+      await loadMySummary();
+    }
+
+    bootstrap();
+  </script>
 </body>
 </html>
