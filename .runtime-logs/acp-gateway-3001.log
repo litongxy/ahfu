@@ -1,0 +1,5 @@
+✅ Redis connected
+✅ ACP Gateway running on http://localhost:3001
+📖 Scenes: http://localhost:3001/acp/config/scenes
+📖 Quick Questions: http://localhost:3001/acp/config/quick-questions
+💬 Chat: POST http://localhost:3001/acp/chat

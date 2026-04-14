@@ -1,0 +1,16 @@
+# frpc config for exposing the current ahfu2 project gateway.
+# Current local service is listening on http://127.0.0.1:3000
+
+serverAddr = "frps.mytool.zone"
+serverPort = 2023
+
+auth.method = "token"
+auth.token = "20230326mytoolzone!"
+
+[[proxies]]
+name = "doctor-lo-ahfu2-http"
+type = "http"
+localIP = "127.0.0.1"
+localPort = 3000
+customDomains = ["doctor.lo.mytool.zone", "doctor.lo.mytool.zone:443", "frps.mytool.zone", "frps.mytool.zone:443", "39.105.174.131", "39.105.174.131:443"]
+locations = ["/"]
