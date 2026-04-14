@@ -41,6 +41,7 @@
     .page-shell {
       position: relative;
       isolation: isolate;
+      padding-bottom: var(--bottom-nav-height, calc(58px + env(safe-area-inset-bottom)));
     }
 
     .page-body.page-stack {
@@ -207,7 +208,8 @@
     .chat-surface.is-idle .messages {
       flex: 1 1 auto;
       min-height: 0;
-      padding-bottom: 0;
+      padding-bottom: 12px;
+      background: transparent;
     }
 
     .chat-surface.is-idle .messages:empty {
@@ -514,10 +516,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-top: 12px;
-      padding: 14px 15px;
-      border-radius: 20px;
+      gap: 10px;
+      margin-top: 10px;
+      margin-left: 4px;
+      margin-right: 4px;
+      padding: 10px 12px;
+      border-radius: 15px;
       background: var(--chat-card-bg);
       border: 1px solid rgba(127, 156, 111, 0.14);
       box-shadow: 0 12px 24px rgba(72, 94, 63, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.76);
@@ -527,7 +531,7 @@
 
     .recommendations button.rec-content-card {
       align-items: flex-start;
-      width: 100%;
+      width: calc(100% - 8px);
       appearance: none;
       text-align: left;
       font: inherit;
@@ -538,14 +542,28 @@
       display: flex;
       flex-direction: column;
       flex: 1 1 auto;
-      gap: 6px;
+      gap: 5px;
       min-width: 0;
     }
 
-    .rec-content-desc {
-      font-size: 11px;
-      color: var(--text-secondary);
-      line-height: 1.5;
+    .rec-content-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .rec-content-meta-item {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: rgba(236, 243, 228, 0.92);
+      border: 1px solid rgba(127, 156, 111, 0.12);
+      color: #5f7356;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     .rec-content-tags {
@@ -584,12 +602,12 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 34px;
-      height: 34px;
-      border-radius: 13px;
+      width: 30px;
+      height: 30px;
+      border-radius: 11px;
       background: linear-gradient(180deg, rgba(235, 244, 229, 0.98), rgba(220, 236, 209, 0.88));
       color: var(--brand-700);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       flex: 0 0 auto;
     }
@@ -892,7 +910,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 12px;
+      padding: max(48px, calc(env(safe-area-inset-top) + 24px)) 12px max(16px, calc(env(safe-area-inset-bottom) + 12px));
+      box-sizing: border-box;
+      overflow-y: auto;
       background: rgba(12, 16, 13, 0.76);
       backdrop-filter: blur(10px);
     }
@@ -1373,8 +1393,10 @@
     }
 
     .chat-surface.is-idle .chat-bottom {
-      margin-top: auto;
+      margin-top: 0;
       padding-top: 6px;
+      background: transparent;
+      border-top: none;
     }
 
     .quick-questions-section::before {
@@ -1455,7 +1477,8 @@
       }
 
       .chat-surface.is-idle .messages {
-        padding-bottom: 0;
+        padding-bottom: 10px;
+        background: transparent;
       }
 
       .hero-history-btn {
@@ -1515,12 +1538,9 @@
         </div>
 
         <div class="hero-copy">
-          <div class="eyebrow">Tong Ren Tang Assistant</div>
           <h1 class="hero-title">元气助手</h1>
         </div>
       </header>
-
-      <div id="status" class="status-banner"></div>
 
       <div class="history-drawer" id="historyDrawer" hidden aria-hidden="true">
         <div class="history-drawer-backdrop" onclick="toggleHistoryDrawer(false)"></div>
@@ -1589,10 +1609,6 @@
     <a href="/chat.html" class="nav-item active">
       <span class="nav-icon">咨</span>
       <span>咨询</span>
-    </a>
-    <a href="/pages/health-profile/index.html" class="nav-item">
-      <span class="nav-icon">康</span>
-      <span>健康</span>
     </a>
     <a href="/pages/recipe/list.html" class="nav-item">
       <span class="nav-icon">食</span>
@@ -2120,19 +2136,6 @@
         .replace(/'/g, '&#39;');
     }
 
-    function shouldRenderRecommendationDesc(type, desc) {
-      const normalizedDesc = typeof desc === 'string'
-        ? desc.replace(/\s+/g, '').trim()
-        : '';
-      if (!normalizedDesc) {
-        return false;
-      }
-      if (/^(为你精选|为你推荐|精选推荐|推荐内容|推荐食谱)$/.test(normalizedDesc)) {
-        return false;
-      }
-      return true;
-    }
-
     function getRecommendationTypeLabel(type) {
       const labels = {
         recipe: '食谱推荐',
@@ -2141,6 +2144,84 @@
         psychology: '心理建议'
       };
       return labels[type] || '智能推荐';
+    }
+
+    function getExerciseIntensityLabel(value) {
+      if (value === 'high') return '高强度';
+      if (value === 'medium') return '中等强度';
+      if (value === 'low') return '低强度';
+      return '';
+    }
+
+    function formatRecommendationDurationText(item) {
+      if (item && Number.isFinite(Number(item.durationSeconds)) && Number(item.durationSeconds) > 0) {
+        return `${Math.round(Number(item.durationSeconds))}秒`;
+      }
+      if (item && Number.isFinite(Number(item.duration)) && Number(item.duration) > 0) {
+        return `${Math.round(Number(item.duration))}分钟`;
+      }
+      const timeText = item && typeof item.time === 'string' ? sanitizeRecommendationText(item.time) : '';
+      return timeText || '';
+    }
+
+    function pickRecommendationUsageTag(item, candidates) {
+      const tags = item && Array.isArray(item.tags)
+        ? item.tags.map(function(tag) { return String(tag || '').trim(); }).filter(Boolean)
+        : [];
+      return candidates.find(function(tag) { return tags.includes(tag); }) || '';
+    }
+
+    function buildRecommendationMetaItems(item) {
+      if (!item || typeof item !== 'object') {
+        return [];
+      }
+
+      const type = String(item.type || '');
+      const meta = [];
+      if (type === 'recipe') {
+        const durationText = formatRecommendationDurationText(item);
+        const caloriesText = Number.isFinite(Number(item.calories))
+          ? formatRecommendationCalories(Number(item.calories))
+          : '';
+        const usageTag = pickRecommendationUsageTag(item, ['早餐', '晚餐', '快手', '家常', '汤类']);
+        [durationText, caloriesText, usageTag].forEach(function(entry) {
+          if (entry) meta.push(entry);
+        });
+      } else if (type === 'exercise') {
+        const intensityText = getExerciseIntensityLabel(item.intensity);
+        const durationText = formatRecommendationDurationText(item);
+        const videoLabel = item.bvid ? '视频跟练' : '动作建议';
+        [intensityText, durationText, videoLabel].forEach(function(entry) {
+          if (entry) meta.push(entry);
+        });
+      } else {
+        const durationText = formatRecommendationDurationText(item);
+        if (durationText) {
+          meta.push(durationText);
+        }
+      }
+
+      return meta.slice(0, 3);
+    }
+
+    function getRecommendationEvidenceBadges(item) {
+      if (!item || !Array.isArray(item.evidenceBadges)) {
+        return [];
+      }
+
+      return item.evidenceBadges
+        .map(function(tag) { return String(tag || '').trim(); })
+        .filter(Boolean)
+        .slice(0, 3);
+    }
+
+    function getVisibleRecommendationReason(item) {
+      const reason = item && typeof item.reason === 'string' ? item.reason.trim() : '';
+      if (!reason) {
+        return '';
+      }
+
+      return reason.startsWith('匹配依据：') ? '' : reason;
     }
 
     const recommendationRecipeAlias = {
@@ -2424,13 +2505,14 @@
         ? item.title.trim()
         : '推荐内容';
       const description = item && typeof item.description === 'string' ? item.description.trim() : '';
-      const reason = item && typeof item.reason === 'string' ? item.reason.trim() : '';
+      const reason = getVisibleRecommendationReason(item);
       const summary = reason || description || '基于当前对话为你推荐，可点击继续查看。';
       const imageUrl = item && typeof item.imageUrl === 'string' && item.imageUrl.trim()
         ? item.imageUrl.trim()
         : (item && typeof item.posterUrl === 'string' && item.posterUrl.trim()
           ? item.posterUrl.trim()
           : (item && typeof item.img === 'string' && item.img.trim() ? item.img.trim() : ''));
+      const evidenceBadges = getRecommendationEvidenceBadges(item);
       const tags = item && Array.isArray(item.tags)
         ? item.tags
           .map(function(tag) { return String(tag).trim(); })
@@ -2453,6 +2535,7 @@
         summary,
         imageUrl,
         link: typeof link === 'string' ? link : '#',
+        evidenceBadges,
         tags,
         sourceId,
         caloriesValue,
@@ -2700,7 +2783,8 @@
         `;
         structuredNode.hidden = false;
 
-        tagsNode.innerHTML = recipeDetail.tags
+        const recipeTags = (Array.isArray(detail.evidenceBadges) ? detail.evidenceBadges : []).concat(recipeDetail.tags);
+        tagsNode.innerHTML = recipeTags
           .map(function(tag) { return `<span class=\"chip chip-muted\">${escapeHtml(tag)}</span>`; })
           .join('');
         tagsNode.hidden = false;
@@ -2746,8 +2830,9 @@
           bindRecommendationVideoLoading();
         }
 
-        if (Array.isArray(detail.tags) && detail.tags.length > 0) {
-          tagsNode.innerHTML = detail.tags
+        const exerciseTags = (Array.isArray(detail.evidenceBadges) ? detail.evidenceBadges : []).concat(Array.isArray(detail.tags) ? detail.tags : []);
+        if (exerciseTags.length > 0) {
+          tagsNode.innerHTML = exerciseTags
             .map(function(tag) { return `<span class=\"chip chip-muted\">${escapeHtml(tag)}</span>`; })
             .join('');
           tagsNode.hidden = false;
@@ -2771,8 +2856,9 @@
         structuredNode.hidden = true;
         structuredNode.innerHTML = '';
 
-        if (Array.isArray(detail.tags) && detail.tags.length > 0) {
-          tagsNode.innerHTML = detail.tags
+        const genericTags = (Array.isArray(detail.evidenceBadges) ? detail.evidenceBadges : []).concat(Array.isArray(detail.tags) ? detail.tags : []);
+        if (genericTags.length > 0) {
+          tagsNode.innerHTML = genericTags
             .map(function(tag) { return `<span class=\"chip chip-muted\">${escapeHtml(tag)}</span>`; })
             .join('');
           tagsNode.hidden = false;
@@ -2989,6 +3075,12 @@
 
     function showStatus(msg, isError) {
       const status = document.getElementById('status');
+      if (!status) {
+        if (msg && isError) {
+          console.warn(msg);
+        }
+        return;
+      }
       if (!msg) {
         status.className = 'status-banner';
         status.textContent = '';
@@ -2997,6 +3089,18 @@
 
       status.textContent = msg;
       status.className = `status-banner ${isError ? 'error' : 'success'}`;
+    }
+
+    function syncBottomNavHeight() {
+      const nav = document.querySelector('.bottom-nav');
+      if (!nav) {
+        return;
+      }
+      const height = nav.offsetHeight;
+      if (!height) {
+        return;
+      }
+      document.documentElement.style.setProperty('--bottom-nav-height', `${height}px`);
     }
 
     function requestFrame(callback) {
@@ -3368,14 +3472,11 @@
         quickQuestionsPool = Array.isArray(data.data) ? data.data.filter(Boolean) : [];
         lastQuickQuestionKeys = [];
         renderQuickQuestions();
-
-        showStatus('已连接到推荐与问答服务', false);
       } catch (error) {
         console.error('猜你想问加载失败：', error);
         quickQuestionsPool = LOCAL_QUICK_QUESTIONS.slice();
         lastQuickQuestionKeys = [];
         renderQuickQuestions();
-        showStatus('推荐服务连接失败，已切换本地问题', true);
       }
     }
 
@@ -3598,7 +3699,7 @@
 
         if (recommendations.contents && recommendations.contents.length > 0) {
           const moreLink = resolveMoreLinkFromContents(recommendations.contents);
-          html += `<div class="rec-section-head"><h4>为你推荐</h4><a class="rec-more-link" href="${escapeHtml(moreLink)}" target="_self">更多</a></div>`;
+          html += `<div class="rec-section-head"><h4>精准推荐</h4><a class="rec-more-link" href="${escapeHtml(moreLink)}" target="_self">更多</a></div>`;
           recommendations.contents.forEach(function (item) {
             const type = item.type || '';
             const iconMap = { recipe: '食', exercise: '练', sleep: '睡', psychology: '心' };
@@ -3606,8 +3707,7 @@
             const link = buildRecommendationLink(item);
             const recId = registerRecommendationDetail(item, link);
             const title = item.title || '';
-            const desc = item.reason || item.description || '';
-            const showDesc = shouldRenderRecommendationDesc(type, desc);
+            const metaItems = buildRecommendationMetaItems(item);
             const tags = Array.isArray(item.tags)
               ? item.tags
                 .map(function (tag) { return String(tag).trim(); })
@@ -3621,7 +3721,11 @@
                   <span class="rec-link-icon">${escapeHtml(icon)}</span>
                   <span class="rec-content-copy">
                     <span class="rec-link-title">${escapeHtml(title)}</span>
-                    ${showDesc ? `<span class="rec-content-desc">${escapeHtml(desc)}</span>` : ''}
+                    ${metaItems.length > 0 ? `
+                      <span class="rec-content-meta">
+                        ${metaItems.map(function (meta) { return `<span class="rec-content-meta-item">${escapeHtml(meta)}</span>`; }).join('')}
+                      </span>
+                    ` : ''}
                     ${tags.length > 0 ? `
                       <span class="${tagRowClass}">
                         ${tags.map(function (tag) { return `<span class="chip chip-muted">${escapeHtml(tag)}</span>`; }).join('')}
@@ -3770,6 +3874,8 @@
     });
 
     async function bootstrap() {
+      syncBottomNavHeight();
+      window.addEventListener('resize', syncBottomNavHeight);
       initializeChatMessages();
       restorePendingChatViewState();
       warmExercisePlayerPage();

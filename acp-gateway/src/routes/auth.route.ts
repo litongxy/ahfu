@@ -5,6 +5,11 @@ import { PhonePasswordAuthError, phonePasswordAuthService } from '../services/ph
 
 const router = Router();
 type RequestWithAuth = Request & { auth?: AuthTokenClaims };
+const DEV_MINI_PROGRAM_OPEN_ID = 'dev_miniprogram_user';
+
+function isDevLoginEnabled(): boolean {
+  return process.env.ENABLE_DEV_LOGIN === 'true' || process.env.NODE_ENV !== 'production';
+}
 
 router.post('/mini-program/login', async (req: Request, res: Response) => {
   try {
@@ -17,6 +22,19 @@ router.post('/mini-program/login', async (req: Request, res: Response) => {
     });
   } catch (error: unknown) {
     if (error instanceof WechatAuthError) {
+      if (error.code === 'WECHAT_CONFIG_MISSING' && isDevLoginEnabled()) {
+        console.warn('[auth] WECHAT_CONFIG_MISSING, fallback to dev mini-program login');
+        res.json({
+          code: 0,
+          data: wechatAuthService.createDevLogin(DEV_MINI_PROGRAM_OPEN_ID),
+          meta: {
+            devFallback: true,
+            fallbackReason: error.code,
+          },
+        });
+        return;
+      }
+
       res.status(error.status).json({
         code: error.status,
         message: error.message,
@@ -34,10 +52,7 @@ router.post('/mini-program/login', async (req: Request, res: Response) => {
 });
 
 router.post('/dev-login', (req: Request, res: Response) => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const enableDevLogin = process.env.ENABLE_DEV_LOGIN === 'true';
-
-  if (isProduction && !enableDevLogin) {
+  if (!isDevLoginEnabled()) {
     res.status(403).json({
       code: 403,
       message: '生产环境已禁用 dev-login',

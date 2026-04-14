@@ -332,7 +332,7 @@
 
         <div class="hero-copy">
           <h1 class="hero-title">健康食谱</h1>
-          <p class="hero-subtitle">从日常家常菜到药膳汤品，把适合当前体质与目标的食谱整理成可直接执行的内容流。</p>
+          <p class="hero-subtitle" id="recipeHeroSubtitle">从日常家常菜到药膳汤品，把适合当前体质与目标的食谱整理成可直接执行的内容流。</p>
         </div>
 
         <div class="recipe-summary">
@@ -349,7 +349,7 @@
 
       <section class="section-card">
         <div class="segmented">
-          <button class="tab active" data-type="all">全部</button>
+          <button class="tab active" data-type="all" id="recipePrimaryTab">全部</button>
           <button class="tab" data-type="汤类">养生汤</button>
           <button class="tab" data-type="药膳">药膳</button>
           <button class="tab" data-type="家常菜">家常菜</button>
@@ -368,10 +368,6 @@
       <span class="nav-icon">咨</span>
       <span>咨询</span>
     </a>
-    <a href="/pages/health-profile/index.html" class="nav-item">
-      <span class="nav-icon">康</span>
-      <span>健康</span>
-    </a>
     <a href="/pages/recipe/list.html" class="nav-item active">
       <span class="nav-icon">食</span>
       <span>食谱</span>
@@ -386,8 +382,11 @@
     </a>
   </nav>
 
+  <script src="/scripts/auth-client.js"></script>
   <script src="/data/recipes.js"></script>
   <script>
+    const API_BASE = '/acp';
+
     function navigateBack(event, fallbackUrl) {
       if (event) {
         event.preventDefault();
@@ -421,12 +420,64 @@
       return false;
     }
 
+    async function fetchWithAuth(url, options) {
+      if (window.AcpAuth && typeof window.AcpAuth.fetchWithAuth === 'function') {
+        return window.AcpAuth.fetchWithAuth(url, options);
+      }
+      return fetch(url, options);
+    }
+
+    function isPhoneLoggedIn() {
+      if (!window.AcpAuth || typeof window.AcpAuth.getLoginType !== 'function') {
+        return false;
+      }
+      return window.AcpAuth.getLoginType() === 'phone';
+    }
+
+    function isUsableParsedReportCandidate(report) {
+      if (!report || report.status !== 'parsed') {
+        return false;
+      }
+
+      const indicators = Array.isArray(report.indicators) ? report.indicators : [];
+      if (indicators.length === 0) {
+        return false;
+      }
+
+      return !indicators.some(function(item) {
+        const name = String(item && item.name ? item.name : '');
+        return ['⚠️', '请上传', '解析失败', '未找到', '维护中', '暂时无法'].some(function(pattern) {
+          return name.includes(pattern);
+        });
+      });
+    }
+
+    function createLatestRecipeContext() {
+      return {
+        active: false,
+        reportId: '',
+        reportTitle: '',
+        recipeIds: [],
+        recipeTitles: [],
+        tags: [],
+        recommendedRecipes: [],
+      };
+    }
+
+    function dedupeStringList(values, limit) {
+      const unique = Array.from(new Set((values || []).map(function(item) {
+        return String(item || '').trim();
+      }).filter(Boolean)));
+      return typeof limit === 'number' ? unique.slice(0, limit) : unique;
+    }
+
     const recipeQueryParamsToClear = ['recipeId', 'id', 'recipeTitle', 'title', 'recipeDesc', 'recipeCalories', 'recipeImage', 'recipeTags', 'source', 'returnTo'];
     const container = document.getElementById('recipeList');
     const noMore = document.getElementById('noMore');
     const pageSize = 16;
     let currentType = 'all';
     let loadedCount = 0;
+    let latestReportRecipeContext = createLatestRecipeContext();
 
     const recommendationRecipeAlias = {
       recipe_tomato_egg: '番茄炒蛋',
@@ -439,8 +490,17 @@
       return String(text || '').replace(/[<>"']/g, '').trim();
     }
 
+    function stripRecipeVariantSuffix(text) {
+      return sanitizeRecipeText(text).replace(/\s*[（(]\d+[）)]\s*$/g, '').trim();
+    }
+
+    function getRecipeDisplayName(recipe) {
+      const strippedName = stripRecipeVariantSuffix(recipe && recipe.name);
+      return strippedName || sanitizeRecipeText(recipe && recipe.name) || '精选食谱';
+    }
+
     function normalizeRecipeText(text) {
-      return sanitizeRecipeText(text)
+      return stripRecipeVariantSuffix(text)
         .toLowerCase()
         .replace(/\s+/g, '')
         .replace(/[（）()·,，。、“”\-_/]/g, '');
@@ -625,6 +685,52 @@
       return bestScore > 0 ? best : null;
     }
 
+    function buildRecipeFromRecommendationItem(item) {
+      const title = sanitizeRecipeText(item && item.title);
+      const desc = sanitizeRecipeText(item && item.description);
+      const tags = Array.isArray(item && item.tags)
+        ? item.tags.map(function(tag) { return sanitizeRecipeText(tag); }).filter(Boolean).slice(0, 6)
+        : [];
+      const referenceById = findRecipeById(item && item.id);
+      const referenceByTitle = findRecipeByTitle(title);
+      const referenceByTags = findRecipeByTags(tags);
+      const referenceRecipe = referenceById || referenceByTitle || referenceByTags;
+      const fallbackImage = pickReusableImage(`${title}|${tags.join('|')}`);
+
+      return {
+        id: sanitizeRecipeText(item && item.id) || `report_recipe_${Date.now()}`,
+        name: title || '推荐食谱',
+        desc: desc || '结合最近体检报告推荐',
+        time: sanitizeRecipeText(item && item.time) || (referenceRecipe && referenceRecipe.time) || '约20分钟',
+        cal: Number.isFinite(Number(item && item.calories))
+          ? String(Math.round(Number(item.calories)))
+          : ((referenceRecipe && referenceRecipe.cal) ? String(referenceRecipe.cal) : '--'),
+        type: (referenceRecipe && referenceRecipe.type) ? referenceRecipe.type : '精选食谱',
+        tags: tags.length > 0 ? tags : (
+          referenceRecipe && Array.isArray(referenceRecipe.tags) && referenceRecipe.tags.length > 0
+            ? referenceRecipe.tags.slice(0, 6)
+            : ['为你精选']
+        ),
+        img: (item && isLikelyImageUrl(item.imageUrl))
+          ? item.imageUrl
+          : ((referenceRecipe && isLikelyImageUrl(referenceRecipe.img)) ? referenceRecipe.img : fallbackImage),
+        ingredients: (referenceRecipe && Array.isArray(referenceRecipe.ingredients) && referenceRecipe.ingredients.length > 0)
+          ? referenceRecipe.ingredients
+          : [
+            '优先准备新鲜食材并按个人口味搭配',
+            '建议少油少盐，控制调味料用量',
+            '烹饪前先确认食材新鲜与适宜人群'
+          ],
+        steps: (referenceRecipe && Array.isArray(referenceRecipe.steps) && referenceRecipe.steps.length > 0)
+          ? referenceRecipe.steps
+          : [
+            '将主要食材清洗、切配并提前备好辅料',
+            '采用蒸、煮、炖或少油快炒的方式烹制',
+            '出锅前轻调味，保持食材原味后即可食用'
+          ]
+      };
+    }
+
     function buildRecipeFromQuery(params) {
       const title = sanitizeRecipeText(params.get('recipeTitle') || params.get('title') || '推荐食谱');
       const desc = sanitizeRecipeText(params.get('recipeDesc') || params.get('desc') || '根据你的健康目标推荐');
@@ -685,6 +791,262 @@
       return buildRecipeFromQuery(params);
     }
 
+    function getRecipeRecommendationContext() {
+      const params = new URLSearchParams(window.location.search);
+      const recipeId = sanitizeRecipeText(params.get('recipeId') || params.get('id') || '');
+      const recipeTitle = sanitizeRecipeText(params.get('recipeTitle') || params.get('title') || '');
+      const tags = parseRecipeTags(params.get('recipeTags') || params.get('tags'));
+
+      return {
+        active: Boolean(recipeId || recipeTitle || tags.length > 0),
+        recipeId: recipeId,
+        recipeTitle: recipeTitle,
+        tags: tags,
+      };
+    }
+
+    function isSameRecipeEntry(left, right) {
+      if (!left || !right) return false;
+
+      const leftId = sanitizeRecipeText(left.id);
+      const rightId = sanitizeRecipeText(right.id);
+      if (leftId && rightId && leftId === rightId) {
+        return true;
+      }
+
+      const leftTitle = normalizeRecipeText(left.name || '');
+      const rightTitle = normalizeRecipeText(right.name || '');
+      return Boolean(leftTitle && rightTitle && leftTitle === rightTitle);
+    }
+
+    function getRecipeDedupKey(recipe) {
+      if (!recipe) return '';
+
+      const normalizedTitle = normalizeRecipeText(recipe.name || '');
+      if (normalizedTitle) {
+        return `title:${normalizedTitle}`;
+      }
+
+      const recipeId = sanitizeRecipeText(recipe.id);
+      return recipeId ? `id:${recipeId}` : '';
+    }
+
+    function dedupeRecipeList(list) {
+      if (!Array.isArray(list) || list.length === 0) {
+        return [];
+      }
+
+      const seen = new Set();
+      return list.filter(function(recipe) {
+        if (!recipe) return false;
+
+        const key = getRecipeDedupKey(recipe);
+        if (!key) {
+          return true;
+        }
+
+        if (seen.has(key)) {
+          return false;
+        }
+
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function buildLatestRecipeContext(report) {
+      if (!report || !report.id) {
+        return createLatestRecipeContext();
+      }
+
+      const recommendationGroup = report && report.recommendations ? report.recommendations : null;
+      const contentList = recommendationGroup && Array.isArray(recommendationGroup.contents)
+        ? recommendationGroup.contents.filter(function(item) {
+            return item && item.type === 'recipe';
+          })
+        : [];
+      if (contentList.length === 0) {
+        return createLatestRecipeContext();
+      }
+
+      const recipeIds = [];
+      const recipeTitles = [];
+      const tagPool = [];
+      const recommendedRecipes = [];
+
+      contentList.forEach(function(item) {
+        const resolved = findRecipeById(item.id) || findRecipeByTitle(item.title) || findRecipeByTags(item.tags) || buildRecipeFromRecommendationItem(item);
+        if (resolved && !recommendedRecipes.some(function(entry) { return isSameRecipeEntry(entry, resolved); })) {
+          recommendedRecipes.push(resolved);
+        }
+
+        recipeIds.push(sanitizeRecipeText(item.id));
+        recipeTitles.push(sanitizeRecipeText(item.title));
+        if (Array.isArray(item.tags)) {
+          tagPool.push.apply(tagPool, item.tags);
+        }
+        if (Array.isArray(item.evidenceBadges)) {
+          tagPool.push.apply(tagPool, item.evidenceBadges);
+        }
+      });
+
+      return {
+        active: recommendedRecipes.length > 0,
+        reportId: String(report.id || '').trim(),
+        reportTitle: sanitizeRecipeText(report.originalName || '最近体检报告'),
+        recipeIds: dedupeStringList(recipeIds, 8),
+        recipeTitles: dedupeStringList(recipeTitles, 8),
+        tags: dedupeStringList(tagPool, 10),
+        recommendedRecipes: recommendedRecipes,
+      };
+    }
+
+    function syncRecipeHeroWithLatestReport() {
+      const subtitle = document.getElementById('recipeHeroSubtitle');
+      const primaryTab = document.getElementById('recipePrimaryTab');
+
+      if (primaryTab) {
+        primaryTab.textContent = latestReportRecipeContext.active ? '推荐' : '全部';
+      }
+
+      if (!subtitle) {
+        return;
+      }
+
+      if (!latestReportRecipeContext.active) {
+        subtitle.textContent = '从日常家常菜到药膳汤品，把适合当前体质与目标的食谱整理成可直接执行的内容流。';
+        return;
+      }
+
+      subtitle.textContent = '已结合你最近一次体检报告调整默认食谱，优先展示更贴近当前状态的搭配。';
+    }
+
+    const recipeRecommendationContext = getRecipeRecommendationContext();
+    const queryRecipe = recipeRecommendationContext.active ? resolveRecipeFromQuery() : null;
+
+    function getRecipePool() {
+      const basePool = dedupeRecipeList(Array.isArray(recipes) ? recipes.slice() : []);
+      const prepended = [];
+
+      if (queryRecipe && !basePool.some(function(item) { return isSameRecipeEntry(item, queryRecipe); })) {
+        prepended.push(queryRecipe);
+      }
+
+      if (latestReportRecipeContext.active) {
+        latestReportRecipeContext.recommendedRecipes.forEach(function(recipe) {
+          if (!recipe) return;
+          if (prepended.some(function(item) { return isSameRecipeEntry(item, recipe); })) return;
+          if (basePool.some(function(item) { return isSameRecipeEntry(item, recipe); })) return;
+          prepended.push(recipe);
+        });
+      }
+
+      return dedupeRecipeList(prepended.concat(basePool));
+    }
+
+    function recipeMatchesRecommendation(recipe) {
+      if (!recipeRecommendationContext.active) {
+        return true;
+      }
+
+      if (queryRecipe && isSameRecipeEntry(recipe, queryRecipe)) {
+        return true;
+      }
+
+      const normalizedId = sanitizeRecipeText(recipe && recipe.id);
+      if (recipeRecommendationContext.recipeId && normalizedId === recipeRecommendationContext.recipeId) {
+        return true;
+      }
+
+      const normalizedName = normalizeRecipeText(recipe && recipe.name);
+      if (
+        recipeRecommendationContext.recipeTitle
+        && normalizedName
+        && normalizedName === normalizeRecipeText(recipeRecommendationContext.recipeTitle)
+      ) {
+        return true;
+      }
+
+      if (recipeRecommendationContext.tags.length > 0) {
+        const recommended = findRecipeByTags(recipeRecommendationContext.tags);
+        if (recommended && isSameRecipeEntry(recipe, recommended)) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    function getRecipeTagOverlapScore(recipe) {
+      if (!latestReportRecipeContext.active || !recipe) {
+        return 0;
+      }
+
+      const recipeTags = Array.isArray(recipe.tags) ? recipe.tags : [];
+      let score = 0;
+
+      recipeTags.forEach(function(tag) {
+        const normalizedTag = normalizeRecipeText(tag);
+        if (!normalizedTag) return;
+
+        if (latestReportRecipeContext.tags.some(function(item) { return normalizeRecipeText(item) === normalizedTag; })) {
+          score += 4;
+        } else if (latestReportRecipeContext.tags.some(function(item) {
+          const normalizedItem = normalizeRecipeText(item);
+          return normalizedItem && (normalizedItem.includes(normalizedTag) || normalizedTag.includes(normalizedItem));
+        })) {
+          score += 2;
+        }
+      });
+
+      return score;
+    }
+
+    function isLatestReportRecommendedRecipe(recipe) {
+      if (!latestReportRecipeContext.active) {
+        return false;
+      }
+
+      if (latestReportRecipeContext.recommendedRecipes.some(function(item) { return isSameRecipeEntry(item, recipe); })) {
+        return true;
+      }
+
+      const recipeId = sanitizeRecipeText(recipe && recipe.id);
+      if (recipeId && latestReportRecipeContext.recipeIds.includes(recipeId)) {
+        return true;
+      }
+
+      const recipeName = normalizeRecipeText(recipe && recipe.name);
+      if (recipeName && latestReportRecipeContext.recipeTitles.some(function(title) {
+        return normalizeRecipeText(title) === recipeName;
+      })) {
+        return true;
+      }
+
+      return getRecipeTagOverlapScore(recipe) > 0;
+    }
+
+    function sortRecipesByLatestReport(list) {
+      if (!latestReportRecipeContext.active) {
+        return list.slice();
+      }
+
+      return list.slice().sort(function(left, right) {
+        const leftRecommended = isLatestReportRecommendedRecipe(left) ? 1 : 0;
+        const rightRecommended = isLatestReportRecommendedRecipe(right) ? 1 : 0;
+        if (leftRecommended !== rightRecommended) {
+          return rightRecommended - leftRecommended;
+        }
+
+        const overlapDiff = getRecipeTagOverlapScore(right) - getRecipeTagOverlapScore(left);
+        if (overlapDiff !== 0) {
+          return overlapDiff;
+        }
+
+        return String(left && left.name || '').localeCompare(String(right && right.name || ''), 'zh-Hans-CN');
+      });
+    }
+
     function openRecipeFromQuery() {
       const recipe = resolveRecipeFromQuery();
       if (!recipe) return;
@@ -728,12 +1090,24 @@
     }
 
     function getFilteredRecipes(type) {
-      if (type === 'all') {
-        return recipes;
+      let pool = getRecipePool();
+
+      if (recipeRecommendationContext.active) {
+        pool = pool.filter(recipeMatchesRecommendation);
+      } else if (latestReportRecipeContext.active && type === 'all') {
+        const recommendedPool = pool.filter(isLatestReportRecommendedRecipe);
+        if (recommendedPool.length > 0) {
+          return sortRecipesByLatestReport(recommendedPool);
+        }
       }
-      return recipes.filter(function(recipe) {
+
+      const filtered = type === 'all' ? pool : pool.filter(function(recipe) {
         return recipe.type === type;
       });
+
+      return latestReportRecipeContext.active && !recipeRecommendationContext.active
+        ? sortRecipesByLatestReport(filtered)
+        : filtered;
     }
 
     function renderRecipes(recipeList) {
@@ -744,12 +1118,13 @@
 
       const nextItems = recipeList.slice(loadedCount, loadedCount + pageSize);
       nextItems.forEach(function(recipe) {
+        const recipeTitle = getRecipeDisplayName(recipe);
         const card = document.createElement('article');
         card.className = 'recipe-card';
         card.dataset.id = recipe.id;
         card.innerHTML = `
           <div>
-            <div class="recipe-card__title">${recipe.name}</div>
+            <div class="recipe-card__title">${recipeTitle}</div>
             <div class="recipe-card__desc">${recipe.desc}</div>
             <div class="recipe-card__meta">
               <span>${recipe.time}</span>
@@ -761,7 +1136,7 @@
               }).join('')}
             </div>
           </div>
-          <img class="recipe-card__thumb" src="${getRecipeImageSrc(recipe)}" alt="${recipe.name}" loading="lazy">
+          <img class="recipe-card__thumb" src="${getRecipeImageSrc(recipe)}" alt="${recipeTitle}" loading="lazy">
         `;
         const thumb = card.querySelector('.recipe-card__thumb');
         bindRecipeImageFallback(thumb, recipe);
@@ -779,8 +1154,53 @@
       currentType = type;
       loadedCount = 0;
       container.innerHTML = '';
+      noMore.textContent = recipeRecommendationContext.active
+        ? '已展示当前对应食谱'
+        : (latestReportRecipeContext.active && type === 'all' ? '已展示最近体检报告推荐食谱' : '已经加载全部食谱');
       noMore.style.display = 'none';
-      renderRecipes(getFilteredRecipes(type));
+
+      const filteredRecipes = getFilteredRecipes(type);
+      if (recipeRecommendationContext.active && filteredRecipes.length === 0) {
+        noMore.textContent = '当前推荐暂无可展示食谱';
+      } else if (latestReportRecipeContext.active && type === 'all' && filteredRecipes.length === 0) {
+        noMore.textContent = '最近体检报告暂未生成对应食谱';
+      }
+
+      renderRecipes(filteredRecipes);
+    }
+
+    async function hydrateLatestRecipeRecommendations() {
+      if (!isPhoneLoggedIn() || recipeRecommendationContext.active) {
+        latestReportRecipeContext = createLatestRecipeContext();
+        syncRecipeHeroWithLatestReport();
+        return;
+      }
+
+      try {
+        const historyRes = await fetchWithAuth(`${API_BASE}/report/history?page=1&pageSize=5`);
+        const historyData = await historyRes.json();
+        const list = historyData && historyData.code === 0 && historyData.data && Array.isArray(historyData.data.list)
+          ? historyData.data.list
+          : [];
+        const latestParsedReport = list.find(isUsableParsedReportCandidate);
+
+        if (!latestParsedReport || !latestParsedReport.id) {
+          latestReportRecipeContext = createLatestRecipeContext();
+          syncRecipeHeroWithLatestReport();
+          return;
+        }
+
+        const detailRes = await fetchWithAuth(`${API_BASE}/report/${encodeURIComponent(latestParsedReport.id)}`);
+        const detailData = await detailRes.json();
+        latestReportRecipeContext = detailData && detailData.code === 0
+          ? buildLatestRecipeContext(detailData.data)
+          : createLatestRecipeContext();
+      } catch (error) {
+        console.error('加载最近体检报告食谱推荐失败', error);
+        latestReportRecipeContext = createLatestRecipeContext();
+      }
+
+      syncRecipeHeroWithLatestReport();
     }
 
     function getRecipeContent(recipe) {
@@ -827,6 +1247,7 @@
     function showRecipeDetail(recipe, options) {
       const opts = options || {};
       const recipeDetail = getRecipeContent(recipe);
+      const recipeTitle = getRecipeDisplayName(recipeDetail);
       const existing = document.querySelector('.sheet-overlay');
       if (existing) existing.remove();
 
@@ -835,7 +1256,7 @@
       modal.innerHTML = `
         <div class="sheet-card">
           <div class="sheet-cover">
-            <img src="${getRecipeImageSrc(recipeDetail)}" alt="${recipeDetail.name}">
+            <img src="${getRecipeImageSrc(recipeDetail)}" alt="${recipeTitle}">
             <button class="sheet-close" aria-label="关闭" type="button">✕</button>
             <div class="sheet-head">
               <div class="chip-row">
@@ -843,7 +1264,7 @@
                   return `<span class="chip chip-hero">${tag}</span>`;
                 }).join('')}
               </div>
-              <h2>${recipeDetail.name}</h2>
+              <h2>${recipeTitle}</h2>
               <p>${recipeDetail.desc}</p>
             </div>
           </div>
@@ -910,8 +1331,17 @@
       }
     });
 
-    filterAndRender('all');
-    openRecipeFromQuery();
+    async function bootstrapRecipePage() {
+      syncRecipeHeroWithLatestReport();
+      filterAndRender('all');
+      openRecipeFromQuery();
+      await hydrateLatestRecipeRecommendations();
+      if (!recipeRecommendationContext.active) {
+        filterAndRender(currentType);
+      }
+    }
+
+    bootstrapRecipePage();
   </script>
 </body>
 </html>

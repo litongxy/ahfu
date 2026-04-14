@@ -3,12 +3,17 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { reportService } from '../services/report.service';
+import type { HealthReport } from '../services/report.model';
+import { RecommendationService } from '../services/recommendation.service';
 import { isUserScopeAllowed, requireAuth, resolveRequestUserId } from '../middleware/auth.middleware';
 import { AuthTokenClaims } from '../services/auth-token.service';
 
 const router = Router();
 router.use(requireAuth);
 type RequestWithAuth = Request & { auth?: AuthTokenClaims };
+type ReportRecommendations = Awaited<ReturnType<RecommendationService['getRecommendations']>>;
+
+const recommendationService = new RecommendationService();
 
 const MOJIBAKE_FILENAME_PATTERN =
   /[\uFFFDÃÂÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿŒœŠšŽžƒˆ˜†‡•–—‘’‚“”„…‰‹›€™]/;
@@ -25,6 +30,35 @@ function decodeUploadOriginalName(originalName: string): string {
   } catch {
     return originalName;
   }
+}
+
+async function buildReportRecommendations(report: HealthReport | null): Promise<ReportRecommendations | undefined> {
+  if (!report) return undefined;
+
+  try {
+    return await recommendationService.getRecommendations('report', {
+      userId: report.userId,
+      report,
+    });
+  } catch (error) {
+    console.error('Build report recommendations error:', error);
+    return undefined;
+  }
+}
+
+async function attachReportRecommendations<T extends object>(
+  payload: T,
+  report: HealthReport | null
+): Promise<T & { recommendations?: ReportRecommendations }> {
+  const recommendations = await buildReportRecommendations(report);
+  if (!recommendations) {
+    return payload;
+  }
+
+  return {
+    ...payload,
+    recommendations,
+  };
 }
 
 const storage = multer.diskStorage({
@@ -87,10 +121,9 @@ router.post('/upload', upload.single('file'), async (req: Request, res: Response
       req.file.path,
       originalName
     );
-
-    res.json({
-      code: 0,
-      data: {
+    const storedReport = await reportService.getReport(report.id);
+    const responseData = await attachReportRecommendations(
+      {
         reportId: report.id,
         status: report.status,
         anomalyCount: report.anomalyCount,
@@ -98,6 +131,12 @@ router.post('/upload', upload.single('file'), async (req: Request, res: Response
         aiAnalysis: report.aiAnalysis,
         extractedText: report.extractedText,
       },
+      storedReport
+    );
+
+    res.json({
+      code: 0,
+      data: responseData,
     });
   } catch (error: any) {
     console.error('Upload error:', error);
@@ -168,9 +207,11 @@ router.get('/:reportId', async (req: Request, res: Response) => {
       });
     }
 
+    const responseData = await attachReportRecommendations(report, report);
+
     res.json({
       code: 0,
-      data: report,
+      data: responseData,
     });
   } catch (error) {
     console.error('Get report error:', error);
@@ -239,10 +280,12 @@ router.post('/analyze/:reportId', async (req: Request, res: Response) => {
     }
 
     const result = await reportService.reAnalyze(reportId);
+    const refreshedReport = await reportService.getReport(reportId);
+    const responseData = await attachReportRecommendations(result, refreshedReport);
 
     res.json({
       code: 0,
-      data: result,
+      data: responseData,
     });
   } catch (error) {
     console.error('Analyze error:', error);

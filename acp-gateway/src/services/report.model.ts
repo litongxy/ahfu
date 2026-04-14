@@ -154,6 +154,8 @@ export function generateAnomalySuggestions(indicator: ReportIndicator): string {
   if (name.includes('尿酸') || name.includes('(ua)')) return '建议低嘌呤饮食、多饮水，必要时复查尿酸';
   if (name.includes('肌酐') || name.includes('(cr)')) return '建议结合尿素氮和尿检结果评估肾功能';
   if (name.includes('尿素氮') || name.includes('(bun)')) return '建议结合肌酐和水化状态，综合评估肾功能';
+  if (name.includes('红细胞压积') || name.includes('(hct)')) return '建议结合血红蛋白、铁代谢和营养情况复查评估是否存在贫血倾向';
+  if (name.includes('淋巴细胞百分率')) return '建议结合白细胞分类、近期感染史和症状综合判断';
   if (name.includes('胱抑素c') || name.includes('(cysc)')) return '建议结合肌酐和eGFR评估早期肾功能变化';
   if (name.includes('促甲状腺激素') || name.includes('(tsh)')) return '建议结合 FT3、FT4 及内分泌评估甲状腺功能';
   if (name.includes('ft3')) return '建议结合 TSH、FT4 综合判断是否存在甲亢或甲减倾向';

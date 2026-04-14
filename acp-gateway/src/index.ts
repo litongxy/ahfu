@@ -56,8 +56,10 @@ async function initServer() {
         imgSrc: ["'self'", "data:", "https:", "https://i0.hdslb.com", "https://i1.hdslb.com", "https://i2.hdslb.com", "https://i3.hdslb.com", "https://i4.hdslb.com"],
         connectSrc: ["'self'", "https://cdn.jsdelivr.net"],
         frameSrc: ["'self'", "https://player.bilibili.com", "https://www.bilibili.com"],
+        "upgrade-insecure-requests": null,
       },
     },
+    strictTransportSecurity: false,
   }));
   app.use(cors({
     origin: '*',
@@ -65,6 +67,10 @@ async function initServer() {
     allowedHeaders: ['Content-Type', 'Authorization', 'Origin'],
   }));
   app.use(express.json({ limit: '10mb' }));
+
+  app.get('/', (req: Request, res: Response) => {
+    res.redirect('/chat.html');
+  });
   
   app.use(express.static(path.join(__dirname, '../../pages')));
   app.use(express.static(path.join(__dirname, '../..')));

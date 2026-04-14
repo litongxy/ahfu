@@ -396,6 +396,159 @@
         .replace(/'/g, '&#39;');
     }
 
+    function normalizeAnalysisCopy(text) {
+      return String(text || '')
+        .replace(/发现\s*\d+\s*项异常(?:指标|结果)?/g, '发现异常指标')
+        .replace(/检出\s*\d+\s*项异常(?:\/阳性)?结果/g, '检出异常/阳性结果')
+        .replace(/- （其余\s*\d+\s*项略）/g, '- （其余内容略）')
+        .replace(/（其余\s*\d+\s*项建议在页面列表中逐项查看。?）/g, '（其余内容建议在页面列表中逐项查看。）');
+    }
+
+    function getRecommendationIcon(type) {
+      const iconMap = {
+        recipe: '食',
+        exercise: '练',
+        sleep: '睡',
+        psychology: '心',
+      };
+      return iconMap[type] || '荐';
+    }
+
+    function getRecommendationTitle(item) {
+      const title = item && typeof item.title === 'string' ? item.title.trim() : '';
+      if (title) {
+        return title;
+      }
+      if (item && item.type === 'exercise') {
+        return '运动课程';
+      }
+      if (item && item.type === 'recipe') {
+        return '健康食谱';
+      }
+      return '个性化推荐';
+    }
+
+    function getRecommendationHref(item) {
+      const rawUrl = item && typeof item.url === 'string' ? item.url.trim() : '';
+      if (rawUrl && rawUrl.startsWith('/') && !rawUrl.startsWith('//')) {
+        return rawUrl;
+      }
+      if (item && item.type === 'exercise') {
+        return '/pages/exercise/list.html';
+      }
+      if (item && item.type === 'recipe') {
+        return '/pages/recipe/list.html';
+      }
+      return '/chat.html';
+    }
+
+    function getVisibleRecommendationReason(item) {
+      const reason = item && typeof item.reason === 'string' ? item.reason.trim() : '';
+      if (!reason) {
+        return '';
+      }
+
+      return reason.startsWith('匹配依据：') ? '' : reason;
+    }
+
+    function getRecommendationSubtitle(item) {
+      const reason = getVisibleRecommendationReason(item);
+      if (reason) {
+        return reason;
+      }
+
+      const description = item && typeof item.description === 'string' ? item.description.trim() : '';
+      if (description) {
+        return description;
+      }
+
+      const tags = item && Array.isArray(item.tags)
+        ? item.tags.map(function(tag) { return String(tag || '').trim(); }).filter(Boolean).slice(0, 3)
+        : [];
+      if (tags.length > 0) {
+        return '关键词：' + tags.join(' / ');
+      }
+
+      if (item && item.type === 'exercise') {
+        return '根据当前报告，继续查看更适合你的运动视频。';
+      }
+      if (item && item.type === 'recipe') {
+        return '根据当前报告，继续查看更适合你的食谱。';
+      }
+      return '结合当前报告生成的后续建议。';
+    }
+
+    function renderReportRecommendationLinks(report) {
+      const recommendationGroup = report && report.recommendations ? report.recommendations : null;
+      const contentList = recommendationGroup && Array.isArray(recommendationGroup.contents)
+        ? recommendationGroup.contents.filter(function(item) {
+            return item && (item.type === 'recipe' || item.type === 'exercise' || item.type === 'sleep' || item.type === 'psychology');
+          })
+        : [];
+      const uniqueContents = [];
+      const seenIds = new Set();
+
+      contentList.forEach(function(item) {
+        const id = item && item.id ? String(item.id) : '';
+        const dedupeKey = id || [item.type || '', item.title || '', item.url || ''].join('::');
+        if (!dedupeKey || seenIds.has(dedupeKey)) {
+          return;
+        }
+        seenIds.add(dedupeKey);
+        uniqueContents.push(item);
+      });
+
+      const cards = uniqueContents.slice(0, 4).map(function(item) {
+        return `
+          <a href="${escapeHtml(getRecommendationHref(item))}" class="recommend-link">
+            <span class="recommend-icon">${escapeHtml(getRecommendationIcon(item.type))}</span>
+            <span class="recommend-copy">
+              <strong>${escapeHtml(getRecommendationTitle(item))}</strong>
+              <span>${escapeHtml(getRecommendationSubtitle(item))}</span>
+            </span>
+          </a>
+        `;
+      });
+
+      cards.push(`
+        <a href="/chat.html" class="recommend-link">
+          <span class="recommend-icon">问</span>
+          <span class="recommend-copy">
+            <strong>继续咨询</strong>
+            <span>带着已上传报告继续提问，聊天会结合你的画像和最近报告回答。</span>
+          </span>
+        </a>
+      `);
+
+      if (cards.length > 1) {
+        return cards.join('');
+      }
+
+      return `
+        <a href="/pages/recipe/list.html" class="recommend-link">
+          <span class="recommend-icon">食</span>
+          <span class="recommend-copy">
+            <strong>健康食谱</strong>
+            <span>根据当前报告，继续查看清淡、养护型饮食内容。</span>
+          </span>
+        </a>
+        <a href="/pages/exercise/list.html" class="recommend-link">
+          <span class="recommend-icon">练</span>
+          <span class="recommend-copy">
+            <strong>运动课程</strong>
+            <span>补充低强度与恢复型课程，帮助建立长期习惯。</span>
+          </span>
+        </a>
+        <a href="/chat.html" class="recommend-link">
+          <span class="recommend-icon">问</span>
+          <span class="recommend-copy">
+            <strong>继续咨询</strong>
+            <span>带着已上传报告继续问问题，系统会保留上下文。</span>
+          </span>
+        </a>
+      `;
+    }
+
     async function handleUpload(input) {
       if (!isPhoneLoggedIn()) {
         redirectToPhoneLogin();
@@ -483,6 +636,17 @@
         throw new Error(data.message || '重新解析失败');
       }
       return data.data;
+    }
+
+    function getInitialReportIdFromQuery() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const reportId = (params.get('reportId') || '').trim();
+        return reportId || '';
+      } catch (error) {
+        console.warn('读取 reportId 参数失败', error);
+        return '';
+      }
     }
 
     function getSeverityChip(item) {
@@ -578,21 +742,21 @@
       const tabs = [
         {
           key: 'all',
-          label: `全部 ${sortedIndicators.length}`,
+          label: '全部',
           match: function() {
             return true;
           },
         },
         {
           key: 'anomaly',
-          label: `异常 ${anomalyItems.length}`,
+          label: '异常',
           match: function(item) {
             return !!item.isAnomaly;
           },
         },
         {
           key: 'normal',
-          label: `正常 ${normalItems.length}`,
+          label: '正常',
           match: function(item) {
             return !item.isAnomaly;
           },
@@ -619,14 +783,27 @@
       const resultList = document.getElementById('resultList');
       let activeTab = 'all';
 
+      function renderAnalysisBlock() {
+        if (!hasAiAnalysis) {
+          return '';
+        }
+
+        const normalizedAnalysis = normalizeAnalysisCopy(report.aiAnalysis);
+        return `
+          <div class="result-item">
+            <div class="result-top">
+              <div class="result-name">AI 分析</div>
+              <span class="chip chip-warning">建议</span>
+            </div>
+            <div class="result-note analysis-copy">${escapeHtml(normalizedAnalysis).replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+      }
+
       function renderActiveTab() {
         if (activeTab === 'analysis') {
           if (hasAiAnalysis) {
-            resultList.innerHTML = `
-              <div class="result-item">
-                <div class="analysis-copy">${escapeHtml(report.aiAnalysis).replace(/\n/g, '<br>')}</div>
-              </div>
-            `;
+            resultList.innerHTML = renderAnalysisBlock();
           } else {
             resultList.innerHTML = '<div class="empty-card">暂无可展示的分析内容。</div>';
           }
@@ -645,7 +822,9 @@
           return tab.match(item);
         });
         const itemsHtml = renderItemList(filtered);
-        resultList.innerHTML = itemsHtml || '<div class="empty-card">当前筛选下没有可展示的指标。</div>';
+        const analysisHtml = activeTab === 'all' ? renderAnalysisBlock() : '';
+        const combinedHtml = `${itemsHtml}${analysisHtml}`;
+        resultList.innerHTML = combinedHtml || '<div class="empty-card">当前筛选下没有可展示的指标。</div>';
 
         const buttons = resultTabs ? resultTabs.querySelectorAll('.result-tab') : [];
         buttons.forEach(function(button) {
@@ -674,29 +853,7 @@
       aiAnalysisContent.innerHTML = '';
 
       recCard.hidden = false;
-      recContent.innerHTML = `
-        <a href="/pages/recipe/list.html" class="recommend-link">
-          <span class="recommend-icon">食</span>
-          <span class="recommend-copy">
-            <strong>健康食谱</strong>
-            <span>根据当前报告，继续查看清淡、养护型饮食内容。</span>
-          </span>
-        </a>
-        <a href="/pages/exercise/list.html" class="recommend-link">
-          <span class="recommend-icon">练</span>
-          <span class="recommend-copy">
-            <strong>运动课程</strong>
-            <span>补充低强度与恢复型课程，帮助建立长期习惯。</span>
-          </span>
-        </a>
-        <a href="/chat.html" class="recommend-link">
-          <span class="recommend-icon">问</span>
-          <span class="recommend-copy">
-            <strong>继续咨询</strong>
-            <span>带着已上传报告继续问问题，系统会保留上下文。</span>
-          </span>
-        </a>
-      `;
+      recContent.innerHTML = renderReportRecommendationLinks(report);
     }
 
     function resetUpload() {
@@ -708,12 +865,34 @@
       renderUploadIdle();
     }
 
-    renderUploadIdle();
-    if (window.AcpAuth && typeof window.AcpAuth.ensurePhoneLogin === 'function') {
-      window.AcpAuth.ensurePhoneLogin().catch(function (error) {
-        console.warn('需要先手机号登录后再上传报告', error);
-      });
+    async function bootstrap() {
+      renderUploadIdle();
+
+      if (window.AcpAuth && typeof window.AcpAuth.ensurePhoneLogin === 'function') {
+        try {
+          await window.AcpAuth.ensurePhoneLogin();
+        } catch (error) {
+          console.warn('需要先手机号登录后再上传报告', error);
+          return;
+        }
+      }
+
+      const initialReportId = getInitialReportIdFromQuery();
+      if (!initialReportId) {
+        return;
+      }
+
+      try {
+        currentReportId = initialReportId;
+        renderUploadLoading('最新体检报告');
+        await loadAndShowReport(initialReportId);
+      } catch (error) {
+        console.error('加载指定报告失败', error);
+        renderUploadIdle();
+      }
     }
+
+    bootstrap();
   </script>
 </body>
 </html>

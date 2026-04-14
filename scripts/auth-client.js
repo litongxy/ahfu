@@ -89,6 +89,62 @@
     safeStorageRemove(TOKEN_KEY);
   }
 
+  function parseParamsFromHash(hashValue) {
+    var raw = typeof hashValue === 'string' ? hashValue : '';
+    if (!raw) {
+      return new URLSearchParams();
+    }
+
+    return new URLSearchParams(raw.charAt(0) === '#' ? raw.slice(1) : raw);
+  }
+
+  function cleanupBootstrapTokenFromUrl() {
+    if (!window.history || typeof window.history.replaceState !== 'function') {
+      return;
+    }
+
+    var searchParams = new URLSearchParams(window.location.search || '');
+    var hashParams = parseParamsFromHash(window.location.hash || '');
+    var changed = false;
+
+    if (searchParams.has('mp_token')) {
+      searchParams.delete('mp_token');
+      changed = true;
+    }
+
+    if (hashParams.has('mp_token')) {
+      hashParams.delete('mp_token');
+      changed = true;
+    }
+
+    if (!changed) {
+      return;
+    }
+
+    var query = searchParams.toString();
+    var hash = hashParams.toString();
+    var nextUrl = window.location.pathname + (query ? '?' + query : '') + (hash ? '#' + hash : '');
+    window.history.replaceState({}, '', nextUrl);
+  }
+
+  function consumeBootstrapToken() {
+    var searchParams = new URLSearchParams(window.location.search || '');
+    var hashParams = parseParamsFromHash(window.location.hash || '');
+    var token = hashParams.get('mp_token') || searchParams.get('mp_token');
+
+    if (!token) {
+      return;
+    }
+
+    if (isTokenValid(token)) {
+      setToken(token);
+    } else {
+      clearToken();
+    }
+
+    cleanupBootstrapTokenFromUrl();
+  }
+
   function safeSessionStorageRemove(key) {
     try {
       window.sessionStorage.removeItem(key);
@@ -362,6 +418,8 @@
 
     return doFetch();
   }
+
+  consumeBootstrapToken();
 
   window.AcpAuth = {
     ensureLogin: ensureLogin,

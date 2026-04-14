@@ -3,6 +3,7 @@ import path from 'path';
 import vm from 'vm';
 import type { HealthReport, ReportIndicator } from './report.model';
 import { buildPantryQueryResult, type PantryQueryResult } from './pantry-recipe.service';
+import { SPECIAL_FINDING_LIBRARY, type SpecialFindingRule } from './report-special-findings-library';
 import { reportService } from './report.service';
 import { userProfiles, type HealthProfile } from './user-profile.store';
 
@@ -14,10 +15,12 @@ export interface Content {
   type: ContentType;
   title: string;
   description: string;
+  time?: string;
   calories?: number; // kcal
   duration?: number; // seconds for short clips; minutes for legacy long-form content
   durationSeconds?: number;
   tags: string[];
+  evidenceBadges?: string[];
   reason?: string;
   url?: string;
   imageUrl?: string;
@@ -88,6 +91,7 @@ type RecipeDataItem = {
   id: number | string;
   name: string;
   desc?: string;
+  time?: string;
   cal?: number;
   type?: string;
   tags?: string[];
@@ -351,8 +355,9 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     type: 'recipe',
     title: '燕麦鸡胸肉蔬菜碗',
     description: '高蛋白+高纤维，稳血糖更耐饿',
+    time: '15分钟',
     calories: 480,
-    tags: ['控糖', '减脂', '高蛋白', '高纤维', '均衡营养'],
+    tags: ['控糖', '减脂', '高蛋白', '高纤维', '均衡营养', '早餐', '快手'],
     url: '/pages/recipe/list.html',
   },
   {
@@ -360,8 +365,9 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     type: 'recipe',
     title: '低盐清蒸鲈鱼',
     description: '清淡少油，适合血脂/血压管理',
+    time: '20分钟',
     calories: 220,
-    tags: ['控脂', '心血管', '低盐', '清淡', '血压友好'],
+    tags: ['控脂', '心血管', '低盐', '清淡', '血压友好', '晚餐'],
     url: '/pages/recipe/list.html',
   },
   {
@@ -369,8 +375,9 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     type: 'recipe',
     title: '番茄豆腐汤',
     description: '清淡易消化，适合护肝/控脂的日常搭配',
+    time: '15分钟',
     calories: 160,
-    tags: ['护肝', '控脂', '清淡', '养胃', '素食'],
+    tags: ['护肝', '控脂', '清淡', '养胃', '素食', '汤类', '晚餐', '快手'],
     url: '/pages/recipe/list.html',
   },
   {
@@ -378,8 +385,9 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     type: 'recipe',
     title: '番茄炒蛋',
     description: '经典快手菜，10分钟就能上桌',
+    time: '10分钟',
     calories: 150,
-    tags: ['番茄鸡蛋', '快手', '家常'],
+    tags: ['番茄鸡蛋', '快手', '家常', '晚餐'],
     url: '/pages/recipe/list.html',
   },
   {
@@ -387,8 +395,9 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     type: 'recipe',
     title: '西红柿鸡蛋面',
     description: '一锅搞定的主食+蛋白组合',
+    time: '15分钟',
     calories: 360,
-    tags: ['番茄鸡蛋', '快手', '主食'],
+    tags: ['番茄鸡蛋', '快手', '主食', '早餐'],
     url: '/pages/recipe/list.html',
   },
   {
@@ -396,8 +405,9 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     type: 'recipe',
     title: '冬瓜香菇鸡蛋汤',
     description: '低嘌呤思路的清淡汤品，适合尿酸管理期',
+    time: '20分钟',
     calories: 140,
-    tags: ['低嘌呤', '清淡', '养胃'],
+    tags: ['低嘌呤', '清淡', '养胃', '汤类', '晚餐'],
     url: '/pages/recipe/list.html',
   },
   {
@@ -405,8 +415,9 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     type: 'recipe',
     title: '糙米杂蔬饭',
     description: '膳食纤维更高，适合控糖控脂的人群',
+    time: '30分钟',
     calories: 420,
-    tags: ['控糖', '控脂', '高纤维', '均衡营养', '素食'],
+    tags: ['控糖', '控脂', '高纤维', '均衡营养', '素食', '晚餐'],
     url: '/pages/recipe/list.html',
   },
   {
@@ -414,8 +425,9 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     type: 'recipe',
     title: '蒜蓉西兰花（少油版）',
     description: '低能量高纤维，适合减脂控脂',
+    time: '10分钟',
     calories: 90,
-    tags: ['减脂', '控脂', '高纤维', '清淡', '素食'],
+    tags: ['减脂', '控脂', '高纤维', '清淡', '素食', '快手', '家常', '晚餐'],
     url: '/pages/recipe/list.html',
   },
   {
@@ -423,8 +435,9 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     type: 'recipe',
     title: '牛肉土豆杂蔬焖菜',
     description: '低脂高蛋白的健康菜肴',
+    time: '30分钟',
     calories: 378,
-    tags: ['减脂', '高蛋白'],
+    tags: ['减脂', '高蛋白', '家常'],
     url: '/pages/recipe/list.html',
   },
   {
@@ -432,8 +445,9 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     type: 'recipe',
     title: '玉米鸡胸肉蔬菜焖面',
     description: '营养均衡的主食选择',
+    time: '25分钟',
     calories: 513,
-    tags: ['均衡营养', '高蛋白', '恢复'],
+    tags: ['均衡营养', '高蛋白', '恢复', '主食', '早餐'],
     url: '/pages/recipe/list.html',
   },
 
@@ -445,7 +459,7 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     description: '高强度间歇训练，适合想快速进入燃脂状态的用户（无明显运动禁忌时）',
     duration: 30,
     calories: 400,
-    tags: ['燃脂', '高强度', '减脂', '控脂'],
+    tags: ['燃脂', '高强度', '减脂', '控脂', '运动视频', '跟练', '课程视频'],
     intensity: 'high',
     bvid: 'BV1oQTnzXEDr',
     posterUrl: 'https://i2.hdslb.com/bfs/archive/b0865ee32908b9417b195a1dcf1f27966d767ff7.jpg',
@@ -458,7 +472,7 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     description: '节奏轻快，新手友好，适合碎片化燃脂',
     duration: 15,
     calories: 200,
-    tags: ['燃脂', '中强度', '新手友好', '减脂', '恢复'],
+    tags: ['燃脂', '中强度', '新手友好', '减脂', '恢复', '运动视频', '跟练', '课程视频'],
     intensity: 'medium',
     bvid: 'BV13g4y1q7pt',
     posterUrl: 'https://i1.hdslb.com/bfs/archive/77d9a7ba73c5f5e91bf27822738a5094bf02e146.jpg',
@@ -471,7 +485,7 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     description: '节奏稳定、呼吸清晰，适合恢复型与长期习惯型运动',
     duration: 12,
     calories: 100,
-    tags: ['八段锦', '低强度', '养生', '血压友好', '恢复', '新手友好'],
+    tags: ['八段锦', '低强度', '养生', '血压友好', '恢复', '新手友好', '运动视频', '跟练', '课程视频'],
     intensity: 'low',
     bvid: 'BV1VsDpYXEqD',
     posterUrl: 'https://i0.hdslb.com/bfs/archive/e89074784b5dddaacde109e8c3bd4528e4a85138.jpg',
@@ -484,7 +498,7 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     description: '舒展放松，提升柔韧性，适合作为压力与僵硬的“恢复日”',
     duration: 50,
     calories: 120,
-    tags: ['瑜伽', '中低强度', '减压', '恢复'],
+    tags: ['瑜伽', '中低强度', '减压', '恢复', '运动视频', '跟练', '课程视频'],
     intensity: 'medium',
     bvid: 'BV1xV411y7c2',
     posterUrl: 'https://i0.hdslb.com/bfs/archive/edea56107a1650c834ef1aec9435b4c76fb38400.jpg',
@@ -497,7 +511,7 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     description: '强化腹部与躯干稳定，适合建立基础力量或改善姿态控制',
     duration: 20,
     calories: 200,
-    tags: ['力量', '核心', '高强度', '增肌'],
+    tags: ['力量', '核心', '高强度', '增肌', '运动视频', '跟练', '课程视频'],
     intensity: 'high',
     bvid: 'BV1k94y1f7Vr',
     posterUrl: 'https://i1.hdslb.com/bfs/archive/0526b5a209bb9eb98c271a8bbd4282fcd92e7dc6.jpg',
@@ -510,7 +524,7 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     description: '久坐低头族友好，坐姿拉伸+放松动作，适合碎片时间跟练',
     duration: 10,
     calories: 40,
-    tags: ['拉伸', '肩颈', '低强度', '恢复'],
+    tags: ['拉伸', '肩颈', '低强度', '恢复', '运动视频', '跟练', '课程视频', '办公室'],
     intensity: 'low',
     bvid: 'BV1vu411e7fC',
     posterUrl: 'https://i0.hdslb.com/bfs/archive/a902b9961903db6d795ba9e62ad191ed7d6fa6da.jpg',
@@ -522,7 +536,7 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     title: '5分钟睡前床上拉伸',
     description: '动作温和、节奏放慢，适合睡前或加班后放松',
     duration: 5,
-    tags: ['拉伸', '助眠', '低强度', '恢复'],
+    tags: ['拉伸', '助眠', '低强度', '恢复', '运动视频', '跟练', '课程视频'],
     intensity: 'low',
     bvid: 'BV1sx41137qi',
     posterUrl: 'https://i0.hdslb.com/bfs/archive/09110586bb8ac07ae7ab3b91761e1bddf45a8534.jpg',
@@ -535,7 +549,7 @@ const contentCatalog: Array<Omit<Content, 'reason'>> = [
     description: '运动前后、睡前和晨起都能跟练，快速缓解肌肉紧张',
     duration: 10,
     calories: 50,
-    tags: ['拉伸', '低强度', '恢复', '新手友好'],
+    tags: ['拉伸', '低强度', '恢复', '新手友好', '运动视频', '跟练', '课程视频'],
     intensity: 'low',
     bvid: 'BV1ga411w7i3',
     posterUrl: 'https://i2.hdslb.com/bfs/archive/64a46fcd19aeb36e08ccf9ef2f544f624dc83a7d.jpg',
@@ -608,6 +622,138 @@ const SIGNATURE_RECIPE_TRIGGER_TOPICS = new Set<string>([
   '素食',
   '均衡营养',
 ]);
+const REPORT_CONSERVATIVE_EXERCISE_TOPICS = new Set<string>([
+  '控糖',
+  '控脂',
+  '减脂',
+  '低嘌呤',
+  '护肝',
+  '护肾',
+  '心血管',
+  '低盐',
+  '血压管理',
+]);
+const REPORT_EXERCISE_BRIDGE_RULES: Array<{
+  from: string[];
+  topics: Array<{ topic: string; weight: number }>;
+}> = [
+  {
+    from: ['控糖'],
+    topics: [
+      { topic: '减脂', weight: 2.0 },
+      { topic: '新手友好', weight: 1.1 },
+    ],
+  },
+  {
+    from: ['控脂'],
+    topics: [
+      { topic: '减脂', weight: 2.2 },
+      { topic: '新手友好', weight: 1.0 },
+    ],
+  },
+  {
+    from: ['心血管', '低盐', '血压管理'],
+    topics: [
+      { topic: '血压友好', weight: 2.4 },
+      { topic: '低强度', weight: 2.1 },
+      { topic: '新手友好', weight: 1.0 },
+    ],
+  },
+  {
+    from: ['低嘌呤'],
+    topics: [
+      { topic: '低强度', weight: 2.1 },
+    ],
+  },
+  {
+    from: ['护肝', '护肾'],
+    topics: [
+      { topic: '低强度', weight: 1.9 },
+    ],
+  },
+  {
+    from: ['养胃', '清淡'],
+    topics: [
+      { topic: '低强度', weight: 1.2 },
+    ],
+  },
+  {
+    from: ['助眠'],
+    topics: [
+      { topic: '低强度', weight: 1.0 },
+    ],
+  },
+  {
+    from: ['减压'],
+    topics: [
+      { topic: '低强度', weight: 1.0 },
+    ],
+  },
+];
+const REPORT_SPECIAL_FINDING_TOPIC_RULES: Array<{
+  codes: Set<string>;
+  topics: Array<{ topic: string; weight: number }>;
+  exerciseCap?: ExerciseIntensity;
+}> = [
+  {
+    codes: new Set([
+      'THYROID_NODULE',
+      'THYROID_CYST',
+      'THYROID_ECHO_UNEVEN',
+      'THYROID_DIFFUSE',
+      'THYROID_ENLARGED',
+      'THYROID_CALCIFICATION',
+      'HASHIMOTO_LIKE',
+    ]),
+    topics: [
+      { topic: '恢复', weight: 2.2 },
+      { topic: '清淡', weight: 1.8 },
+      { topic: '低强度', weight: 1.5 },
+      { topic: '均衡营养', weight: 1.2 },
+    ],
+    exerciseCap: 'medium',
+  },
+  {
+    codes: new Set([
+      'BREAST_NODULE',
+      'BREAST_CYST',
+      'BREAST_HYPERPLASIA',
+      'BREAST_LOBULAR_HYPERPLASIA',
+      'BREAST_FIBROADENOMA',
+      'BREAST_DUCT_DILATION',
+      'BREAST_CALCIFICATION',
+    ]),
+    topics: [
+      { topic: '恢复', weight: 2.2 },
+      { topic: '清淡', weight: 1.8 },
+      { topic: '低强度', weight: 1.5 },
+      { topic: '均衡营养', weight: 1.2 },
+    ],
+    exerciseCap: 'medium',
+  },
+  {
+    codes: new Set([
+      'LUNG_NODULE',
+      'LUNG_MICRONODULE',
+      'GROUND_GLASS_NODULE',
+      'LUNG_MARKINGS',
+      'CHRONIC_BRONCHITIS',
+      'EMPHYSEMA',
+      'PLEURAL_THICKENING',
+      'LUNG_CALCIFICATION',
+      'OLD_LUNG_LESION',
+      'PULMONARY_BULLA',
+      'BRONCHIECTASIS',
+      'PULMONARY_FIBROSIS',
+    ]),
+    topics: [
+      { topic: '低强度', weight: 2.8 },
+      { topic: '恢复', weight: 2.4 },
+      { topic: '清淡', weight: 1.4 },
+    ],
+    exerciseCap: 'low',
+  },
+];
 
 function uniqueStringList(values: string[], limit: number = 8): string[] {
   return Array.from(
@@ -618,6 +764,70 @@ function uniqueStringList(values: string[], limit: number = 8): string[] {
     )
   ).slice(0, limit);
 }
+
+function parseTimeMinutes(raw: unknown): number | undefined {
+  const text = String(raw || '').trim();
+  if (!text) return undefined;
+  const matched = text.match(/(\d+(?:\.\d+)?)\s*分钟/);
+  if (!matched) return undefined;
+  const value = Number(matched[1]);
+  return Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+function normalizeSearchableText(input: string): string {
+  return String(input || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[（）()·,，。、“”\-_/:+]/g, '');
+}
+
+function buildContentSearchText(content: Omit<Content, 'reason'>): string {
+  return normalizeSearchableText(
+    [
+      content.title,
+      content.description,
+      content.time,
+      Array.isArray(content.tags) ? content.tags.join(' ') : '',
+    ].join(' ')
+  );
+}
+
+const TOPIC_CONTENT_ALIASES: Record<string, string[]> = {
+  控糖: ['控糖', '稳血糖', '低糖', '燕麦', '全麦', '杂粮'],
+  控脂: ['控脂', '低脂', '少油', '轻食', '燃脂'],
+  心血管: ['心血管', '护心', '鱼类', '清蒸', '有氧'],
+  低盐: ['低盐', '少盐', '清淡'],
+  血压管理: ['血压管理', '血压友好', '低盐', '低强度'],
+  血压友好: ['血压友好', '低强度', '恢复', '八段锦'],
+  低嘌呤: ['低嘌呤', '尿酸'],
+  护肝: ['护肝', '低脂', '清淡', '恢复'],
+  护肾: ['护肾', '清淡', '低强度'],
+  减脂: ['减脂', '燃脂', '低脂', '轻食'],
+  高蛋白: ['高蛋白', '鸡胸', '鱼', '豆腐', '鸡蛋'],
+  高纤维: ['高纤维', '燕麦', '全麦', '杂蔬', '蔬菜'],
+  清淡: ['清淡', '少油', '低负担', '易消化', '汤'],
+  养胃: ['养胃', '暖胃', '易消化', '汤'],
+  素食: ['素食', '豆腐', '蔬菜'],
+  均衡营养: ['均衡营养', '杂蔬', '蛋白', '主食'],
+  恢复: ['恢复', '放松', '舒缓', '拉伸', '八段锦'],
+  新手友好: ['新手友好', '入门', '基础', '低强度'],
+  短时动作: ['短时动作', '动作片段', '碎片时间', '10秒', '20秒', '30秒', '5分钟', '10分钟'],
+  运动视频: ['运动视频', '课程视频', '视频', '课程', '跟练', '动作片段'],
+  跟练: ['跟练', '视频', '课程'],
+  早餐: ['早餐', '早饭', '晨起', '燕麦', '粥', '三明治', '鸡蛋饼'],
+  晚餐: ['晚餐', '晚饭', '清淡', '低负担', '易消化', '汤'],
+  快手: ['快手', '10分钟', '12分钟', '15分钟', '一锅', '省事'],
+  汤类: ['汤', '羹', '炖'],
+  家常: ['家常', '下饭', '快手'],
+  办公室: ['办公室', '工位', '久坐', '伏案', '通勤'],
+  拉伸: ['拉伸', '伸展', '放松'],
+  肩颈: ['肩颈', '颈椎', '斜方肌', '开胸', '肩背'],
+  腰背: ['腰背', '下背', '核心', '臀桥'],
+  久坐: ['久坐', '办公室', '通勤', '驾车'],
+  助眠: ['助眠', '睡前', '放松', '轻柔'],
+  减压: ['减压', '呼吸', '放松', '正念'],
+};
 
 function loadRecipeDataFile(): RecipeDataItem[] {
   try {
@@ -642,6 +852,7 @@ function deriveRecipeRecommendationTags(recipe: RecipeDataItem): string[] {
   const rawTags = Array.isArray(recipe.tags) ? recipe.tags.map((tag) => String(tag || '').trim()).filter(Boolean) : [];
   const combined = [recipe.name, recipe.desc, type, ...rawTags].join(' ');
   const tags = new Set<string>();
+  const timeMinutes = parseTimeMinutes(recipe.time);
 
   const add = (...values: string[]) => {
     values.forEach((value) => {
@@ -654,6 +865,23 @@ function deriveRecipeRecommendationTags(recipe: RecipeDataItem): string[] {
   if (type === '药膳') add('恢复');
   if (type === '素食') add('素食', '高纤维', '清淡');
   if (type === '早餐') add('均衡营养', '高蛋白');
+  if (type === '早餐') add('早餐');
+  if (type === '汤类') add('汤类');
+  if (type === '家常菜') add('家常');
+  if (type === '药膳') add('汤类');
+  if (timeMinutes !== undefined && timeMinutes <= 15) add('快手');
+  if (/早餐|早饭/.test(combined)) add('早餐');
+  if (/晚餐|晚饭/.test(combined)) add('晚餐');
+  if (/汤|羹|炖/.test(combined)) add('汤类');
+  if (/家常|下饭/.test(combined)) add('家常');
+  if (/快手|10分钟|15分钟|简单易做|一锅/.test(combined)) add('快手');
+  if (
+    /晚餐|晚饭|睡前|低负担|易消化/.test(combined) ||
+    ((type === '汤类' || /清淡|低脂/.test(combined)) && timeMinutes !== undefined && timeMinutes <= 25) ||
+    (typeof recipe.cal === 'number' && recipe.cal > 0 && recipe.cal <= 220 && /清淡|汤|低脂/.test(combined))
+  ) {
+    add('晚餐');
+  }
 
   if (/低盐|少盐|高血压|血压|心血管/.test(combined)) add('低盐', '心血管', '血压友好');
   if (/糖|燕麦|全麦|稳糖|控糖/.test(combined)) add('控糖');
@@ -688,6 +916,7 @@ function buildRecipeContentsFromData(existingTitles: Set<string>): Array<Omit<Co
       type: 'recipe' as const,
       title: String(recipe.name).trim(),
       description: String(recipe.desc || '根据你的健康目标推荐').trim(),
+      time: String(recipe.time || '').trim() || undefined,
       calories: Number.isFinite(Number(recipe.cal)) ? Number(recipe.cal) : undefined,
       tags: deriveRecipeRecommendationTags(recipe),
       imageUrl: typeof recipe.img === 'string' ? recipe.img.trim() : undefined,
@@ -776,14 +1005,36 @@ function normalizeRecipeContent(raw: unknown): RecipeCatalogItem | null {
   if (!id || !title) return null;
 
   const description = String(item.description || '根据你的健康目标推荐').trim() || '根据你的健康目标推荐';
+  const time = typeof item.time === 'string' ? item.time.trim() : '';
+  const combined = [title, description, time].join(' ');
+  const supplementalTags = (() => {
+    const timeMinutes = parseTimeMinutes(time);
+    const tags: string[] = [];
+    if (/早餐|早饭|燕麦|早餐碗|早餐杯|三明治|鸡蛋饼/.test(combined)) tags.push('早餐');
+    if (
+      /晚餐|晚饭|夜宵|宵夜/.test(combined) ||
+      ((/清淡|低负担|易消化|汤/.test(combined)) && timeMinutes !== undefined && timeMinutes <= 25)
+    ) {
+      tags.push('晚餐');
+    }
+    if (/快手|一锅|简单|懒人/.test(combined) || (timeMinutes !== undefined && timeMinutes <= 15)) tags.push('快手');
+    if (/汤|羹|炖/.test(combined)) tags.push('汤类');
+    if (/家常|下饭/.test(combined)) tags.push('家常');
+    if (/糖|燕麦|全麦|稳糖|控糖/.test(combined)) tags.push('控糖');
+    if (/低脂|控脂|减脂|轻食/.test(combined)) tags.push('控脂', '减脂');
+    if (/鸡胸|鸡蛋|豆腐|鱼|虾|牛奶|高蛋白/.test(combined)) tags.push('高蛋白');
+    return tags;
+  })();
   const normalized: RecipeCatalogItem = {
     id,
     type: 'recipe',
     title,
     description,
-    tags: normalizeTags(item.tags),
+    tags: uniqueStringList([...normalizeTags(item.tags), ...supplementalTags], 12),
     url: '/pages/recipe/list.html',
   };
+
+  if (time) normalized.time = time;
 
   const calories = parseFiniteNumber(item.calories);
   if (calories !== undefined) normalized.calories = calories;
@@ -813,26 +1064,34 @@ function normalizeExerciseContent(raw: unknown): ExerciseCatalogItem | null {
   if (!id || !title) return null;
 
   const description = String(item.description || '根据你的健康目标推荐').trim() || '根据你的健康目标推荐';
+  const normalizedTags = normalizeTags(item.tags);
+  const bvid = typeof item.bvid === 'string' ? item.bvid.trim() : '';
+  const duration = parseFiniteNumber(item.duration);
+  const durationSeconds = parseFiniteNumber(item.durationSeconds);
+  const intensity = normalizeExerciseIntensity(item.intensity);
   const normalized: ExerciseCatalogItem = {
     id,
     type: 'exercise',
     title,
     description,
-    tags: normalizeTags(item.tags),
-    intensity: normalizeExerciseIntensity(item.intensity),
+    tags: uniqueStringList([
+      ...normalizedTags,
+      '运动视频',
+      bvid ? '跟练' : '',
+      intensity === 'low' ? '低强度' : intensity === 'medium' ? '中等强度' : '高强度',
+      durationSeconds !== undefined && durationSeconds > 0 && durationSeconds <= 120 ? '动作片段' : '课程视频',
+    ], 12),
+    intensity,
     url: '/pages/exercise/list.html',
   };
 
   const calories = parseFiniteNumber(item.calories);
   if (calories !== undefined) normalized.calories = calories;
 
-  const duration = parseFiniteNumber(item.duration);
   if (duration !== undefined) normalized.duration = duration;
 
-  const durationSeconds = parseFiniteNumber(item.durationSeconds);
   if (durationSeconds !== undefined) normalized.durationSeconds = durationSeconds;
 
-  const bvid = typeof item.bvid === 'string' ? item.bvid.trim() : '';
   if (bvid) {
     normalized.bvid = bvid;
     normalized.url = `/pages/exercise/list.html?bvid=${bvid}`;
@@ -981,8 +1240,76 @@ function compactEvidenceLabel(evidence: string): string {
     .replace(/^生活习惯：/, '')
     .replace(/^体质信息：/, '')
     .replace(/^报告异常：/, '')
+    .replace(/^报告建议：/, '')
     .replace(/^年龄：/, '')
     .replace(/^性别：/, '');
+}
+
+function getTopicPresentationPriority(
+  topic: string,
+  signals: RecommendationSignals,
+  scene: string
+): number {
+  const evidences = Array.from(signals.topicEvidence.get(topic) ?? []);
+  const hasQuestionEvidence = evidences.some((item) => item === '用户提问' || item === '食材提问');
+  const hasReportEvidence = evidences.some((item) => item.startsWith('报告异常：') || item.startsWith('报告建议：'));
+  const hasProfileEvidence = evidences.some((item) =>
+    item.startsWith('健康档案：') ||
+    item.startsWith('健康目标：') ||
+    item.startsWith('生活习惯：') ||
+    item.startsWith('体质信息：') ||
+    item.startsWith('年龄：') ||
+    item.startsWith('性别：')
+  );
+  const hasDefaultEvidence = evidences.some((item) => item === '场景默认');
+
+  if (scene === 'report') {
+    if (hasReportEvidence) return 4;
+    if (hasQuestionEvidence) return 3;
+    if (hasProfileEvidence) return 2;
+    if (hasDefaultEvidence) return 0;
+    return 1;
+  }
+
+  if (hasQuestionEvidence) return 4;
+  if (hasProfileEvidence) return 3;
+  if (hasReportEvidence) return 2;
+  if (hasDefaultEvidence) return 0;
+  return 1;
+}
+
+function sortTopicsForPresentation(
+  topics: string[],
+  signals: RecommendationSignals,
+  scene: string
+): string[] {
+  return [...topics].sort((a, b) => {
+    const priorityDiff = getTopicPresentationPriority(b, signals, scene) - getTopicPresentationPriority(a, signals, scene);
+    if (priorityDiff !== 0) return priorityDiff;
+    return (signals.topicWeights.get(b) ?? 0) - (signals.topicWeights.get(a) ?? 0);
+  });
+}
+
+function buildEvidenceBadges(matchedTopics: string[], signals: RecommendationSignals, scene: string): string[] {
+  const badges: string[] = [];
+  const sortedTopics = sortTopicsForPresentation(matchedTopics, signals, scene);
+
+  sortedTopics.slice(0, 3).forEach((topic) => {
+    const evidenceLabels = Array.from(signals.topicEvidence.get(topic) ?? [])
+      .map(compactEvidenceLabel)
+      .filter(Boolean);
+
+    if (evidenceLabels.length > 0) {
+      badges.push(...evidenceLabels.slice(0, 2));
+      return;
+    }
+
+    if (topic) {
+      badges.push(topic);
+    }
+  });
+
+  return uniqueStringList(badges, 3);
 }
 
 function extractTopicsFromTextEntries(
@@ -1010,6 +1337,15 @@ function extractTopicsFromMessage(message: string, signals: RecommendationSignal
   if (!m) return;
 
   const rules: Array<{ topic: string; patterns: RegExp[]; weight?: number }> = [
+    { topic: '运动视频', patterns: [/视频/, /跟练/, /课程/, /教程/, /动作片段/], weight: 1.7 },
+    { topic: '跟练', patterns: [/跟练/, /边看边练/, /带着练/], weight: 1.6 },
+    { topic: '早餐', patterns: [/早餐/, /早饭/, /晨起/, /早上吃什么/], weight: 1.5 },
+    { topic: '晚餐', patterns: [/晚餐/, /晚饭/, /夜宵/, /宵夜/], weight: 1.5 },
+    { topic: '快手', patterns: [/快手/, /省事/, /简单做/, /懒人/, /10分钟/, /12分钟/, /15分钟/], weight: 1.4 },
+    { topic: '汤类', patterns: [/汤/, /羹/, /炖汤/], weight: 1.2 },
+    { topic: '家常', patterns: [/家常/, /下饭/], weight: 1.2 },
+    { topic: '拉伸', patterns: [/拉伸/, /伸展/], weight: 1.3 },
+    { topic: '办公室', patterns: [/办公室/, /工位/, /开会/, /通勤/], weight: 1.2 },
     { topic: '控糖', patterns: [/血糖/, /糖尿病/, /控糖/, /餐后血糖/, /糖化血红蛋白/, /hba1c/i], weight: 1.4 },
     { topic: '控脂', patterns: [/血脂/, /胆固醇/, /甘油三酯/, /高脂血症/, /低密度/, /ldl/i, /tg/i, /tc/i], weight: 1.4 },
     { topic: '心血管', patterns: [/心血管/, /动脉硬化/, /冠心病/, /心电图/, /心脏/], weight: 1.3 },
@@ -1198,22 +1534,60 @@ function extractTopicsFromProfile(
 function extractTopicsFromIndicators(
   indicators: ReportIndicator[],
   signals: RecommendationSignals
-): { hasHypertensionLike: boolean; hasHeartRiskLike: boolean; hasSeriousAnomaly: boolean } {
+): {
+  hasHypertensionLike: boolean;
+  hasHeartRiskLike: boolean;
+  hasSeriousAnomaly: boolean;
+  matchedTopics: Set<string>;
+  exerciseMaxIntensityHint: ExerciseIntensity | null;
+} {
   let hasHypertensionLike = false;
   let hasHeartRiskLike = false;
   let hasSeriousAnomaly = false;
+  const matchedTopics = new Set<string>();
+  let exerciseMaxIntensityHint: ExerciseIntensity | null = null;
 
-  const indicatorRules: Array<{ pattern: RegExp; topics: string[] }> = [
-    { pattern: /总胆固醇|胆固醇|\(tc\)|\btc\b/i, topics: ['控脂', '心血管'] },
-    { pattern: /甘油三酯|\(tg\)|\btg\b/i, topics: ['控脂', '心血管', '减脂'] },
-    { pattern: /低密度|ldl/i, topics: ['控脂', '心血管'] },
-    { pattern: /高密度|hdl/i, topics: ['心血管'] },
-    { pattern: /空腹血糖|糖化血红蛋白|hba1c|glu/i, topics: ['控糖'] },
-    { pattern: /尿酸|\(ua\)|\bua\b/i, topics: ['低嘌呤'] },
-    { pattern: /谷丙转氨酶|alt|谷草转氨酶|ast|脂肪肝|胆红素|碱性磷酸酶|ggt/i, topics: ['护肝'] },
-    { pattern: /肌酐|尿素氮|胱抑素|egfr|尿蛋白|尿潜血|尿白细胞/i, topics: ['护肾'] },
-    { pattern: /血压|收缩压|舒张压|高血压/i, topics: ['低盐', '血压管理'] },
-    { pattern: /体重指数|bmi|超重|肥胖/i, topics: ['减脂'] },
+  const indicatorRules: Array<{ pattern: RegExp; topics: Array<{ topic: string; weight: number }> }> = [
+    {
+      pattern: /总胆固醇|胆固醇|\(tc\)|\btc\b/i,
+      topics: [{ topic: '控脂', weight: 3.8 }, { topic: '心血管', weight: 3.3 }],
+    },
+    {
+      pattern: /甘油三酯|\(tg\)|\btg\b/i,
+      topics: [{ topic: '控脂', weight: 3.8 }, { topic: '心血管', weight: 3.4 }, { topic: '减脂', weight: 3.2 }],
+    },
+    {
+      pattern: /低密度|ldl/i,
+      topics: [{ topic: '控脂', weight: 3.8 }, { topic: '心血管', weight: 3.3 }],
+    },
+    {
+      pattern: /高密度|hdl/i,
+      topics: [{ topic: '心血管', weight: 3.1 }],
+    },
+    {
+      pattern: /空腹血糖|糖化血红蛋白|hba1c|glu/i,
+      topics: [{ topic: '控糖', weight: 3.8 }],
+    },
+    {
+      pattern: /尿酸|\(ua\)|\bua\b/i,
+      topics: [{ topic: '低嘌呤', weight: 3.8 }],
+    },
+    {
+      pattern: /谷丙转氨酶|alt|谷草转氨酶|ast|脂肪肝|胆红素|碱性磷酸酶|ggt/i,
+      topics: [{ topic: '护肝', weight: 3.8 }],
+    },
+    {
+      pattern: /肌酐|尿素氮|胱抑素|egfr|尿蛋白|尿潜血|尿白细胞/i,
+      topics: [{ topic: '护肾', weight: 3.8 }],
+    },
+    {
+      pattern: /血压|收缩压|舒张压|高血压/i,
+      topics: [{ topic: '低盐', weight: 3.8 }, { topic: '血压管理', weight: 3.8 }],
+    },
+    {
+      pattern: /体重指数|bmi|超重|肥胖/i,
+      topics: [{ topic: '减脂', weight: 3.8 }],
+    },
   ];
 
   const heartRiskPattern = /心电图|t波|st段|早搏|房颤|心肌|冠心病/i;
@@ -1223,9 +1597,11 @@ function extractTopicsFromIndicators(
     if (!item || !item.isAnomaly) continue;
     const name = String(item.name || '');
     const value = String(item.value || '');
-    const combined = `${name} ${value}`;
+    const suggestion = String(item.suggestion || '');
+    const combined = `${name} ${value} ${suggestion}`;
+    const weightBonus = getReportTopicWeightBonus(item.severity);
 
-    if (item.severity === 'serious' || item.severity === 'abnormal') {
+    if (item.severity === 'serious') {
       hasSeriousAnomaly = true;
     }
     if (hypertensionPattern.test(combined)) hasHypertensionLike = true;
@@ -1233,14 +1609,74 @@ function extractTopicsFromIndicators(
 
     for (const rule of indicatorRules) {
       if (rule.pattern.test(combined)) {
-        for (const topic of rule.topics) {
-          addTopic(signals, topic, `报告异常：${name}`, 3.8);
+        for (const topicRule of rule.topics) {
+          addTopic(signals, topicRule.topic, `报告异常：${name}`, topicRule.weight + weightBonus);
+          matchedTopics.add(topicRule.topic);
         }
+      }
+    }
+
+    const matchedFindingCodes = new Set(matchSpecialFindingRules(item).map((rule) => rule.code));
+    for (const reportRule of REPORT_SPECIAL_FINDING_TOPIC_RULES) {
+      const isMatched = Array.from(reportRule.codes).some((code) => matchedFindingCodes.has(code));
+      if (!isMatched) continue;
+
+      for (const topicRule of reportRule.topics) {
+        addTopic(signals, topicRule.topic, `报告异常：${name}`, topicRule.weight + weightBonus);
+        matchedTopics.add(topicRule.topic);
+      }
+
+      if (reportRule.exerciseCap) {
+        exerciseMaxIntensityHint = pickLowerExerciseIntensity(exerciseMaxIntensityHint, reportRule.exerciseCap);
       }
     }
   }
 
-  return { hasHypertensionLike, hasHeartRiskLike, hasSeriousAnomaly };
+  return { hasHypertensionLike, hasHeartRiskLike, hasSeriousAnomaly, matchedTopics, exerciseMaxIntensityHint };
+}
+
+function bridgeReportTopicsToContentSignals(
+  signals: RecommendationSignals,
+  reportTopics: Set<string>
+): void {
+  for (const rule of REPORT_EXERCISE_BRIDGE_RULES) {
+    const matchedSources = rule.from.filter((topic) => reportTopics.has(topic));
+    if (matchedSources.length === 0) continue;
+
+    const evidence = `报告建议：${matchedSources[0]}`;
+    for (const next of rule.topics) {
+      addTopic(signals, next.topic, evidence, next.weight);
+    }
+  }
+}
+
+function pickLowerExerciseIntensity(
+  current: ExerciseIntensity | null,
+  next: ExerciseIntensity
+): ExerciseIntensity {
+  if (!current) return next;
+  return EXERCISE_INTENSITY_RANK[next] < EXERCISE_INTENSITY_RANK[current] ? next : current;
+}
+
+function getReportTopicWeightBonus(severity: ReportIndicator['severity']): number {
+  if (severity === 'serious') return 0.9;
+  if (severity === 'abnormal') return 0.5;
+  if (severity === 'slight') return 0.2;
+  return 0;
+}
+
+function matchSpecialFindingRules(indicator: ReportIndicator): SpecialFindingRule[] {
+  const source = String(indicator?.name || '').trim();
+  if (!source) return [];
+
+  const normalizedSource = normalizeSearchableText(source);
+  return SPECIAL_FINDING_LIBRARY.filter((rule) => {
+    const normalizedDisplayName = normalizeSearchableText(rule.displayName);
+    if (normalizedDisplayName && normalizedSource.includes(normalizedDisplayName)) {
+      return true;
+    }
+    return rule.aliases.some((alias) => alias.test(source));
+  });
 }
 
 function isValidHealthReport(report: HealthReport | null | undefined): report is HealthReport {
@@ -1354,15 +1790,35 @@ export class RecommendationService {
     if (isValidHealthReport(report)) {
       signals.reportId = report.id;
       const anomalyIndicators = report.indicators.filter((i) => i && i.isAnomaly);
-      const { hasHypertensionLike, hasHeartRiskLike, hasSeriousAnomaly } = extractTopicsFromIndicators(
+      const { hasHypertensionLike, hasHeartRiskLike, hasSeriousAnomaly, matchedTopics, exerciseMaxIntensityHint } = extractTopicsFromIndicators(
         anomalyIndicators,
         signals
       );
 
+      if (matchedTopics.size > 0) {
+        bridgeReportTopicsToContentSignals(signals, matchedTopics);
+      }
+
+      if (hasHeartRiskLike) {
+        addTopic(signals, '血压友好', '报告建议：心电图风险', 2.4);
+        addTopic(signals, '低强度', '报告建议：心电图风险', 2.4);
+        addTopic(signals, '新手友好', '报告建议：心电图风险', 1.2);
+      } else if (hasHypertensionLike) {
+        addTopic(signals, '血压友好', '报告建议：血压管理', 2.2);
+        addTopic(signals, '低强度', '报告建议：血压管理', 1.8);
+      }
+
       // Exercise safety heuristics: keep conservative defaults when report suggests risk.
       if (hasHeartRiskLike || hasSeriousAnomaly) {
         lowerExerciseMaxIntensity(signals, 'low');
-      } else if (hasHypertensionLike) {
+      } else if (exerciseMaxIntensityHint) {
+        lowerExerciseMaxIntensity(signals, exerciseMaxIntensityHint);
+      }
+
+      if (
+        hasHypertensionLike ||
+        Array.from(matchedTopics).some((topic) => REPORT_CONSERVATIVE_EXERCISE_TOPICS.has(topic))
+      ) {
         lowerExerciseMaxIntensity(signals, 'medium');
       }
     }
@@ -1388,6 +1844,10 @@ export class RecommendationService {
     if (scene === 'antiaging') return ['exercise', 'recipe'];
 
     const topics = signals.topics;
+    if (topics.has('运动视频') || topics.has('跟练') || topics.has('拉伸')) return ['exercise', 'recipe', 'sleep'];
+    if (topics.has('早餐') || topics.has('晚餐') || topics.has('快手') || topics.has('汤类') || topics.has('家常')) {
+      return ['recipe', 'exercise', 'sleep'];
+    }
     if (topics.has('助眠')) return ['sleep', 'exercise', 'recipe'];
     if (topics.has('减压')) return ['psychology', 'exercise', 'sleep'];
     if (
@@ -1427,6 +1887,7 @@ export class RecommendationService {
   ): { score: number; matchedTopics: string[] } {
     let score = 0;
     const matchedTopicSet = new Set<string>();
+    const searchText = buildContentSearchText(content);
 
     const typeIndex = preferredTypes.indexOf(content.type);
     if (typeIndex >= 0) {
@@ -1441,6 +1902,19 @@ export class RecommendationService {
       }
     }
 
+    for (const [topic, weight] of signals.topicWeights.entries()) {
+      if (matchedTopicSet.has(topic)) continue;
+      const aliases = TOPIC_CONTENT_ALIASES[topic] ?? [topic];
+      const hasAliasMatch = aliases.some((alias) => {
+        const normalizedAlias = normalizeSearchableText(alias);
+        return normalizedAlias && searchText.includes(normalizedAlias);
+      });
+      if (!hasAliasMatch) continue;
+
+      score += 1.4 + Math.min(3.6, weight * 0.9);
+      matchedTopicSet.add(topic);
+    }
+
     // Exercise safety filtering
     if (content.type === 'exercise' && content.intensity) {
       if (EXERCISE_INTENSITY_RANK[content.intensity] > EXERCISE_INTENSITY_RANK[signals.exerciseMaxIntensity]) {
@@ -1450,6 +1924,26 @@ export class RecommendationService {
 
     // Prefer items with explicit BVID when user intents include videos
     if (content.type === 'exercise' && content.bvid) score += 1;
+    if (signals.topics.has('运动视频') && content.type === 'exercise') {
+      score += content.bvid ? 4.4 : 2.6;
+      matchedTopicSet.add('运动视频');
+    }
+    if (signals.topics.has('跟练') && content.type === 'exercise') {
+      score += content.bvid ? 2.8 : 1.2;
+      matchedTopicSet.add('跟练');
+    }
+    if (signals.topics.has('早餐') && content.type === 'recipe' && searchText.includes('早餐')) {
+      score += 2.8;
+      matchedTopicSet.add('早餐');
+    }
+    if (signals.topics.has('晚餐') && content.type === 'recipe' && (searchText.includes('晚餐') || searchText.includes('清淡') || searchText.includes('汤'))) {
+      score += 2.4;
+      matchedTopicSet.add('晚餐');
+    }
+    if (signals.topics.has('快手') && content.type === 'recipe' && (searchText.includes('快手') || searchText.includes('10分钟') || searchText.includes('15分钟'))) {
+      score += 2.2;
+      matchedTopicSet.add('快手');
+    }
 
     if (matchedTopicSet.size === 0 && signals.topics.size > 0) {
       score -= 1.2;
@@ -1463,8 +1957,14 @@ export class RecommendationService {
     };
   }
 
-  private buildReason(matchedTopics: string[], signals: RecommendationSignals, fallback: string): string {
-    const picked = matchedTopics.slice(0, 2);
+  private buildReason(
+    content: Omit<Content, 'reason'>,
+    matchedTopics: string[],
+    signals: RecommendationSignals,
+    fallback: string,
+    scene: string
+  ): string {
+    const picked = sortTopicsForPresentation(matchedTopics, signals, scene).slice(0, 2);
     const evidenceLabels = Array.from(
       new Set(
         picked.flatMap((topic) =>
@@ -1475,23 +1975,45 @@ export class RecommendationService {
       )
     ).slice(0, 2);
 
-    if (evidenceLabels.length > 0) {
-      if (picked.length > 0) {
-        return `基于你的${evidenceLabels.join('、')}，适合当前的${picked.join(' / ')}需求`;
-      }
-      return `基于你的${evidenceLabels.join('、')}`;
+    const basis = evidenceLabels.length > 0
+      ? evidenceLabels.join('、')
+      : picked.length > 0
+        ? picked.join('、')
+        : signals.reportId
+          ? '体检结果'
+          : signals.hasProfile
+            ? '健康档案'
+            : '当前提问';
+    const direction = picked.length > 0 ? picked.join(' / ') : '';
+
+    if (content.type === 'recipe') {
+      const focusTags = content.tags
+        .filter((tag) => ['控糖', '控脂', '低盐', '低嘌呤', '护肝', '护肾', '高蛋白', '高纤维', '清淡', '养胃', '早餐', '晚餐', '快手'].includes(tag))
+        .slice(0, 2);
+      const directionText = focusTags.length > 0
+        ? focusTags.join(' / ')
+        : direction || '日常饮食管理';
+      return `匹配依据：${basis}；推荐方向：${directionText}`;
     }
 
-    if (picked.length > 0) {
-      return `适合你当前的${picked.join(' / ')}需求`;
+    if (content.type === 'exercise') {
+      const intensityLabel = content.intensity === 'high'
+        ? '高强度'
+        : content.intensity === 'medium'
+          ? '中等强度'
+          : '低强度';
+      const durationLabel = Number.isFinite(Number(content.durationSeconds)) && Number(content.durationSeconds) > 0
+        ? `${Math.round(Number(content.durationSeconds))}秒`
+        : Number.isFinite(Number(content.duration)) && Number(content.duration) > 0
+          ? `${Math.round(Number(content.duration))}分钟`
+          : '';
+      const videoLabel = content.bvid ? '视频跟练' : '动作建议';
+      const suffix = [intensityLabel, durationLabel, videoLabel].filter(Boolean).join(' / ');
+      return `匹配依据：${basis}；建议先做${suffix || direction || '当前更稳妥的训练'}`;
     }
 
-    if (signals.reportId) {
-      return '结合你的体检情况推荐';
-    }
-
-    if (signals.hasProfile) {
-      return '结合你的健康档案推荐';
+    if (evidenceLabels.length > 0 && direction) {
+      return `匹配依据：${basis}；推荐方向：${direction}`;
     }
 
     return fallback;
@@ -1551,8 +2073,9 @@ export class RecommendationService {
       description: direct
         ? `${item.highlight} 当前食材可直接做。`
         : `${item.highlight} 再补 ${item.missing.join('、')} 更合适。`,
+      time: item.time,
       tags: Array.from(new Set([...(item.tags || []), ...(item.ingredients || [])])).slice(0, 6),
-      reason: direct ? '适合：现有食材可直接做（食材提问）' : '适合：按你现有食材匹配（食材提问）',
+      reason: direct ? '匹配依据：你现有食材已齐；推荐方向：优先做快手家常菜' : '匹配依据：现有食材已命中主料；推荐方向：补齐辅料后更稳妥',
       url: this.resolveContentUrl({
         id: item.id,
         type: 'recipe',
@@ -1560,6 +2083,7 @@ export class RecommendationService {
         description: direct
           ? `${item.highlight} 当前食材可直接做。`
           : `${item.highlight} 再补 ${item.missing.join('、')} 更合适。`,
+        time: item.time,
         tags: Array.from(new Set([...(item.tags || []), ...(item.ingredients || [])])).slice(0, 6),
       }),
     }));
@@ -1664,6 +2188,18 @@ export class RecommendationService {
 
   private shouldPrioritizeSignatureRecipes(scene: string, signals: RecommendationSignals): boolean {
     if (signals.pantryQuery?.isPantryQuery) return false;
+    if (signals.reportId) return false;
+    if (
+      signals.topics.has('早餐') ||
+      signals.topics.has('晚餐') ||
+      signals.topics.has('快手') ||
+      signals.topics.has('汤类') ||
+      signals.topics.has('家常') ||
+      signals.topics.has('运动视频') ||
+      signals.topics.has('跟练')
+    ) {
+      return false;
+    }
     if (scene === 'diet') return true;
     if (scene !== 'chat' && scene !== 'report') return false;
     return Array.from(SIGNATURE_RECIPE_TRIGGER_TOPICS).some((topic) => signals.topics.has(topic));
@@ -1711,11 +2247,13 @@ export class RecommendationService {
   private toReasonedContents(
     items: RankedContentCandidate[],
     signals: RecommendationSignals,
-    fallbackReason: string
+    fallbackReason: string,
+    scene: string
   ): Content[] {
     return items.map((item) => ({
       ...item.content,
-      reason: this.buildReason(item.matchedTopics, signals, fallbackReason),
+      evidenceBadges: buildEvidenceBadges(item.matchedTopics, signals, scene),
+      reason: this.buildReason(item.content, item.matchedTopics, signals, fallbackReason, scene),
     }));
   }
 
@@ -1754,11 +2292,14 @@ export class RecommendationService {
       !signals.hasProfile &&
       (scene === 'disease' || scene === 'chat' || scene === 'tcm' || scene === 'report');
     const strictlyMatched = scored.filter((item) => item.matchedTopics.length > 0);
-    const ranked = requireMatchedTopicsOnly
-      ? strictlyMatched.length >= 8
-        ? strictlyMatched
-        : scored
-      : scored;
+    const enforceStrictMatches = hasReport || requireMatchedTopicsOnly;
+    const ranked = hasReport
+      ? (strictlyMatched.length > 0 ? strictlyMatched : scored)
+      : enforceStrictMatches
+        ? strictlyMatched.length >= 8
+          ? strictlyMatched
+          : scored
+        : scored;
     if (ranked.length === 0) {
       return [];
     }
@@ -1804,9 +2345,17 @@ export class RecommendationService {
       const primaryMatchedCount = ranked.filter((item) => item.content.type === preferredPrimary).length;
       const secondaryMatchedCount = ranked.filter((item) => item.content.type === secondaryType).length;
       const primarySource =
-        requireMatchedTopicsOnly && primaryMatchedCount < Math.max(primaryCount, 2) ? scored : ranked;
+        hasReport
+          ? ranked
+          : requireMatchedTopicsOnly && primaryMatchedCount < Math.max(primaryCount, 2)
+            ? scored
+            : ranked;
       const secondarySource =
-        requireMatchedTopicsOnly && secondaryMatchedCount < 6 ? scored : ranked;
+        hasReport
+          ? ranked
+          : requireMatchedTopicsOnly && secondaryMatchedCount < 6
+            ? scored
+            : ranked;
 
       const primarySignature =
         prioritizeSignatureRecipes && preferredPrimary === 'recipe'
@@ -1841,11 +2390,11 @@ export class RecommendationService {
       return picked.slice(0, 3);
     })();
 
-    const desired = this.toReasonedContents(pickedCandidates, signals, personalizedFallback);
+    const desired = this.toReasonedContents(pickedCandidates, signals, personalizedFallback, scene);
     const deduped = desired.filter((item, index, arr) => arr.findIndex((x) => x.id === item.id) === index);
 
     const hasRecipeRecommendation = deduped.some((item) => item.type === 'recipe');
-    if (!hasRecipeRecommendation && deduped.length < 3) {
+    if (!hasReport && !hasRecipeRecommendation && deduped.length < 3) {
       const exerciseFallbacks = this.toReasonedContents(
         this.pickRankedCandidates(ranked, 3 - deduped.length, {
           diversityKey,
@@ -1854,7 +2403,8 @@ export class RecommendationService {
           type: 'exercise',
         }),
         signals,
-        personalizedFallback
+        personalizedFallback,
+        scene
       );
       deduped.push(...exerciseFallbacks);
     }

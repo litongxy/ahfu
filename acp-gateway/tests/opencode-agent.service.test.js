@@ -63,4 +63,48 @@ describe('medical web fallback heuristics', () => {
     expect(service.hasMedicalKnowledgeHit('三七粉对心脑血管有保护作用吗？')).toBe(false);
     expect(service.shouldPreferWebSearch('三七粉对心脑血管有保护作用吗？', 'tcm')).toBe(true);
   });
+
+  test('recognizes colloquial sleep questions as health queries', () => {
+    const { OpencodeAgentService } = require(servicePath);
+    const service = new OpencodeAgentService();
+
+    expect(service.detectScene('最近总是睡不好怎么办')).toBe('sleep');
+    expect(service.hasMedicalKnowledgeHit('最近总是睡不好怎么办')).toBe(true);
+  });
+
+  test('detects guided video queries as exercise scene', () => {
+    const { OpencodeAgentService } = require(servicePath);
+    const service = new OpencodeAgentService();
+
+    expect(service.detectScene('肩颈很紧，给我一个能直接跟练的视频')).toBe('exercise');
+  });
+
+  test('prioritizes report scene when report intent and recipe keywords appear together', () => {
+    const { OpencodeAgentService } = require(servicePath);
+    const service = new OpencodeAgentService();
+
+    expect(service.detectScene('根据我最近体检报告，给我推荐更对应的食谱和运动视频')).toBe('report');
+  });
+
+  test('does not treat generic breakfast recommendation as pantry cooking intent', () => {
+    const { OpencodeAgentService } = require(servicePath);
+    const service = new OpencodeAgentService();
+
+    expect(service.isCookingRecipeIntent('明早来不及做饭，帮我推荐两个快手早餐食谱')).toBe(false);
+    expect(service.isCookingRecipeIntent('根据我最近体检报告，给我推荐更对应的食谱和运动视频')).toBe(false);
+  });
+
+  test('keeps pantry-style recipe requests as cooking intent', () => {
+    const { OpencodeAgentService } = require(servicePath);
+    const service = new OpencodeAgentService();
+
+    expect(service.isCookingRecipeIntent('冰箱里有鸡蛋和番茄，可以做什么菜？')).toBe(true);
+  });
+
+  test('does not prefer web search for lifestyle recommendation intent', () => {
+    const { OpencodeAgentService } = require(servicePath);
+    const service = new OpencodeAgentService();
+
+    expect(service.isLifestyleRecommendationIntent('明早来不及做饭，帮我推荐两个快手早餐食谱', 'diet')).toBe(true);
+  });
 });

@@ -86,7 +86,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 12px;
+      padding: max(48px, calc(env(safe-area-inset-top) + 24px)) 12px max(16px, calc(env(safe-area-inset-bottom) + 12px));
+      box-sizing: border-box;
+      overflow-y: auto;
       background: rgba(12, 16, 13, 0.76);
       backdrop-filter: blur(10px);
     }
@@ -255,7 +257,7 @@
 
         <div class="hero-copy">
           <h1 class="hero-title">运动课程</h1>
-          <p class="hero-subtitle">全部改为 10-30 秒动作片段，围绕力量训练、柔韧/身心、心肺功能提升、放松减压、康复/功能恢复和体态改善等目标，碎片时间也能快速跟练。</p>
+          <p class="hero-subtitle" id="exerciseHeroSubtitle">全部改为 10-30 秒动作片段，围绕力量训练、柔韧/身心、心肺功能提升、放松减压、康复/功能恢复和体态改善等目标，碎片时间也能快速跟练。</p>
         </div>
 
         <div class="course-grid">
@@ -301,10 +303,6 @@
       <span class="nav-icon">咨</span>
       <span>咨询</span>
     </a>
-    <a href="/pages/health-profile/index.html" class="nav-item">
-      <span class="nav-icon">康</span>
-      <span>健康</span>
-    </a>
     <a href="/pages/recipe/list.html" class="nav-item">
       <span class="nav-icon">食</span>
       <span>食谱</span>
@@ -319,7 +317,62 @@
     </a>
   </nav>
 
+  <script src="/scripts/auth-client.js"></script>
   <script>
+    const API_BASE = '/acp';
+
+    async function fetchWithAuth(url, options) {
+      if (window.AcpAuth && typeof window.AcpAuth.fetchWithAuth === 'function') {
+        return window.AcpAuth.fetchWithAuth(url, options);
+      }
+      return fetch(url, options);
+    }
+
+    function isPhoneLoggedIn() {
+      if (!window.AcpAuth || typeof window.AcpAuth.getLoginType !== 'function') {
+        return false;
+      }
+      return window.AcpAuth.getLoginType() === 'phone';
+    }
+
+    function isUsableParsedReportCandidate(report) {
+      if (!report || report.status !== 'parsed') {
+        return false;
+      }
+
+      const indicators = Array.isArray(report.indicators) ? report.indicators : [];
+      if (indicators.length === 0) {
+        return false;
+      }
+
+      return !indicators.some(function(item) {
+        const name = String(item && item.name ? item.name : '');
+        return ['⚠️', '请上传', '解析失败', '未找到', '维护中', '暂时无法'].some(function(pattern) {
+          return name.includes(pattern);
+        });
+      });
+    }
+
+    function createLatestExerciseContext() {
+      return {
+        active: false,
+        reportId: '',
+        preferredTypes: [],
+        recommendedBvids: [],
+        keywords: [],
+        recommendedVideos: [],
+      };
+    }
+
+    function dedupeStringList(values, limit) {
+      const unique = Array.from(new Set((values || []).map(function(item) {
+        return String(item || '').trim();
+      }).filter(Boolean)));
+      return typeof limit === 'number' ? unique.slice(0, limit) : unique;
+    }
+
+    let latestReportExerciseContext = createLatestExerciseContext();
+
     // 当前页统一展示 30 秒内动作片段，保留长视频数据仅兼容旧链接直达。
     const LONG_VIDEO_COUNT = 0;
     const MICRO_VIDEO_COUNT = 80;
@@ -655,6 +708,226 @@ micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https
         .replace(/'/g, '&#39;');
     }
 
+    function normalizeExerciseText(value) {
+      return String(value || '')
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[（）()·,，。、“”\-_/]/g, '');
+    }
+
+    function pushPreferredType(list, type) {
+      if (type && !list.includes(type)) {
+        list.push(type);
+      }
+    }
+
+    function collectPreferredTypesFromExerciseText(source, preferredTypes) {
+      const text = normalizeExerciseText(source);
+      if (!text) {
+        return;
+      }
+
+      if (/肩颈|颈椎|斜方肌|圆肩|头前伸|肩背/.test(text)) {
+        pushPreferredType(preferredTypes, 'micro-neck');
+        pushPreferredType(preferredTypes, 'goal-rehab');
+        pushPreferredType(preferredTypes, 'goal-posture');
+      }
+      if (/久坐|办公室|工位|伏案|通勤/.test(text)) {
+        pushPreferredType(preferredTypes, 'micro-sedentary');
+        pushPreferredType(preferredTypes, 'goal-rehab');
+        pushPreferredType(preferredTypes, 'goal-flexibility');
+      }
+      if (/腰背|下背|腰椎|脊柱/.test(text)) {
+        pushPreferredType(preferredTypes, 'micro-waist');
+        pushPreferredType(preferredTypes, 'goal-rehab');
+        pushPreferredType(preferredTypes, 'goal-flexibility');
+      }
+      if (/下肢|臀腿|骨盆|髋|核心|激活|燃脂|减脂|有氧/.test(text)) {
+        pushPreferredType(preferredTypes, 'micro-limb');
+        pushPreferredType(preferredTypes, 'goal-strength');
+        pushPreferredType(preferredTypes, 'goal-cardio');
+      }
+      if (/睡前|助眠|呼吸|减压|放松|轻柔|冥想/.test(text)) {
+        pushPreferredType(preferredTypes, 'micro-sleep');
+        pushPreferredType(preferredTypes, 'goal-relax');
+        pushPreferredType(preferredTypes, 'goal-flexibility');
+      }
+      if (/手腕|前臂|腱鞘炎|鼠标手/.test(text)) {
+        pushPreferredType(preferredTypes, 'micro-wrist');
+        pushPreferredType(preferredTypes, 'goal-rehab');
+      }
+      if (/恢复|康复|低强度|新手友好|血压友好/.test(text)) {
+        pushPreferredType(preferredTypes, 'goal-rehab');
+        pushPreferredType(preferredTypes, 'goal-relax');
+      }
+      if (/拉伸|柔韧|瑜伽|舒展/.test(text)) {
+        pushPreferredType(preferredTypes, 'goal-flexibility');
+      }
+      if (/力量|稳定|强化/.test(text)) {
+        pushPreferredType(preferredTypes, 'goal-strength');
+      }
+      if (/心肺|循环/.test(text)) {
+        pushPreferredType(preferredTypes, 'goal-cardio');
+      }
+    }
+
+    function buildLatestExerciseContext(report) {
+      if (!report || !report.id) {
+        return createLatestExerciseContext();
+      }
+
+      const recommendationGroup = report && report.recommendations ? report.recommendations : null;
+      const contentList = recommendationGroup && Array.isArray(recommendationGroup.contents)
+        ? recommendationGroup.contents.filter(function(item) {
+            return item && item.type === 'exercise';
+          })
+        : [];
+      if (contentList.length === 0) {
+        return createLatestExerciseContext();
+      }
+
+      const preferredTypes = [];
+      const recommendedBvids = [];
+      const keywords = [];
+      const recommendedVideos = [];
+
+      contentList.forEach(function(item, index) {
+        const textParts = [];
+        if (item.title) textParts.push(item.title);
+        if (item.description) textParts.push(item.description);
+        if (Array.isArray(item.tags)) textParts.push(item.tags.join(' '));
+        if (Array.isArray(item.evidenceBadges)) textParts.push(item.evidenceBadges.join(' '));
+
+        collectPreferredTypesFromExerciseText(textParts.join(' '), preferredTypes);
+
+        if (Array.isArray(item.tags)) {
+          keywords.push.apply(keywords, item.tags);
+        }
+        if (Array.isArray(item.evidenceBadges)) {
+          keywords.push.apply(keywords, item.evidenceBadges);
+        }
+        if (item.bvid) {
+          recommendedBvids.push(extractBvid(item.bvid));
+        }
+
+        const recommendedVideo = buildReportRecommendedVideoCard(item, report.id, index, preferredTypes);
+        if (recommendedVideo) {
+          recommendedVideos.push(recommendedVideo);
+        }
+      });
+
+      return {
+        active: preferredTypes.length > 0 || recommendedBvids.length > 0,
+        reportId: String(report.id || '').trim(),
+        preferredTypes: dedupeStringList(preferredTypes, 10),
+        recommendedBvids: dedupeStringList(recommendedBvids, 8),
+        keywords: dedupeStringList(keywords, 12),
+        recommendedVideos: recommendedVideos,
+      };
+    }
+
+    function parseExerciseDurationMeta(item) {
+      const durationSeconds = Number(item && item.durationSeconds);
+      if (Number.isFinite(durationSeconds) && durationSeconds > 0) {
+        return {
+          duration: Math.round(durationSeconds),
+          isMicro: durationSeconds <= 120,
+        };
+      }
+
+      const duration = Number(item && item.duration);
+      if (Number.isFinite(duration) && duration > 0) {
+        return {
+          duration: Math.round(duration),
+          isMicro: false,
+        };
+      }
+
+      const timeText = String(item && item.time ? item.time : '').trim();
+      const secondMatch = timeText.match(/(\d+)\s*秒/);
+      if (secondMatch) {
+        return {
+          duration: Math.round(Number(secondMatch[1])),
+          isMicro: true,
+        };
+      }
+
+      const minuteMatch = timeText.match(/(\d+)\s*分钟/);
+      if (minuteMatch) {
+        return {
+          duration: Math.round(Number(minuteMatch[1])),
+          isMicro: false,
+        };
+      }
+
+      return {
+        duration: 10,
+        isMicro: false,
+      };
+    }
+
+    function buildReportRecommendedVideoCard(item, reportId, index, preferredTypes) {
+      if (!item || item.type !== 'exercise') {
+        return null;
+      }
+
+      const durationMeta = parseExerciseDurationMeta(item);
+      const goalTypes = [];
+      collectPreferredTypesFromExerciseText([
+        item.title || '',
+        item.description || '',
+        Array.isArray(item.tags) ? item.tags.join(' ') : '',
+        Array.isArray(item.evidenceBadges) ? item.evidenceBadges.join(' ') : '',
+      ].join(' '), goalTypes);
+
+      if (goalTypes.length === 0 && Array.isArray(preferredTypes)) {
+        preferredTypes.forEach(function(type) {
+          pushPreferredType(goalTypes, type);
+        });
+      }
+
+      const primaryType = goalTypes[0] || 'goal-rehab';
+      const primaryGoalMeta = GOAL_TYPE_META[primaryType] || GOAL_TYPE_META['goal-rehab'];
+      const bvid = extractBvid((item && item.bvid) || (item && item.url) || '');
+      const chipPool = ['报告推荐']
+        .concat(Array.isArray(item.tags) ? item.tags.slice(0, 2) : [])
+        .concat(Array.isArray(item.evidenceBadges) ? item.evidenceBadges.slice(0, 2) : []);
+      const chips = dedupeStringList(chipPool, 2);
+      const title = String(item.title || '').trim();
+
+      return {
+        id: `report_video_${String(reportId || 'latest').trim()}_${index + 1}`,
+        title: title || '运动推荐',
+        description: String(item.description || '').trim() || '结合最近体检报告推荐',
+        duration: durationMeta.duration,
+        calories: Number.isFinite(Number(item.calories)) ? Math.round(Number(item.calories)) : 80,
+        difficulty: item.intensity === 'high' ? 3 : item.intensity === 'medium' ? 2 : 1,
+        bvid: bvid,
+        poster: String(item.posterUrl || item.imageUrl || '').trim(),
+        chips: chips.length > 0 ? chips : ['报告推荐', primaryGoalMeta.chip],
+        mainType: primaryType,
+        types: Array.from(new Set(goalTypes.length > 0 ? goalTypes : ['goal-rehab'])),
+        isMicro: durationMeta.isMicro,
+        sourceTitle: title || '运动推荐',
+        owner: '智能推荐',
+        personalized: true,
+      };
+    }
+
+    function syncExerciseHeroWithLatestReport() {
+      const subtitle = document.getElementById('exerciseHeroSubtitle');
+      if (!subtitle) {
+        return;
+      }
+
+      if (!latestReportExerciseContext.active) {
+        subtitle.textContent = '全部改为 10-30 秒动作片段，围绕力量训练、柔韧/身心、心肺功能提升、放松减压、康复/功能恢复和体态改善等目标，碎片时间也能快速跟练。';
+        return;
+      }
+
+      subtitle.textContent = '已结合你最近一次体检报告调整默认推荐，优先展示更贴近当前状态的动作片段。';
+    }
+
     function buildLevelDots(level) {
       const safeLevel = Math.max(1, Math.min(3, Number(level || 1)));
       const dots = [];
@@ -711,6 +984,7 @@ micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https
           data-bvid="${escapeHtml(item.bvid)}"
           data-duration="${escapeHtml(item.duration)}"
           data-is-micro="${item.isMicro ? '1' : '0'}"
+          data-personalized="${item.personalized ? '1' : '0'}"
           data-title="${title}"
           data-source-title="${sourceTitle}"
           data-poster="${escapeHtml(item.poster)}">
@@ -742,6 +1016,112 @@ micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https
       const feed = document.getElementById('exerciseFeed');
       if (!feed) return;
       feed.innerHTML = cards.map(buildCourseCardHtml).join('');
+    }
+
+    let lastTabLeadCourseKey = '';
+
+    function getCourseCardOrderKey(card) {
+      if (!card || !card.dataset) {
+        return '';
+      }
+
+      return String(card.dataset.id || card.dataset.bvid || card.dataset.title || '').trim();
+    }
+
+    function shuffleCourseCardArray(cards) {
+      const shuffled = cards.slice();
+      for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        const current = shuffled[index];
+        shuffled[index] = shuffled[swapIndex];
+        shuffled[swapIndex] = current;
+      }
+      return shuffled;
+    }
+
+    function reorderVisibleCourseCards(type, options) {
+      const feed = document.getElementById('exerciseFeed');
+      if (!feed) {
+        return;
+      }
+
+      const cards = Array.from(feed.querySelectorAll('.course-card'));
+      if (cards.length <= 1) {
+        if (cards.length === 1) {
+          lastTabLeadCourseKey = getCourseCardOrderKey(cards[0]) || lastTabLeadCourseKey;
+        }
+        return;
+      }
+
+      const visibleCards = [];
+      const hiddenCards = [];
+      cards.forEach(function(card) {
+        if (card.style.display === 'none') {
+          hiddenCards.push(card);
+          return;
+        }
+        visibleCards.push(card);
+      });
+
+      if (visibleCards.length === 0) {
+        return;
+      }
+
+      const opts = options || {};
+      const shouldShuffle = Boolean(opts.randomize) && visibleCards.length > 1;
+      let orderedVisibleCards = visibleCards.slice();
+
+      if (shouldShuffle) {
+        orderedVisibleCards = shuffleCourseCardArray(visibleCards);
+      }
+
+      const fragment = document.createDocumentFragment();
+      orderedVisibleCards.concat(hiddenCards).forEach(function(card) {
+        fragment.appendChild(card);
+      });
+      feed.appendChild(fragment);
+
+      lastTabLeadCourseKey = getCourseCardOrderKey(orderedVisibleCards[0]) || lastTabLeadCourseKey;
+    }
+
+    function isSameCourseEntry(left, right) {
+      if (!left || !right) {
+        return false;
+      }
+
+      const leftId = String(left.id || '').trim();
+      const rightId = String(right.id || '').trim();
+      if (leftId && rightId && leftId === rightId) {
+        return true;
+      }
+
+      const leftBvid = extractBvid(left.bvid || '');
+      const rightBvid = extractBvid(right.bvid || '');
+      if (leftBvid && rightBvid && leftBvid === rightBvid) {
+        return true;
+      }
+
+      const leftTitle = normalizeExerciseText(left.title || left.sourceTitle || '');
+      const rightTitle = normalizeExerciseText(right.title || right.sourceTitle || '');
+      return Boolean(leftTitle && rightTitle && leftTitle === rightTitle);
+    }
+
+    function buildVisibleVideoCatalog(baseVideos) {
+      if (
+        !latestReportExerciseContext.active ||
+        videoRecommendationContext.active ||
+        !Array.isArray(latestReportExerciseContext.recommendedVideos) ||
+        latestReportExerciseContext.recommendedVideos.length === 0
+      ) {
+        return baseVideos.slice();
+      }
+
+      const personalized = latestReportExerciseContext.recommendedVideos.slice();
+      const remainder = baseVideos.filter(function(item) {
+        return !personalized.some(function(candidate) { return isSameCourseEntry(candidate, item); });
+      });
+
+      return personalized.concat(remainder);
     }
 
     function getProxyPosterUrl(rawUrl) {
@@ -804,10 +1184,35 @@ micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https
       return type === 'all' || set.includes(type);
     }
 
-    function applyTypeFilter(type) {
+    function applyTypeFilter(type, options) {
+      const opts = options || {};
+      const useLatestReportContext =
+        type === 'all' &&
+        !videoRecommendationContext.active &&
+        latestReportExerciseContext.active;
+      let visibleCount = 0;
+
       document.querySelectorAll('.course-card').forEach(function(card) {
-        card.style.display = cardHasType(card, type) ? 'block' : 'none';
+        const baseVisible = cardHasType(card, type) && cardMatchesRecommendationContext(card);
+        const latestVisible = !useLatestReportContext || cardMatchesLatestExerciseContext(card);
+        const visible = baseVisible && latestVisible;
+        card.style.display = visible ? 'block' : 'none';
+        if (visible) {
+          visibleCount += 1;
+        }
       });
+
+      if (!useLatestReportContext || visibleCount > 0) {
+        reorderVisibleCourseCards(type, opts);
+        return;
+      }
+
+      document.querySelectorAll('.course-card').forEach(function(card) {
+        const visible = cardHasType(card, type) && cardMatchesRecommendationContext(card);
+        card.style.display = visible ? 'block' : 'none';
+      });
+
+      reorderVisibleCourseCards(type, opts);
     }
 
     function setActiveTab(type) {
@@ -855,6 +1260,133 @@ micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https
       if (!text) return '';
       const matched = text.match(/BV[0-9A-Za-z]{10}/i);
       return matched ? matched[0].toUpperCase() : '';
+    }
+
+    function getVideoRecommendationContext() {
+      const params = new URLSearchParams(window.location.search);
+      const bvid = extractBvid(params.get('bvid') || '');
+      const contentId = String(params.get('contentId') || '').trim();
+      const preferMicro = isTruthyFlag(params.get('isMicro'));
+      const clipSeconds = toPositiveNumber(params.get('clipSeconds'));
+
+      return {
+        active: Boolean(bvid || contentId),
+        bvid,
+        contentId,
+        preferMicro,
+        clipSeconds,
+      };
+    }
+
+    const videoRecommendationContext = getVideoRecommendationContext();
+
+    function cardMatchesRecommendationContext(card) {
+      if (!videoRecommendationContext.active) {
+        return true;
+      }
+      if (!card || !card.dataset) {
+        return false;
+      }
+
+      const cardId = String(card.dataset.id || '').trim();
+      if (videoRecommendationContext.contentId && cardId === videoRecommendationContext.contentId) {
+        return true;
+      }
+
+      const cardBvid = extractBvid(card.dataset.bvid || '');
+      if (videoRecommendationContext.bvid && cardBvid !== videoRecommendationContext.bvid) {
+        return false;
+      }
+      if (!videoRecommendationContext.bvid) {
+        return false;
+      }
+
+      const isMicroCard = card.dataset.isMicro === '1';
+      const duration = toPositiveNumber(card.dataset.duration);
+
+      if (videoRecommendationContext.preferMicro && !isMicroCard) {
+        return false;
+      }
+      if (
+        videoRecommendationContext.preferMicro
+        && videoRecommendationContext.clipSeconds > 0
+        && duration !== videoRecommendationContext.clipSeconds
+      ) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function cardMatchesLatestExerciseContext(card) {
+      if (!latestReportExerciseContext.active) {
+        return true;
+      }
+      if (!card || !card.dataset) {
+        return false;
+      }
+
+      if (card.dataset.personalized === '1') {
+        return true;
+      }
+
+      const cardBvid = extractBvid(card.dataset.bvid || '');
+      if (cardBvid && latestReportExerciseContext.recommendedBvids.includes(cardBvid)) {
+        return true;
+      }
+
+      const cardTypes = String(card.dataset.types || card.dataset.type || '')
+        .split(',')
+        .map(function(item) { return item.trim(); })
+        .filter(Boolean);
+      if (cardTypes.some(function(type) { return latestReportExerciseContext.preferredTypes.includes(type); })) {
+        return true;
+      }
+
+      const cardText = normalizeExerciseText([
+        card.dataset.title || '',
+        card.dataset.sourceTitle || '',
+        card.dataset.types || '',
+      ].join(' '));
+
+      return latestReportExerciseContext.keywords.some(function(keyword) {
+        const normalizedKeyword = normalizeExerciseText(keyword);
+        return normalizedKeyword && cardText.includes(normalizedKeyword);
+      });
+    }
+
+    async function hydrateLatestExerciseRecommendations() {
+      if (!isPhoneLoggedIn() || videoRecommendationContext.active) {
+        latestReportExerciseContext = createLatestExerciseContext();
+        syncExerciseHeroWithLatestReport();
+        return;
+      }
+
+      try {
+        const historyRes = await fetchWithAuth(`${API_BASE}/report/history?page=1&pageSize=5`);
+        const historyData = await historyRes.json();
+        const list = historyData && historyData.code === 0 && historyData.data && Array.isArray(historyData.data.list)
+          ? historyData.data.list
+          : [];
+        const latestParsedReport = list.find(isUsableParsedReportCandidate);
+
+        if (!latestParsedReport || !latestParsedReport.id) {
+          latestReportExerciseContext = createLatestExerciseContext();
+          syncExerciseHeroWithLatestReport();
+          return;
+        }
+
+        const detailRes = await fetchWithAuth(`${API_BASE}/report/${encodeURIComponent(latestParsedReport.id)}`);
+        const detailData = await detailRes.json();
+        latestReportExerciseContext = detailData && detailData.code === 0
+          ? buildLatestExerciseContext(detailData.data)
+          : createLatestExerciseContext();
+      } catch (error) {
+        console.error('加载最近体检报告运动推荐失败', error);
+        latestReportExerciseContext = createLatestExerciseContext();
+      }
+
+      syncExerciseHeroWithLatestReport();
     }
 
     function isMiniProgramRuntime() {
@@ -1059,22 +1591,36 @@ micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https
 
     const longVideos = buildLongVideos(LONG_VIDEO_COUNT);
     const microVideos = buildMicroVideos(MICRO_VIDEO_COUNT);
-    const allVideos = longVideos.concat(microVideos);
+    const baseVideos = longVideos.concat(microVideos);
+    let allVideos = buildVisibleVideoCatalog(baseVideos);
 
-    renderCourseCards(allVideos);
-    initCardPosters();
+    function rerenderCourseCards() {
+      allVideos = buildVisibleVideoCatalog(baseVideos);
+      renderCourseCards(allVideos);
+      initCardPosters();
+    }
+
+    rerenderCourseCards();
     bindCourseCardClicks();
 
     document.querySelectorAll('.tab').forEach(function(tab) {
       tab.addEventListener('click', function() {
         const nextType = this.dataset.type || 'all';
         setActiveTab(nextType);
-        applyTypeFilter(nextType);
+        applyTypeFilter(nextType, { randomize: true });
       });
     });
 
+    syncExerciseHeroWithLatestReport();
     setActiveTab('all');
-    applyTypeFilter('all');
+    applyTypeFilter('all', { randomize: false });
+    hydrateLatestExerciseRecommendations().then(function() {
+      if (!videoRecommendationContext.active) {
+        rerenderCourseCards();
+        setActiveTab('all');
+        applyTypeFilter('all', { randomize: false });
+      }
+    });
 
     (function consumeQueryBvid() {
       const params = new URLSearchParams(window.location.search);
@@ -1132,7 +1678,7 @@ micro-wrist|26|BV1ZwMizKE2i|三个动作预防腱鞘炎|卢骁急诊日记|https
           ? matchedTypes.find(function(type) { return type.indexOf('micro-') === 0; }) || matchedTypes.find(function(type) { return type !== 'micro'; }) || 'all'
           : matchedTypes[0] || 'all';
         setActiveTab(preferredTab);
-        applyTypeFilter(preferredTab);
+        applyTypeFilter(preferredTab, { randomize: false });
       }
 
       if (matched && typeof matched.scrollIntoView === 'function') {

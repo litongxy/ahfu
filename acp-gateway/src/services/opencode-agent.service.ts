@@ -7,6 +7,9 @@ import {
 import { RecommendationService } from './recommendation.service';
 import { pageRouteService } from './page-route.service';
 import { questionsKnowledge } from './questions-knowledge.service';
+import { formatReportSummaryForPrompt } from './report-context.service';
+import type { HealthReport } from './report.model';
+import { reportService } from './report.service';
 import { userProfiles } from './user-profile.store';
 import { webSearchService, WebSearchResult } from './web-search.service';
 
@@ -273,11 +276,15 @@ export class OpencodeAgentService {
     let scene = this.detectScene(message);
     
     let profile: HealthProfile | null = null;
+    let latestReport: HealthReport | null = null;
     if (context.userId) {
       profile = fetchHealthProfile(context.userId);
+      latestReport = await reportService.getLatestParsedReport(context.userId);
     }
     
-    const profileContext = formatHealthProfileForPrompt(profile);
+    const userContext = [formatHealthProfileForPrompt(profile), formatReportSummaryForPrompt(latestReport)]
+      .filter(Boolean)
+      .join('\n');
     const personalizedSuggestions = generatePersonalizedSuggestions(message, profile);
     const contraindications = checkMedicationContraindications(message, profile);
     const healthReminders = generateHealthReminders(profile ?? {} as HealthProfile);
@@ -298,16 +305,16 @@ export class OpencodeAgentService {
 
       // 超纲问题：优先联网查询；太超纲/无法联网时直接提示无法回答
       if (this.isOutOfScope(message, scene)) {
-        response = (await this.tryAnswerWithWebSearch(message, profileContext)) || this.getOutOfScopeResponse();
+        response = (await this.tryAnswerWithWebSearch(message, userContext)) || this.getOutOfScopeResponse();
       } else {
         if (!hasMedicalKnowledgeHit && this.shouldPreferWebSearch(message, scene)) {
           response =
-            (await this.tryAnswerWithWebSearch(message, profileContext)) ||
+            (await this.tryAnswerWithWebSearch(message, userContext)) ||
             this.getMissingKnowledgeResponse(true);
         } else {
           if (this.useAI) {
             try {
-              response = await this.callAI(message, profileContext);
+              response = await this.callAI(message, userContext);
             } catch (e) {
               console.error('AI error:', e);
               response = questionsKnowledge.getDirectAnswer(message) || this.getFallbackResponse(message, scene);
@@ -320,7 +327,7 @@ export class OpencodeAgentService {
           }
 
           if (this.shouldTriggerWebSearch(message, response, scene)) {
-            const webResponse = await this.tryAnswerWithWebSearch(message, profileContext);
+            const webResponse = await this.tryAnswerWithWebSearch(message, userContext);
             if (webResponse) {
               response = webResponse;
             } else if (!hasMedicalKnowledgeHit && this.looksLikeHealthQuestion(message.toLowerCase())) {
@@ -343,6 +350,7 @@ export class OpencodeAgentService {
       userId: context.userId,
       message,
       profile,
+      report: latestReport,
     });
     const pageRoutes = pageRouteService.getRecommendedRoutes(message);
     const pages = pageRoutes.map(r => ({ name: r.name, url: r.url, icon: r.icon }));
@@ -351,6 +359,10 @@ export class OpencodeAgentService {
     const finalPages = this.shouldRecommendProfileAndReport(message, response, scene)
       ? this.getProfileAndReportPages()
       : filteredPages;
+
+    if (this.shouldUseRecommendationFallbackResponse(message, scene, response, recs.contents)) {
+      response = this.getRecommendationFallbackResponse(scene);
+    }
 
     return {
       response,
@@ -403,11 +415,16 @@ export class OpencodeAgentService {
 
   private detectScene(message: string): string {
     const m = message.toLowerCase();
+    if (m.includes('体检') || m.includes('报告') || m.includes('指标')) return 'report';
     if (
       m.includes('吃') ||
       m.includes('饮食') ||
       m.includes('食谱') ||
       m.includes('菜谱') ||
+      m.includes('早餐') ||
+      m.includes('早饭') ||
+      m.includes('晚餐') ||
+      m.includes('晚饭') ||
       m.includes('食材') ||
       m.includes('做菜') ||
       m.includes('什么菜') ||
@@ -419,12 +436,33 @@ export class OpencodeAgentService {
     ) {
       return 'diet';
     }
-    if (m.includes('运动') || m.includes('健身') || m.includes('跑步') || m.includes('锻炼') || m.includes('减肥')) return 'exercise';
+    if (
+      m.includes('运动') ||
+      m.includes('健身') ||
+      m.includes('跑步') ||
+      m.includes('锻炼') ||
+      m.includes('减肥') ||
+      m.includes('视频') ||
+      m.includes('跟练') ||
+      m.includes('课程') ||
+      m.includes('拉伸') ||
+      m.includes('动作片段')
+    ) return 'exercise';
     if (m.includes('心理') || m.includes('压力') || m.includes('情绪') || m.includes('焦虑')) return 'psychology';
-    if (m.includes('睡眠') || m.includes('失眠') || m.includes('睡觉') || m.includes('入睡')) return 'sleep';
+    if (
+      m.includes('睡眠') ||
+      m.includes('失眠') ||
+      m.includes('睡觉') ||
+      m.includes('入睡') ||
+      m.includes('睡不好') ||
+      m.includes('睡不踏实') ||
+      m.includes('早醒') ||
+      m.includes('老醒') ||
+      m.includes('犯困') ||
+      m.includes('多梦')
+    ) return 'sleep';
     if (m.includes('抗衰') || m.includes('美容') || m.includes('保养')) return 'antiaging';
     if (m.includes('同仁堂') || m.includes('品牌') || m.includes('历史')) return 'brand';
-    if (m.includes('体检') || m.includes('报告') || m.includes('指标')) return 'report';
     if (
       m.includes('中医') ||
       m.includes('养生') ||
@@ -466,9 +504,15 @@ export class OpencodeAgentService {
       m.includes('脑卒中') ||
       m.includes('中风') ||
       m.includes('心悸') ||
+      m.includes('心慌') ||
+      m.includes('发慌') ||
       m.includes('胸闷') ||
+      m.includes('胸口发闷') ||
       m.includes('血脂') ||
-      m.includes('甘油三酯')
+      m.includes('甘油三酯') ||
+      m.includes('口腔溃疡') ||
+      m.includes('嘴里破') ||
+      m.includes('嘴里烂')
     )
       return 'disease';
     return 'chat';
@@ -504,6 +548,7 @@ export class OpencodeAgentService {
     const lower = trimmed.toLowerCase();
     if (this.isSmallTalk(lower)) return false;
     if (this.isCookingRecipeIntent(lower)) return false;
+    if (this.isLifestyleRecommendationIntent(lower, scene)) return false;
     if (!this.looksLikeHealthQuestion(lower)) return false;
     if (scene === 'brand') return false;
 
@@ -586,7 +631,13 @@ export class OpencodeAgentService {
       '瘙痒',
       '失眠',
       '睡不着',
+      '睡不好',
+      '睡不踏实',
       '睡眠',
+      '早醒',
+      '老醒',
+      '犯困',
+      '多梦',
       '焦虑',
       '抑郁',
       '压力',
@@ -605,7 +656,9 @@ export class OpencodeAgentService {
       '脑卒中',
       '中风',
       '胸闷',
+      '胸口发闷',
       '心悸',
+      '心慌',
       '动脉硬化',
       '高血脂',
       '甘油三酯',
@@ -771,7 +824,7 @@ export class OpencodeAgentService {
     const m = String(message || '').toLowerCase();
     if (!m.trim()) return false;
 
-    const keywords = [
+    const cookingKeywords = [
       '做什么菜',
       '做啥菜',
       '做哪些菜',
@@ -783,12 +836,74 @@ export class OpencodeAgentService {
       '怎么吃',
       '菜谱',
       '食谱',
-      '家常菜',
-      '下饭',
+    ];
+    const pantryContextKeywords = [
       '冰箱',
       '我有',
+      '家里有',
+      '手头有',
+      '现有食材',
+      '目前有',
+      '剩了',
+      '剩下',
+      '还有这些食材',
     ];
-    return keywords.some((keyword) => m.includes(keyword));
+
+    const hasCookingKeyword = cookingKeywords.some((keyword) => m.includes(keyword));
+    if (!hasCookingKeyword) return false;
+
+    return pantryContextKeywords.some((keyword) => m.includes(keyword));
+  }
+
+  private isLifestyleRecommendationIntent(message: string, scene: string): boolean {
+    const m = String(message || '').toLowerCase();
+    if (!m.trim()) return false;
+
+    const recommendationKeywords = [
+      '推荐',
+      '食谱',
+      '菜谱',
+      '早餐',
+      '早饭',
+      '晚餐',
+      '晚饭',
+      '视频',
+      '跟练',
+      '课程',
+      '运动',
+      '锻炼',
+    ];
+    if (!recommendationKeywords.some((keyword) => m.includes(keyword))) {
+      return false;
+    }
+
+    return ['diet', 'exercise', 'report', 'sleep', 'psychology', 'antiaging'].includes(scene);
+  }
+
+  private shouldUseRecommendationFallbackResponse(
+    message: string,
+    scene: string,
+    response: string,
+    contents: unknown[]
+  ): boolean {
+    if (!Array.isArray(contents) || contents.length === 0) return false;
+    if (!this.isLifestyleRecommendationIntent(message, scene)) return false;
+
+    const text = String(response || '').trim();
+    if (!text) return true;
+    return text.includes('这个问题在当前医疗知识库里没有直接命中');
+  }
+
+  private getRecommendationFallbackResponse(scene: string): string {
+    const responses: Record<string, string> = {
+      diet: '我先按你的目标筛了几条更贴近的饮食推荐，优先看卡片里的时长、热量和标签；如果你补充口味、食材或体检指标，我可以继续细化到更具体的搭配。',
+      exercise: '我先按你的需求筛了几条更贴近的跟练内容，优先看强度、时长和标签；如果你告诉我疼痛部位、可用时间或运动基础，我可以继续缩小范围。',
+      report: '我先结合你最近一次体检报告和当前问题，筛了几条更相关的食谱与运动建议；如果你告诉我最关心的异常项，我可以继续按指标逐条解释。',
+      sleep: '我先按你的睡眠目标筛了几条更贴近的建议，你可以先看卡片里的标签和标题；如果你补充入睡困难、早醒还是多梦，我可以继续细化。',
+      psychology: '我先按你的当前困扰筛了几条更贴近的建议，你可以先看卡片里的标签和标题；如果你补充持续时长和影响程度，我可以继续细化。',
+      antiaging: '我先按你的当前目标筛了几条更贴近的建议，你可以先看卡片里的标签和标题；如果你补充年龄段和重点诉求，我可以继续细化。',
+    };
+    return responses[scene] || '我先按你的当前需求筛了几条更贴近的建议，你可以先看卡片里的标签和标题；如果你补充更多背景，我可以继续细化。';
   }
 
   private getCookingIntentFallback(message: string): string {

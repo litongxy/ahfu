@@ -47,11 +47,12 @@ export const SPECIAL_FINDING_LIBRARY: SpecialFindingRule[] = [
 
   rule('THYROID_NODULE', '甲状腺结节', [/甲状腺.*结节/i], '建议结合甲状腺超声分级与专科意见定期复查', 'abnormal'),
   rule('THYROID_CYST', '甲状腺囊肿', [/甲状腺.*囊肿/i], '建议结合甲状腺超声表现和甲功结果随访', 'slight'),
-  rule('THYROID_ECHO_UNEVEN', '甲状腺回声欠均匀', [/甲状腺(?:腺体)?回声(?:欠均匀|不均匀|不均|欠均)/i], '建议结合甲功和甲状腺抗体评估是否存在弥漫性病变', 'slight'),
+  rule('THYROID_ECHO_UNEVEN', '甲状腺回声欠均匀', [/甲状腺.*回声(?:欠均匀|不均匀|不均|欠均)/i], '建议结合甲功和甲状腺抗体评估是否存在弥漫性病变', 'slight'),
   rule('THYROID_DIFFUSE', '甲状腺弥漫性病变', [/甲状腺弥漫性病变/i], '建议结合甲功、抗体及超声表现进一步评估', 'abnormal'),
   rule('THYROID_ENLARGED', '甲状腺肿大', [/甲状腺肿大/i, /甲状腺增大/i], '建议结合甲功与压迫症状评估甲状腺状态', 'slight'),
   rule('THYROID_CALCIFICATION', '甲状腺钙化灶', [/甲状腺.*钙化/i], '建议结合超声分级和专科意见随访', 'abnormal'),
   rule('HASHIMOTO_LIKE', '桥本样改变', [/桥本(?:甲状腺炎)?/i, /桥本样改变/i], '建议结合甲状腺抗体及甲功进一步判断', 'abnormal'),
+  rule('FATTY_LIVER', '脂肪肝', [/脂肪肝(?:\((?:轻度|中度|重度)\))?/i], '建议结合体重、血脂和肝功能进行综合管理并定期复查', 'abnormal', [/脂肪肝与/i]),
 
   rule('BREAST_NODULE', '乳腺结节', [/乳腺.*结节/i], '建议结合乳腺超声分级和乳腺专科意见定期复查', 'abnormal'),
   rule('BREAST_CYST', '乳腺囊肿', [/乳腺.*囊肿/i], '建议结合乳腺超声表现定期随访', 'slight'),
@@ -79,6 +80,7 @@ export const SPECIAL_FINDING_LIBRARY: SpecialFindingRule[] = [
   rule('ADNEXAL_MASS', '附件包块', [/附件包块/i], '建议尽快结合妇科超声和专科意见进一步评估', 'serious'),
   rule('VAGINITIS', '阴道炎', [/阴道炎/i], '建议结合白带检查和妇科专科意见规范处理', 'slight'),
   rule('CERVICITIS', '宫颈炎', [/宫颈炎/i], '建议结合妇科检查和病原学结果综合评估', 'slight'),
+  rule('VULVAR_LEUKOPLAKIA', '外阴白斑', [/外阴白斑/i], '建议尽快结合妇科专科意见进一步评估和规范处理', 'abnormal'),
 
   rule('LUNG_NODULE', '肺结节', [/肺.*结节/i], '建议结合胸部 CT 大小、密度和随访建议定期复查', 'abnormal'),
   rule('LUNG_MICRONODULE', '肺小结节', [/肺.*小结节/i, /微小结节/i], '建议结合胸部 CT 随访建议定期复查', 'slight'),
@@ -124,9 +126,9 @@ export const SPECIAL_FINDING_LIBRARY: SpecialFindingRule[] = [
   rule('PROSTATE_ENLARGED', '前列腺增大', [/前列腺增大/i], '建议结合 PSA、排尿症状和泌尿外科意见评估', 'abnormal'),
   rule('VARICOCELE', '精索静脉曲张', [/精索静脉曲张/i], '建议结合泌尿男科意见和症状程度进一步评估', 'abnormal'),
 
-  rule('CAROTID_PLAQUE', '颈动脉斑块', [/颈动脉.*斑块/i], '建议结合血脂、血压和心血管风险进行管理', 'abnormal'),
+  rule('CAROTID_PLAQUE', '颈动脉斑块', [/颈动脉.*斑块/i], '建议结合血脂、血压和心血管风险进行管理', 'abnormal', [/预测因子/i]),
   rule('CAROTID_IMT', '颈动脉内膜增厚', [/颈动脉.*(?:内中膜增厚|内膜增厚|IMT增厚)/i], '建议结合血脂血压和生活方式进行干预', 'slight'),
-  rule('ATHEROSCLEROSIS', '动脉粥样硬化', [/动脉粥样硬化/i], '建议结合血脂、血压和心血管专科意见综合管理', 'abnormal'),
+  rule('ATHEROSCLEROSIS', '动脉粥样硬化', [/动脉粥样硬化/i], '建议结合血脂、血压和心血管专科意见综合管理', 'abnormal', [/危险因素/i, /预测因子/i, /见于[:：]?/i, /动脉硬化趋势/i]),
   rule('SINUS_BRADYCARDIA', '窦性心动过缓', [/窦性心动过缓/i], '建议结合症状和运动基础评估是否需要进一步检查', 'slight'),
   rule('SINUS_TACHYCARDIA', '窦性心动过速', [/窦性心动过速/i], '建议结合休息状态、甲功和心血管情况综合评估', 'slight'),
   rule('SINUS_ARRHYTHMIA', '窦性心律不齐', [/窦性心律不齐/i], '建议结合年龄、症状和医生意见判断是否需要随访', 'slight'),
@@ -140,6 +142,9 @@ export const SPECIAL_FINDING_LIBRARY: SpecialFindingRule[] = [
   rule('LVH_VOLTAGE', '左室高电压', [/左室高电压/i, /左心室高电压/i], '建议结合血压和超声心动图进一步评估', 'abnormal'),
   rule('MITRAL_REGURGITATION', '二尖瓣反流', [/二尖瓣反流/i], '建议结合超声心动图和心脏专科意见评估', 'slight'),
   rule('TRICUSPID_REGURGITATION', '三尖瓣反流', [/三尖瓣反流/i], '建议结合超声心动图和心脏专科意见评估', 'slight'),
+  rule('AORTIC_REGURGITATION', '主动脉瓣反流', [/主动脉瓣反流/i], '建议结合超声心动图和心内科意见定期复查', 'slight'),
+  rule('LV_DIASTOLIC_DYSFUNCTION', '左心室舒张功能减低', [/左心室舒张功能减低/i, /左室舒张功能减低/i, /舒张功能减低/i], '建议结合血压、心脏彩超和心内科意见综合评估', 'abnormal'),
+  rule('VASCULAR_ELASTICITY_REDUCED', '血管弹性减弱', [/血管弹性(?:轻度|中度|重度)?减弱/i], '建议结合血压、血脂和动脉硬化风险进行系统管理', 'abnormal'),
 
   rule('CHRONIC_GASTRITIS', '慢性胃炎', [/慢性(?:浅表性|非萎缩性|萎缩性)?胃炎/i], '建议规律饮食并结合消化科意见评估是否需要复查胃镜', 'abnormal'),
   rule('SUPERFICIAL_GASTRITIS', '慢性浅表性胃炎', [/慢性浅表性胃炎/i], '建议规律饮食并结合消化科意见随访', 'slight'),
@@ -152,11 +157,11 @@ export const SPECIAL_FINDING_LIBRARY: SpecialFindingRule[] = [
   rule('COLON_POLYP', '结肠息肉', [/结肠息肉/i, /肠息肉/i], '建议结合肠镜病理和消化科意见定期复查', 'abnormal'),
   rule('HEMORRHOIDS', '痔', [/痔疮/i, /内痔/i, /外痔/i, /混合痔/i], '建议结合症状、排便习惯和肛肠科意见评估', 'slight'),
 
-  rule('REFRACTIVE_ERROR', '屈光不正', [/屈光不正/i], '建议结合验光结果和眼科意见评估视力矫正方案', 'slight'),
+  rule('REFRACTIVE_ERROR', '屈光不正', [/屈光不正/i], '建议结合验光结果和眼科意见评估视力矫正方案', 'slight', [/如既往[有无]屈光不正/i, /既往[有无]屈光不正/i]),
   rule('MYOPIA', '近视', [/近视/i], '建议结合视力和验光结果规范配镜或随访', 'slight'),
   rule('HYPEROPIA', '远视', [/远视/i], '建议结合视力和验光结果规范随访', 'slight'),
   rule('ASTIGMATISM', '散光', [/散光/i], '建议结合验光结果和视疲劳情况评估矫正方案', 'slight'),
-  rule('VISION_DECLINE', '视力下降', [/视力下降/i, /裸眼视力下降/i], '建议结合眼科检查明确原因并及时干预', 'slight'),
+  rule('VISION_DECLINE', '视力下降', [/视力下降/i, /裸眼视力下降/i, /视力欠佳/i], '建议结合眼科检查明确原因并及时干预', 'slight'),
   rule('DRY_EYE', '干眼', [/干眼/i, /干眼症/i], '建议结合用眼习惯调整和眼科意见处理', 'slight'),
   rule('CATARACT', '白内障', [/白内障/i], '建议结合眼科专科意见评估成熟度和处理方案', 'abnormal'),
   rule('FUNDUS_ARTERIOSCLEROSIS', '眼底动脉硬化', [/眼底动脉硬化/i], '建议结合血压、血脂和眼底复查综合管理', 'abnormal'),
@@ -170,7 +175,7 @@ export const SPECIAL_FINDING_LIBRARY: SpecialFindingRule[] = [
   rule('THYROID_CARTILAGE_NODULE', '声带小结', [/声带小结/i], '建议减少过度用嗓并结合耳鼻喉科意见随访', 'slight'),
 
   rule('DENTAL_CALCULUS', '牙结石', [/牙结石/i], '建议加强口腔清洁并定期洁牙', 'slight'),
-  rule('DENTAL_CARIES', '龋齿', [/龋齿/i], '建议尽快口腔科就诊处理，避免进一步损伤', 'slight'),
+  rule('DENTAL_CARIES', '龋齿', [/龋齿/i], '建议尽快口腔科就诊处理，避免进一步损伤', 'slight', [/龋齿无/i]),
   rule('PERIODONTITIS', '牙周炎', [/牙周炎/i], '建议加强口腔卫生并结合口腔科意见规范治疗', 'abnormal'),
   rule('GINGIVITIS', '牙龈炎', [/牙龈炎/i], '建议改善口腔清洁习惯并定期口腔复查', 'slight'),
 
@@ -184,6 +189,9 @@ export const SPECIAL_FINDING_LIBRARY: SpecialFindingRule[] = [
   rule('BONE_SPUR', '骨赘形成', [/骨赘/i], '建议结合疼痛和活动受限情况综合评估', 'slight'),
   rule('SCOLIOSIS', '脊柱侧弯', [/脊柱侧弯/i], '建议结合影像程度和骨科意见进一步评估', 'abnormal'),
   rule('KNEE_DEGENERATION', '膝关节退行性变', [/膝关节退行性变/i], '建议结合体重管理和康复骨科意见综合处理', 'abnormal'),
+  rule('LACUNAR_INFARCTION', '腔隙性脑梗塞', [/腔隙性脑梗塞/i, /腔隙性脑梗死/i], '建议结合神经内科意见和脑血管危险因素管理进一步评估', 'abnormal'),
+  rule('CEREBRAL_ISCHEMIC_LESION', '脑内缺血灶', [/脑内缺血灶/i, /缺血灶/i], '建议结合脑血管危险因素和神经内科意见综合评估', 'abnormal'),
+  rule('BRAIN_ATROPHY', '脑萎缩', [/脑萎缩/i], '建议结合年龄、认知情况和神经内科意见综合判断', 'slight'),
 ];
 
 export const SPECIAL_FINDING_HEALTH_KEYWORDS: string[] = [
@@ -212,4 +220,12 @@ export const SPECIAL_FINDING_HEALTH_KEYWORDS: string[] = [
   '牙周炎',
   '骨质疏松',
   '退行性变',
+  '脂肪肝',
+  '外阴白斑',
+  '主动脉瓣反流',
+  '舒张功能减低',
+  '血管弹性减弱',
+  '脑梗塞',
+  '脑萎缩',
+  '视力欠佳',
 ];

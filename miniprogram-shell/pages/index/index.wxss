@@ -1,3 +1,33 @@
 page {
   height: 100%;
+  background: linear-gradient(180deg, #f4f8ff 0%, #eef6f2 100%);
+}
+
+.page {
+  min-height: 100%;
+}
+
+.status-card {
+  margin: 48rpx 32rpx;
+  padding: 40rpx 36rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 20rpx 60rpx rgba(33, 82, 67, 0.08);
+}
+
+.status-card--error {
+  border: 2rpx solid rgba(201, 74, 74, 0.18);
+}
+
+.status-title {
+  color: #143d31;
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.status-desc {
+  margin-top: 16rpx;
+  color: #4f6b62;
+  font-size: 28rpx;
+  line-height: 1.7;
 }

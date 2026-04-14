@@ -1,1 +1,13 @@
-<web-view src="{{url}}" />
+<view class="page">
+  <view wx:if="{{loading}}" class="status-card">
+    <view class="status-title">正在登录</view>
+    <view class="status-desc">小程序正在换取登录态，完成后会自动进入 H5。</view>
+  </view>
+
+  <view wx:elif="{{error}}" class="status-card status-card--error">
+    <view class="status-title">登录失败</view>
+    <view class="status-desc">{{error}}</view>
+  </view>
+
+  <web-view wx:else src="{{url}}" />
+</view>

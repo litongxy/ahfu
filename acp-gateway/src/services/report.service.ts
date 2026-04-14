@@ -16,6 +16,7 @@ import {
   SPECIAL_FINDING_LIBRARY,
   SpecialFindingRule,
 } from './report-special-findings-library';
+import { isUsableParsedReport } from './report-context.service';
 
 const reports: Map<string, HealthReport> = new Map();
 const UPLOAD_DIR = path.resolve(__dirname, '../../uploads/reports');
@@ -619,9 +620,9 @@ export class ReportService {
     const repairedText = this.repairMojibakeText(normalizedText);
 
     return repairedText
-      .replace(/[＜﹤]/g, '<')
-      .replace(/[＞﹥]/g, '>')
-      .replace(/(\d)\s*(?:--|—|–|－|﹣|−|~|～|至)\s*(\d)/g, '$1-$2');
+      .split('\n')
+      .map(line => this.normalizeReportLine(line))
+      .join('\n');
   }
 
   private normalizeCompatibilityText(text: string): string {
@@ -784,7 +785,14 @@ export class ReportService {
       .replace(/[：]/g, ':')
       .replace(/[＜﹤]/g, '<')
       .replace(/[＞﹥]/g, '>')
+      .replace(/\s*\/\s*/g, '/')
+      .replace(/\s*\^\s*/g, '^')
       .replace(/(\d)\s*(?:--|—|–|－|﹣|−|~|～|至)\s*(\d)/g, '$1-$2')
+      .replace(/([\u4e00-\u9fff])\s+(?=[\u4e00-\u9fff])/g, '$1')
+      .replace(/([A-Za-z])\s+(?=[A-Za-z])/g, '$1')
+      .replace(/(\d)\s+(?=%)/g, '$1')
+      .replace(/\(\s+/g, '(')
+      .replace(/\s+\)/g, ')')
       .replace(/\s+/g, ' ')
       .trim();
   }
@@ -1118,8 +1126,48 @@ export class ReportService {
           score += 2;
         }
 
+        if (context.length <= 24) {
+          score += 3;
+        }
+
+        if (value === match[0] || value.startsWith(match[0]) || this.normalizeReportLine(context).startsWith(match[0])) {
+          score += 4;
+        }
+
+        if (/^(?:小结|结论|提示|印象|诊断|异常(?:结果|项目)?|检查所见|超声(?:提示|所见)|.*检查结果)/.test(context)) {
+          score += 5;
+        }
+
+        if (/[:：]/.test(context)) {
+          score += 2;
+        }
+
+        if (/(阳性|增高|降低|减低|减弱|欠佳|反流|结节|囊肿|息肉|外痔|白斑|脑梗塞|脑梗死|缺血灶|脑萎缩)/.test(context)) {
+          score += 2;
+        }
+
+        if (/(外痔|内痔|混合痔|视力欠佳|脂肪肝\(?(?:轻度|中度|重度)?\)?|HP\s*阳性|甲状腺右叶结节|左心室舒张功能减低|主动脉瓣反流|血管弹性(?:轻度|中度|重度)?减弱)/.test(context)) {
+          score += 4;
+        }
+
         if (/^[【\[]?\d+[】\]]?[、.)）:]?/.test(context)) {
           score += 1;
+        }
+
+        if (/^\d+\s*[、.．]/.test(context) || /^[①②③④⑤⑥⑦⑧⑨⑩]/.test(context)) {
+          score -= 6;
+        }
+
+        if (/(【医学解释】|【常见原因及后果】|【建议】)/.test(context)) {
+          score -= 12;
+        }
+
+        if (/(病因|危险因素|独立预测因子|可导致|可见于|可因|常见的有|世界卫生组织|活动性感染|观察变化|定期复查|正规医院|治愈率|发病率|主要靠|准确性高)/.test(context)) {
+          score -= 8;
+        }
+
+        if (context.length > 64) {
+          score -= 4;
         }
 
         candidates.push({
@@ -1137,6 +1185,9 @@ export class ReportService {
 
     candidates.sort((a, b) => b.score - a.score || a.value.length - b.value.length);
     const best = candidates[0];
+    if (best.score < 5) {
+      return null;
+    }
 
     return {
       name: rule.displayName,
@@ -1179,19 +1230,21 @@ export class ReportService {
       return false;
     }
 
+    const hasFindingCue = /(小结|结论|提示|印象|诊断|异常|阳性|增高|降低|减低|减弱|反流|脂肪肝|白斑|外痔|痔疮|视力欠佳|缺血灶|脑梗塞|脑梗死|脑萎缩|结节|囊肿|息肉|增生|肌瘤|回声|钙化|咽炎|HPV|TCT|HP)/.test(normalized);
+
     if (/(医学名词科普|名词科普|名词解释|科普知识内容)/.test(normalized)) {
       return false;
     }
 
-    if (normalized.length > 120 && !/(结论|提示|印象|诊断|所见|异常)/.test(normalized)) {
+    if (normalized.length > 120 && !hasFindingCue && !/(结论|提示|印象|诊断|所见|异常)/.test(normalized)) {
       return false;
     }
 
-    if (/[。！？]/.test(normalized) && normalized.length > 48) {
+    if (/[。！？]/.test(normalized) && normalized.length > 48 && !hasFindingCue) {
       return false;
     }
 
-    if (/[，,;；]/.test(normalized) && normalized.length > 32) {
+    if (/[，,;；]/.test(normalized) && normalized.length > 32 && !hasFindingCue) {
       return false;
     }
 
@@ -1199,7 +1252,7 @@ export class ReportService {
       return false;
     }
 
-    return /(结节|囊肿|息肉|增生|肌瘤|异常|改变|炎|肥胖|超重|屈光不正|近视|远视|散光|结石|斑块|积液|回声|钙化|胃炎|食管炎|幽门螺杆菌|心动过缓|心动过速|早搏|阻滞|高电压|退行性变|咽炎|牙周炎|龋齿|白内障|骨量减少|骨质疏松|体重指数|BMI|腰围|TCT|HPV)/.test(normalized)
+    return /(结节|囊肿|息肉|增生|肌瘤|异常|改变|炎|肥胖|超重|屈光不正|近视|远视|散光|结石|斑块|积液|回声|钙化|胃炎|食管炎|幽门螺杆菌|心动过缓|心动过速|早搏|阻滞|高电压|退行性变|咽炎|牙周炎|龋齿|白内障|骨量减少|骨质疏松|体重指数|BMI|腰围|TCT|HPV|脂肪肝|白斑|痔|反流|舒张功能减低|弹性减弱|视力欠佳|脑梗塞|脑梗死|缺血灶|脑萎缩)/.test(normalized)
       || /^[【\[]\d+[】\]]/.test(normalized)
       || /^[（(]\d+[)）]/.test(normalized);
   }
@@ -1221,7 +1274,7 @@ export class ReportService {
       .trim();
 
     const fallback = fallbackValue.trim();
-    const conditionHits = (cleaned.match(/结节|囊肿|息肉|结石|增生|肌瘤|斑块|积液|钙化|炎|改变/g) || []).length;
+    const conditionHits = (cleaned.match(/结节|囊肿|息肉|结石|增生|肌瘤|斑块|积液|钙化|炎|改变|外痔|白斑|脂肪肝|反流|减低|减弱|欠佳|脑梗塞|脑梗死|缺血灶|脑萎缩|回声/g) || []).length;
     const isDefinitionLike = /(是指|简称|又称|又译为|主要症状|主要表现|常见于|多见于|引自|参考区间|正常值范围|指导原则|WS\/T|T-Score|等疾病)/.test(cleaned);
 
     if (!cleaned) {
@@ -1229,6 +1282,10 @@ export class ReportService {
     }
 
     if (isDefinitionLike) {
+      return fallback;
+    }
+
+    if (cleaned.startsWith(fallback) && /[:：]/.test(cleaned)) {
       return fallback;
     }
 
@@ -1476,7 +1533,8 @@ export class ReportService {
 3. 不下确定诊断，用“可能/倾向/需要结合医生评估”等表述。
 4. 建议更详细：总字数建议约 900-1800 字。
 5. 必须包含“7天行动计划（每天 1-2 个具体任务）”。
-6. 结尾必须单独一行输出：仅供参考，如有不适请就医。
+6. 不要写异常总数、剩余项数量等数字汇总，直接表述为“异常指标/相关指标/其余内容”即可。
+7. 结尾必须单独一行输出：仅供参考，如有不适请就医。
 
 【异常指标清单】
 ${indicatorList}
@@ -1505,7 +1563,7 @@ ${indicatorList}
   }
 
   private generateDefaultAnalysis(anomalyItems: ReportIndicator[]): string {
-    const summary = `您的体检报告发现 ${anomalyItems.length} 项异常指标，需要结合既往病史、近期症状与复查结果综合判断。`;
+    const summary = '您的体检报告提示存在需要关注的异常指标，建议结合既往病史、近期症状与复查结果综合判断。';
 
     const abnormalList = anomalyItems
       .slice(0, 12)
@@ -1514,7 +1572,7 @@ ${indicatorList}
         return `- ${i.name}: ${i.value}${i.unit}${range}`;
       })
       .join('\n');
-    const omitted = anomalyItems.length > 12 ? `\n- （其余 ${anomalyItems.length - 12} 项略）` : '';
+    const omitted = anomalyItems.length > 12 ? '\n- （其余内容略）' : '';
 
     const perItemNotes = anomalyItems
       .slice(0, 8)
@@ -1533,7 +1591,7 @@ ${indicatorList}
         return `${idx + 1}. ${i.name}：${value}${unit}${range}（${severityLabel}）\n   - 建议：${suggestion}`;
       })
       .join('\n');
-    const perItemOmitted = anomalyItems.length > 8 ? `\n（其余 ${anomalyItems.length - 8} 项建议在页面列表中逐项查看。）` : '';
+    const perItemOmitted = anomalyItems.length > 8 ? '\n（其余内容建议在页面列表中逐项查看。）' : '';
 
     const categories: Record<string, string[]> = {
       肝功能: anomalyItems.filter(i => i.name.includes('转氨酶') || i.name.includes('ALT') || i.name.includes('AST') || i.name.includes('胆红素')).map(i => i.name),
@@ -1645,6 +1703,11 @@ ${indicatorList}
     userReports.sort((a, b) => b.uploadTime.getTime() - a.uploadTime.getTime());
     const start = (page - 1) * pageSize;
     return userReports.slice(start, start + pageSize);
+  }
+
+  async getLatestParsedReport(userId: string): Promise<HealthReport | null> {
+    const history = await this.getReportHistory(userId, 1, 20);
+    return history.find((report) => isUsableParsedReport(report)) || null;
   }
 
   async generatePDFReport(reportId: string): Promise<string | null> {

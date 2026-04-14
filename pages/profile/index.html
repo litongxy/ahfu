@@ -48,31 +48,6 @@
       object-fit: cover;
     }
 
-    .hero-actions {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .hero-shortcut {
-      padding: 11px 12px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.14);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-    }
-
-    .hero-shortcut-title {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .hero-shortcut-meta {
-      margin-top: 4px;
-      font-size: 11px;
-      color: rgba(248, 255, 246, 0.76);
-    }
-
     .quick-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -115,7 +90,6 @@
         font-size: 22px;
       }
 
-      .hero-actions,
       .quick-grid {
         grid-template-columns: 1fr;
       }
@@ -138,43 +112,7 @@
             <p class="hero-subtitle" id="profileSubtitle">请先手机号登录，登录后可查看你自己填写的档案与报告。</p>
           </div>
         </div>
-
-        <div class="hero-actions">
-          <a href="/pages/health-profile/index.html" class="hero-shortcut">
-            <div class="hero-shortcut-title">完善健康档案</div>
-            <div class="hero-shortcut-meta">补齐基础信息，解锁精准推荐</div>
-          </a>
-          <a href="/pages/report-analysis/index.html" class="hero-shortcut">
-            <div class="hero-shortcut-title">上传体检报告</div>
-            <div class="hero-shortcut-meta">查看异常指标与调理建议</div>
-          </a>
-        </div>
       </header>
-
-      <section class="section-card">
-        <div class="section-heading">
-          <div>
-            <div class="section-kicker">Overview</div>
-            <div class="section-title">账户总览</div>
-            <div class="section-subtitle">高频信息做成轻量概览，进入详情前先给用户明确反馈。</div>
-          </div>
-        </div>
-
-        <div class="metric-grid">
-          <div class="metric-card">
-            <div class="metric-value" id="metricProfileValue">0</div>
-            <div class="metric-label">健康档案</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-value" id="metricReportValue">0</div>
-            <div class="metric-label">体检报告</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-value">0</div>
-            <div class="metric-label">收藏内容</div>
-          </div>
-        </div>
-      </section>
 
       <section class="section-card">
         <div class="section-heading">
@@ -223,14 +161,6 @@
           </span>
           <span class="row-trailing">查看</span>
         </a>
-        <a href="/pages/recipe/list.html" class="list-row">
-          <span class="row-icon">藏</span>
-          <span class="row-body">
-            <span class="row-title">我的收藏</span>
-            <span class="row-meta">沉淀已感兴趣的食谱与课程</span>
-          </span>
-          <span class="row-trailing">查看</span>
-        </a>
       </section>
 
       <div class="sticky-cta">
@@ -243,10 +173,6 @@
     <a href="/chat.html" class="nav-item">
       <span class="nav-icon">咨</span>
       <span>咨询</span>
-    </a>
-    <a href="/pages/health-profile/index.html" class="nav-item">
-      <span class="nav-icon">康</span>
-      <span>健康</span>
     </a>
     <a href="/pages/recipe/list.html" class="nav-item">
       <span class="nav-icon">食</span>
@@ -264,8 +190,6 @@
 
   <script src="/scripts/auth-client.js"></script>
   <script>
-    const API_BASE = '/acp';
-
     function setText(id, text) {
       const node = document.getElementById(id);
       if (node) {
@@ -419,8 +343,6 @@
       setRandomAvatar();
       setText('profileTitle', '游客用户');
       setText('profileSubtitle', '请先手机号登录，登录后可查看你自己填写的档案与报告。');
-      setText('metricProfileValue', '0');
-      setText('metricReportValue', '0');
       setHeroLoginEntryEnabled(true);
     }
 
@@ -430,35 +352,6 @@
       setText('profileTitle', masked || '已登录用户');
       setText('profileSubtitle', '你可以查看并维护当前手机号下的健康档案和体检报告。');
       setHeroLoginEntryEnabled(false);
-    }
-
-    async function fetchWithAuth(url, options) {
-      if (window.AcpAuth && typeof window.AcpAuth.fetchWithAuth === 'function') {
-        return window.AcpAuth.fetchWithAuth(url, options);
-      }
-      return fetch(url, options);
-    }
-
-    async function loadMySummary() {
-      try {
-        const profileRes = await fetchWithAuth(API_BASE + '/health/profile');
-        const profileData = await profileRes.json();
-        setText('metricProfileValue', profileData.code === 0 && profileData.data ? '1' : '0');
-      } catch (error) {
-        setText('metricProfileValue', '0');
-      }
-
-      try {
-        const reportRes = await fetchWithAuth(API_BASE + '/report/history?page=1&pageSize=1');
-        const reportData = await reportRes.json();
-        if (reportData.code === 0 && reportData.data && typeof reportData.data.total === 'number') {
-          setText('metricReportValue', String(reportData.data.total));
-          return;
-        }
-        setText('metricReportValue', '0');
-      } catch (error) {
-        setText('metricReportValue', '0');
-      }
     }
 
     function bindEvents() {
@@ -505,7 +398,6 @@
       }
 
       applyPhoneState(authState.phone);
-      await loadMySummary();
     }
 
     bootstrap();

@@ -67,6 +67,67 @@
       text-align: center;
     }
 
+    .latest-report-banner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(95, 159, 69, 0.08), rgba(95, 159, 69, 0.03));
+      border: 1px solid rgba(95, 159, 69, 0.18);
+    }
+
+    .latest-report-banner[hidden] {
+      display: none;
+    }
+
+    .latest-report-copy {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .latest-report-kicker {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--brand-700);
+    }
+
+    .latest-report-title {
+      margin-top: 4px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.4;
+      word-break: break-all;
+    }
+
+    .latest-report-meta {
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .latest-report-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(95, 159, 69, 0.18);
+      background: rgba(255, 255, 255, 0.86);
+      color: var(--brand-700);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
     .page-shell-with-bottom-cta {
       padding-bottom: calc(72px + env(safe-area-inset-bottom));
     }
@@ -324,7 +385,7 @@
       </section>
 
       <div class="sticky-cta sticky-cta-inline">
-        <div class="sticky-copy">档案会用于生成更贴近你的推荐与咨询建议。</div>
+        <div class="latest-report-banner" id="latestReportBanner" hidden></div>
         <button class="btn" id="saveBtn">保存健康档案</button>
       </div>
     </div>
@@ -334,10 +395,6 @@
     <a href="/chat.html" class="nav-item">
       <span class="nav-icon">咨</span>
       <span>咨询</span>
-    </a>
-    <a href="/pages/health-profile/index.html" class="nav-item active">
-      <span class="nav-icon">康</span>
-      <span>健康</span>
     </a>
     <a href="/pages/recipe/list.html" class="nav-item">
       <span class="nav-icon">食</span>
@@ -356,6 +413,7 @@
   <script src="/scripts/auth-client.js"></script>
   <script>
     const API_BASE = '/acp';
+    const CHRONIC_DISEASE_NONE_VALUE = '无';
 
     async function fetchWithAuth(url, options) {
       if (window.AcpAuth && typeof window.AcpAuth.fetchWithAuth === 'function') {
@@ -386,6 +444,80 @@
           window.history.back();
         }
       });
+    }
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatReportDate(input) {
+      if (!input) return '';
+      const date = new Date(input);
+      if (Number.isNaN(date.getTime())) return '';
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function getReportStatusLabel(status) {
+      if (status === 'parsed') return '已解析';
+      if (status === 'parsing') return '解析中';
+      if (status === 'failed') return '解析失败';
+      return '已上传';
+    }
+
+    function renderLatestReportBanner(report) {
+      const banner = document.getElementById('latestReportBanner');
+      if (!banner) return;
+
+      if (!report || !report.id) {
+        banner.hidden = true;
+        banner.innerHTML = '';
+        return;
+      }
+
+      const title = report.originalName || '最新体检报告';
+      const uploadDate = formatReportDate(report.uploadTime);
+      const anomalyCount = Number.isFinite(Number(report.anomalyCount)) ? Number(report.anomalyCount) : null;
+      const metaParts = [];
+      if (uploadDate) metaParts.push(`${uploadDate} 上传`);
+      if (anomalyCount !== null) metaParts.push(anomalyCount > 0 ? `${anomalyCount} 项异常` : '未见明显异常');
+      metaParts.push(getReportStatusLabel(report.status));
+
+      banner.hidden = false;
+      banner.innerHTML = `
+        <div class="latest-report-copy">
+          <div class="latest-report-kicker">Latest Report</div>
+          <div class="latest-report-title">${escapeHtml(title)}</div>
+          <div class="latest-report-meta">${escapeHtml(metaParts.join(' · '))}</div>
+        </div>
+        <a class="latest-report-link" href="/pages/report-analysis/index.html?reportId=${encodeURIComponent(report.id)}">查看</a>
+      `;
+    }
+
+    async function loadLatestReportBanner() {
+      if (!isPhoneLoggedIn()) {
+        renderLatestReportBanner(null);
+        return;
+      }
+
+      try {
+        const res = await fetchWithAuth(`${API_BASE}/report/history?page=1&pageSize=1`);
+        const data = await res.json();
+        const latestReport = data && data.code === 0 && data.data && Array.isArray(data.data.list)
+          ? (data.data.list[0] || null)
+          : null;
+        renderLatestReportBanner(latestReport);
+      } catch (error) {
+        console.error('加载最新体检报告失败', error);
+        renderLatestReportBanner(null);
+      }
     }
 
     function showToast(message, duration) {
@@ -434,6 +566,65 @@
       });
     }
 
+    function applyChronicDiseaseSelection(selectedValues) {
+      const inputs = Array.from(
+        document.querySelectorAll('#chronicDiseaseGroup input[type="checkbox"]')
+      );
+      const selected = Array.isArray(selectedValues)
+        ? selectedValues.map(function(value) { return String(value || '').trim(); }).filter(Boolean)
+        : [];
+      const selectedSet = new Set(selected);
+      const shouldSelectNone = selectedSet.has(CHRONIC_DISEASE_NONE_VALUE) || selectedSet.size === 0;
+
+      inputs.forEach(function(input) {
+        input.checked = shouldSelectNone
+          ? input.value === CHRONIC_DISEASE_NONE_VALUE
+          : selectedSet.has(input.value);
+      });
+    }
+
+    function syncChronicDiseaseExclusiveState(changedInput) {
+      const inputs = Array.from(
+        document.querySelectorAll('#chronicDiseaseGroup input[type="checkbox"]')
+      );
+      if (!changedInput) {
+        return;
+      }
+
+      if (changedInput.value === CHRONIC_DISEASE_NONE_VALUE && changedInput.checked) {
+        inputs.forEach(function(input) {
+          if (input !== changedInput) {
+            input.checked = false;
+          }
+        });
+        return;
+      }
+
+      if (changedInput.value !== CHRONIC_DISEASE_NONE_VALUE && changedInput.checked) {
+        inputs.forEach(function(input) {
+          if (input.value === CHRONIC_DISEASE_NONE_VALUE) {
+            input.checked = false;
+          }
+        });
+      }
+    }
+
+    function setupChronicDiseaseMutualExclusion() {
+      const group = document.getElementById('chronicDiseaseGroup');
+      if (!group) {
+        return;
+      }
+
+      group.addEventListener('change', function(event) {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') {
+          return;
+        }
+
+        syncChronicDiseaseExclusiveState(target);
+      });
+    }
+
     async function loadProfile() {
       if (!isPhoneLoggedIn()) {
         redirectToPhoneLogin();
@@ -458,10 +649,9 @@
         if (profile.sleepInfo) document.getElementById('sleep').value = profile.sleepInfo;
         if (profile.exerciseHabit) document.getElementById('exercise').value = profile.exerciseHabit;
 
-        const selectedDiseases = profile.chronicDisease || [];
-        document.querySelectorAll('#chronicDiseaseGroup input[type="checkbox"]').forEach(function(input) {
-          input.checked = selectedDiseases.includes(input.value);
-        });
+        if (Array.isArray(profile.chronicDisease)) {
+          applyChronicDiseaseSelection(profile.chronicDisease);
+        }
       } catch (error) {
         console.error('加载档案失败', error);
       }
@@ -548,6 +738,7 @@
     document.getElementById('saveBtn').addEventListener('click', saveProfile);
     async function bootstrap() {
       setupBackLink();
+      setupChronicDiseaseMutualExclusion();
 
       if (window.AcpAuth && typeof window.AcpAuth.ensurePhoneLogin === 'function') {
         try {
@@ -559,9 +750,15 @@
       }
 
       await loadProfile();
+      await loadLatestReportBanner();
     }
 
     bootstrap();
+    window.addEventListener('pageshow', function() {
+      loadLatestReportBanner().catch(function(error) {
+        console.error('刷新最新体检报告失败', error);
+      });
+    });
   </script>
 </body>
 </html>

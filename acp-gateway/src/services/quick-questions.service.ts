@@ -14,6 +14,10 @@ interface TopicGroup {
 }
 
 const MAX_QUESTION_COUNT = 500;
+const QUICK_QUESTION_EXCLUDED_FILE_PATTERNS = [
+  /^医疗口语问法扩展库/,
+  /^医疗问答扩展库/,
+];
 
 const SEED_QUESTIONS: Array<{ question: string; scene: string }> = [
   { question: '健康饮食的误区有哪些？', scene: 'diet' },
@@ -26,6 +30,16 @@ const SEED_QUESTIONS: Array<{ question: string; scene: string }> = [
   { question: '久坐肩颈酸痛怎么缓解？', scene: 'exercise' },
   { question: '血压偏高日常怎么调理？', scene: 'disease' },
   { question: '体检报告里转氨酶偏高怎么办？', scene: 'report' },
+  { question: '高血压平时怎么控制更稳？', scene: 'disease' },
+  { question: '糖尿病饮食最该注意什么？', scene: 'disease' },
+  { question: '高血脂怎么降更靠谱？', scene: 'disease' },
+  { question: '高尿酸日常怎么调理？', scene: 'disease' },
+  { question: '脂肪肝怎么改善比较有效？', scene: 'disease' },
+  { question: '冠心病有哪些常见信号？', scene: 'disease' },
+  { question: '慢阻肺平时怎么保养？', scene: 'disease' },
+  { question: '哮喘总反复发作怎么办？', scene: 'disease' },
+  { question: '前列腺炎有哪些常见症状？', scene: 'disease' },
+  { question: '家庭血压测量要注意什么？', scene: 'report' },
 ];
 
 export class QuickQuestionsService {
@@ -127,6 +141,7 @@ export class QuickQuestionsService {
       const files = fs
         .readdirSync(this.questionsDir)
         .filter((file) => file.endsWith('.md'))
+        .filter((file) => !QUICK_QUESTION_EXCLUDED_FILE_PATTERNS.some((pattern) => pattern.test(file.replace(/\.md$/i, ''))))
         .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'));
 
       for (const file of files) {
@@ -192,6 +207,10 @@ export class QuickQuestionsService {
   }
 
   private toFileLevelQuestion(fileTitle: string): string {
+    if (/(常见|系统|疾病|问题|综合|常识|介绍|方式|项目|选择|解读|适应症|指标|检查|检验)/.test(fileTitle)) {
+      return '';
+    }
+
     if (/报告|体检|检查|检验|指标/.test(fileTitle)) {
       return `${fileTitle}最关键的解读点是什么`;
     }
@@ -216,6 +235,18 @@ export class QuickQuestionsService {
   }
 
   private toPrimaryQuestion(topic: string): string {
+    if (/(测量|监测|记录)/.test(topic)) {
+      return `${topic}要注意什么`;
+    }
+
+    if (/(适应症|筛查|评估|套餐|项目)/.test(topic)) {
+      return `${topic}是什么意思`;
+    }
+
+    if (/(管理|随访)/.test(topic)) {
+      return `${topic}要注意什么`;
+    }
+
     if (/^(为什么|如何|怎样|怎么|是否|能否|可否|要不要|需不需要)/.test(topic)) {
       return topic;
     }
@@ -244,6 +275,14 @@ export class QuickQuestionsService {
   }
 
   private toSecondaryQuestion(topic: string): string {
+    if (/(测量|监测|记录)/.test(topic)) {
+      return `${topic}常见误区有哪些`;
+    }
+
+    if (/(适应症|筛查|评估|套餐|项目)/.test(topic)) {
+      return `${topic}通常适合什么情况`;
+    }
+
     if (/(检查|检验|体检|指标|报告)/.test(topic)) {
       return `${topic}异常时通常要注意什么`;
     }
