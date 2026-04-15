@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { userProfiles } from '../services/user-profile.store';
+import { rebuildProfileFromReport } from '../services/report-profile.service';
+import { reportService } from '../services/report.service';
+import { getEffectiveHealthProfile, userProfiles } from '../services/user-profile.store';
 import { isUserScopeAllowed, requireAuth, resolveRequestUserId } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -26,40 +28,53 @@ interface HealthProfile {
   constitutionType?: string;
 }
 
-router.get('/profile', (req: Request, res: Response) => {
-  const requestedUserId = req.query.userId as string | undefined;
-  if (!isUserScopeAllowed(req, requestedUserId)) {
-    res.status(403).json({
-      code: 403,
-      message: '无权访问其他用户档案',
-    });
-    return;
-  }
+router.get('/profile', async (req: Request, res: Response) => {
+  try {
+    const requestedUserId = req.query.userId as string | undefined;
+    if (!isUserScopeAllowed(req, requestedUserId)) {
+      res.status(403).json({
+        code: 403,
+        message: '无权访问其他用户档案',
+      });
+      return;
+    }
 
-  const userId = resolveRequestUserId(req, requestedUserId || undefined);
+    const userId = resolveRequestUserId(req, requestedUserId || undefined);
 
-  if (!userId) {
-    res.status(400).json({
-      code: 400,
-      message: 'userId is required',
-    });
-    return;
-  }
+    if (!userId) {
+      res.status(400).json({
+        code: 400,
+        message: 'userId is required',
+      });
+      return;
+    }
 
-  const profile = userProfiles.get(userId);
+    let profile = getEffectiveHealthProfile(userId);
+    if (!profile) {
+      const latestReport = await reportService.getLatestParsedReport(userId);
+      rebuildProfileFromReport(latestReport);
+      profile = getEffectiveHealthProfile(userId);
+    }
 
-  if (!profile) {
+    if (!profile) {
+      res.json({
+        code: 0,
+        data: null,
+      });
+      return;
+    }
+
     res.json({
       code: 0,
-      data: null,
+      data: profile,
     });
-    return;
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({
+      code: 500,
+      message: '获取健康档案失败',
+    });
   }
-
-  res.json({
-    code: 0,
-    data: profile,
-  });
 });
 
 router.post('/profile', (req: Request, res: Response) => {
@@ -122,10 +137,11 @@ router.post('/profile', (req: Request, res: Response) => {
   };
 
   userProfiles.set(userId, profile);
+  const mergedProfile = getEffectiveHealthProfile(userId);
 
   res.json({
     code: 0,
-    data: profile,
+    data: mergedProfile,
   });
 });
 

@@ -1,6 +1,7 @@
 import type { HealthReport, ReportIndicator } from './report.model';
 
 const REPORT_PARSE_FAILURE_PATTERNS = ['⚠️', '请上传', '解析失败', '未找到', '维护中', '暂时无法'];
+const MAX_PROMPT_ANOMALIES = 12;
 
 function isParseFailureIndicator(indicator: ReportIndicator | null | undefined): boolean {
   const name = String(indicator?.name || '');
@@ -67,7 +68,7 @@ export function formatReportSummaryForPrompt(report: HealthReport | null | undef
   const anomalyItems = indicators
     .filter((indicator) => indicator && indicator.isAnomaly)
     .sort((a, b) => getSeverityRank(b) - getSeverityRank(a))
-    .slice(0, 5);
+  const promptItems = anomalyItems.slice(0, MAX_PROMPT_ANOMALIES);
   const lines: string[] = [];
   const uploadDate = normalizeReportDate(report.uploadTime);
 
@@ -75,9 +76,12 @@ export function formatReportSummaryForPrompt(report: HealthReport | null | undef
     lines.push(`• 上传时间：${uploadDate}`);
   }
 
-  if (anomalyItems.length > 0) {
+  if (promptItems.length > 0) {
     lines.push(`• 异常概览：本次体检发现 ${anomalyItems.length} 项需要关注的指标`);
-    lines.push(`• 重点指标：${anomalyItems.map((indicator) => formatIndicatorSummary(indicator)).join('；')}`);
+    lines.push(`• 重点指标：${promptItems.map((indicator) => formatIndicatorSummary(indicator)).join('；')}`);
+    if (anomalyItems.length > promptItems.length) {
+      lines.push(`• 其余异常：还有 ${anomalyItems.length - promptItems.length} 项，聊天回答时也应结合完整报告内容综合判断`);
+    }
   } else {
     lines.push('• 异常概览：本次体检未见明显异常指标');
   }

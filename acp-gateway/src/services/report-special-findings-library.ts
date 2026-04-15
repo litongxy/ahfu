@@ -82,8 +82,8 @@ export const SPECIAL_FINDING_LIBRARY: SpecialFindingRule[] = [
   rule('CERVICITIS', '宫颈炎', [/宫颈炎/i], '建议结合妇科检查和病原学结果综合评估', 'slight'),
   rule('VULVAR_LEUKOPLAKIA', '外阴白斑', [/外阴白斑/i], '建议尽快结合妇科专科意见进一步评估和规范处理', 'abnormal'),
 
-  rule('LUNG_NODULE', '肺结节', [/肺.*结节/i], '建议结合胸部 CT 大小、密度和随访建议定期复查', 'abnormal'),
-  rule('LUNG_MICRONODULE', '肺小结节', [/肺.*小结节/i, /微小结节/i], '建议结合胸部 CT 随访建议定期复查', 'slight'),
+  rule('LUNG_NODULE', '肺结节', [/肺(?:部)?[^。；;，,\n]{0,12}结节/i], '建议结合胸部 CT 大小、密度和随访建议定期复查', 'abnormal'),
+  rule('LUNG_MICRONODULE', '肺小结节', [/肺(?:部)?[^。；;，,\n]{0,12}小结节/i, /肺(?:部)?[^。；;，,\n]{0,12}微小结节/i, /微小结节/i], '建议结合胸部 CT 随访建议定期复查', 'slight'),
   rule('GROUND_GLASS_NODULE', '磨玻璃结节', [/磨玻璃结节/i], '建议结合胸部 CT 随访方案定期复查', 'abnormal'),
   rule('LUNG_MARKINGS', '肺纹理增多', [/肺纹理(?:增多|增粗|紊乱)/i], '建议结合呼吸道症状和胸片/CT 表现综合判断', 'slight'),
   rule('CHRONIC_BRONCHITIS', '慢性支气管炎', [/慢性支气管炎/i], '建议戒烟并结合呼吸科意见评估肺功能', 'abnormal'),
@@ -158,9 +158,9 @@ export const SPECIAL_FINDING_LIBRARY: SpecialFindingRule[] = [
   rule('HEMORRHOIDS', '痔', [/痔疮/i, /内痔/i, /外痔/i, /混合痔/i], '建议结合症状、排便习惯和肛肠科意见评估', 'slight'),
 
   rule('REFRACTIVE_ERROR', '屈光不正', [/屈光不正/i], '建议结合验光结果和眼科意见评估视力矫正方案', 'slight', [/如既往[有无]屈光不正/i, /既往[有无]屈光不正/i]),
-  rule('MYOPIA', '近视', [/近视/i], '建议结合视力和验光结果规范配镜或随访', 'slight'),
-  rule('HYPEROPIA', '远视', [/远视/i], '建议结合视力和验光结果规范随访', 'slight'),
-  rule('ASTIGMATISM', '散光', [/散光/i], '建议结合验光结果和视疲劳情况评估矫正方案', 'slight'),
+  rule('MYOPIA', '近视', [/近视/i], '建议结合视力和验光结果规范配镜或随访', 'slight', [/包括近视/i, /矫治近视/i, /儿童表现为.*近视/i]),
+  rule('HYPEROPIA', '远视', [/远视/i], '建议结合视力和验光结果规范随访', 'slight', [/包括.*远视/i]),
+  rule('ASTIGMATISM', '散光', [/散光/i], '建议结合验光结果和视疲劳情况评估矫正方案', 'slight', [/包括.*散光/i]),
   rule('VISION_DECLINE', '视力下降', [/视力下降/i, /裸眼视力下降/i, /视力欠佳/i], '建议结合眼科检查明确原因并及时干预', 'slight'),
   rule('DRY_EYE', '干眼', [/干眼/i, /干眼症/i], '建议结合用眼习惯调整和眼科意见处理', 'slight'),
   rule('CATARACT', '白内障', [/白内障/i], '建议结合眼科专科意见评估成熟度和处理方案', 'abnormal'),
@@ -169,7 +169,7 @@ export const SPECIAL_FINDING_LIBRARY: SpecialFindingRule[] = [
   rule('VITREOUS_OPACITY', '玻璃体混浊', [/玻璃体混浊/i], '建议结合眼科检查明确是否与年龄或炎症相关', 'slight'),
 
   rule('DEVIATED_SEPTUM', '鼻中隔偏曲', [/鼻中隔偏曲/i], '建议结合鼻塞等症状和耳鼻喉科意见评估', 'slight'),
-  rule('SINUSITIS', '鼻窦炎', [/鼻窦炎/i], '建议结合鼻部症状和耳鼻喉科意见规范处理', 'abnormal'),
+  rule('SINUSITIS', '鼻窦炎', [/鼻窦炎/i], '建议结合鼻部症状和耳鼻喉科意见规范处理', 'abnormal', [/防治.*鼻窦炎/i, /预防.*鼻窦炎/i]),
   rule('CHRONIC_PHARYNGITIS', '慢性咽炎', [/慢性咽炎/i], '建议减少烟酒刺激并结合耳鼻喉科意见处理', 'slight'),
   rule('TONSIL_HYPERTROPHY', '扁桃体肥大', [/扁桃体肥大/i], '建议结合反复感染史和耳鼻喉科意见评估', 'slight'),
   rule('THYROID_CARTILAGE_NODULE', '声带小结', [/声带小结/i], '建议减少过度用嗓并结合耳鼻喉科意见随访', 'slight'),

@@ -3,9 +3,10 @@ import path from 'path';
 import vm from 'vm';
 import type { HealthReport, ReportIndicator } from './report.model';
 import { buildPantryQueryResult, type PantryQueryResult } from './pantry-recipe.service';
+import { buildProfileFromReport } from './report-profile.service';
 import { SPECIAL_FINDING_LIBRARY, type SpecialFindingRule } from './report-special-findings-library';
 import { reportService } from './report.service';
-import { userProfiles, type HealthProfile } from './user-profile.store';
+import { getEffectiveHealthProfile, mergeHealthProfiles, type HealthProfile } from './user-profile.store';
 
 type ContentType = 'recipe' | 'exercise' | 'psychology' | 'sleep';
 type ExerciseIntensity = 'low' | 'medium' | 'high';
@@ -1409,6 +1410,12 @@ function extractTopicsFromProfile(
       addTopic(signals, '控脂', '健康档案：血脂异常', 3.6);
       addTopic(signals, '心血管', '健康档案：血脂异常', 2.4);
     }
+    if (disease.includes('心血管')) {
+      addTopic(signals, '心血管', `健康档案：${disease}`, 3.6);
+      addTopic(signals, '低盐', `健康档案：${disease}`, 2.4);
+      addTopic(signals, '血压友好', `健康档案：${disease}`, 2.2);
+      lowerExerciseMaxIntensity(signals, 'low');
+    }
     if (disease.includes('冠心病')) {
       addTopic(signals, '心血管', '健康档案：冠心病', 3.8);
       addTopic(signals, '低盐', '健康档案：冠心病', 2.4);
@@ -1428,6 +1435,25 @@ function extractTopicsFromProfile(
     if (disease.includes('胃溃疡') || disease.includes('胃炎')) {
       addTopic(signals, '养胃', `健康档案：${disease}`, 3.0);
       addTopic(signals, '清淡', `健康档案：${disease}`, 2.6);
+    }
+    if (disease.includes('幽门螺杆菌')) {
+      addTopic(signals, '养胃', `健康档案：${disease}`, 3.2);
+      addTopic(signals, '清淡', `健康档案：${disease}`, 2.0);
+    }
+    if (disease.includes('甲状腺')) {
+      addTopic(signals, '恢复', `健康档案：${disease}`, 1.6);
+      lowerExerciseMaxIntensity(signals, 'medium');
+    }
+    if (disease.includes('脑血管')) {
+      addTopic(signals, '心血管', `健康档案：${disease}`, 3.2);
+      addTopic(signals, '低盐', `健康档案：${disease}`, 2.2);
+      addTopic(signals, '控脂', `健康档案：${disease}`, 2.4);
+      lowerExerciseMaxIntensity(signals, 'low');
+    }
+    if (disease.includes('贫血')) {
+      addTopic(signals, '恢复', `健康档案：${disease}`, 2.4);
+      addTopic(signals, '高蛋白', `健康档案：${disease}`, 1.8);
+      lowerExerciseMaxIntensity(signals, 'medium');
     }
     if (disease.includes('哮喘')) {
       addTopic(signals, '恢复', '健康档案：哮喘', 2.4);
@@ -1463,10 +1489,13 @@ function extractTopicsFromProfile(
       { pattern: /睡眠|早睡|助眠/, topics: [{ topic: '助眠', weight: 3.2 }] },
       { pattern: /减压|放松|情绪/, topics: [{ topic: '减压', weight: 3.2 }] },
       { pattern: /增肌|力量/, topics: [{ topic: '高蛋白', weight: 2.8 }] },
+      { pattern: /养胃|胃|幽门螺杆菌/, topics: [{ topic: '养胃', weight: 2.8 }, { topic: '清淡', weight: 1.8 }] },
       { pattern: /肝/, topics: [{ topic: '护肝', weight: 2.8 }] },
       { pattern: /肾/, topics: [{ topic: '护肾', weight: 2.8 }] },
+      { pattern: /心脏|心血管|脑血管/, topics: [{ topic: '心血管', weight: 2.8 }, { topic: '低盐', weight: 2.2 }] },
       { pattern: /肩颈/, topics: [{ topic: '肩颈', weight: 2.8 }] },
       { pattern: /腰背/, topics: [{ topic: '腰背', weight: 2.8 }] },
+      { pattern: /恢复|调理/, topics: [{ topic: '恢复', weight: 2.2 }] },
     ],
     '健康目标'
   );
@@ -1739,7 +1768,7 @@ export class RecommendationService {
       addTopic(signals, '饮食', '食材提问', 2.5);
     }
     if (userId) {
-      const profile = userProfiles.get(userId) ?? null;
+      const profile = getEffectiveHealthProfile(userId);
       signals.hasProfile = hasMeaningfulProfile(profile);
       extractTopicsFromProfile(profile, signals);
     }
@@ -1768,14 +1797,12 @@ export class RecommendationService {
       addTopic(signals, '饮食', '食材提问', 2.5);
     }
 
-    const profile =
+    const baseProfile =
       options.profile !== undefined
         ? options.profile
         : options.userId
-          ? (userProfiles.get(options.userId) ?? null)
+          ? getEffectiveHealthProfile(options.userId)
           : null;
-    signals.hasProfile = hasMeaningfulProfile(profile);
-    extractTopicsFromProfile(profile, signals);
 
     let report: HealthReport | null = options.report ?? null;
     if (!report && options.userId) {
@@ -1786,6 +1813,11 @@ export class RecommendationService {
         report = null;
       }
     }
+
+    const reportDerivedProfile = buildProfileFromReport(report);
+    const profile = mergeHealthProfiles(baseProfile, reportDerivedProfile);
+    signals.hasProfile = hasMeaningfulProfile(profile);
+    extractTopicsFromProfile(profile, signals);
 
     if (isValidHealthReport(report)) {
       signals.reportId = report.id;

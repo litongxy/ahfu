@@ -853,25 +853,47 @@ export class ReportService {
     const numericValue = parseFloat(best.value);
     const isAnomaly = this.checkAnomaly(numericValue, best.referenceRange);
     const severity = this.getSeverity(numericValue, best.referenceRange);
+    const normalizedIndicator = this.normalizeIndicatorAbnormality(spec.name, numericValue, best.referenceRange, isAnomaly, severity);
 
     return {
       name: spec.name,
       value: best.value,
       unit: best.unit,
       referenceRange: best.referenceRange,
-      isAnomaly,
-      severity,
-      suggestion: isAnomaly
+      isAnomaly: normalizedIndicator.isAnomaly,
+      severity: normalizedIndicator.severity,
+      suggestion: normalizedIndicator.isAnomaly
         ? generateAnomalySuggestions({
             name: spec.name,
             value: best.value,
             unit: best.unit,
             referenceRange: best.referenceRange,
-            isAnomaly,
-            severity,
+            isAnomaly: normalizedIndicator.isAnomaly,
+            severity: normalizedIndicator.severity,
           } as ReportIndicator)
         : '',
     };
+  }
+
+  private normalizeIndicatorAbnormality(
+    indicatorName: string,
+    value: number,
+    range: string,
+    isAnomaly: boolean,
+    severity: 'normal' | 'slight' | 'abnormal' | 'serious'
+  ): { isAnomaly: boolean; severity: 'normal' | 'slight' | 'abnormal' | 'serious' } {
+    if (!isAnomaly) {
+      return { isAnomaly, severity };
+    }
+
+    if (/高密度脂蛋白/i.test(indicatorName)) {
+      const parsedRange = this.parseReferenceRange(range);
+      if (parsedRange?.max !== undefined && Number.isFinite(value) && value > parsedRange.max) {
+        return { isAnomaly: false, severity: 'normal' };
+      }
+    }
+
+    return { isAnomaly, severity };
   }
 
   private buildIndicatorContexts(lines: string[], index: number): string[] {
@@ -1010,14 +1032,15 @@ export class ReportService {
   }
 
   private extractSpecialFindings(lines: string[]): ReportIndicator[] {
+    const findingLines = this.buildSpecialFindingLines(lines);
     const indicators: ReportIndicator[] = [];
 
     const ecgLines = Array.from(new Set(
-      lines.flatMap((line, index) => {
+      findingLines.flatMap((line, index) => {
         if (!/心电图/.test(line)) {
           return [];
         }
-        const nextLine = index < lines.length - 1 ? lines[index + 1] : '';
+        const nextLine = index < findingLines.length - 1 ? findingLines[index + 1] : '';
         return [line, this.normalizeReportLine(`${line} ${nextLine}`)];
       }).filter(Boolean)
     ));
@@ -1046,7 +1069,7 @@ export class ReportService {
       });
     }
 
-    if (lines.some(line => /(?:检查所见|超声).*脂肪肝/.test(line) && !/未见异常/.test(line))) {
+    if (findingLines.some(line => /(?:检查所见|超声).*脂肪肝/.test(line) && !/未见异常/.test(line))) {
       indicators.push({
         name: '脂肪肝',
         value: '检出',
@@ -1058,7 +1081,7 @@ export class ReportService {
       });
     }
 
-    if (lines.some(line => /血压.*(?:偏高|异常|升高)/.test(line))) {
+    if (findingLines.some(line => /血压.*(?:偏高|异常|升高)/.test(line))) {
       indicators.push({
         name: '高血压',
         value: '检出',
@@ -1070,9 +1093,64 @@ export class ReportService {
       });
     }
 
-    indicators.push(...this.extractRuleBasedFindings(lines));
+    indicators.push(...this.extractRuleBasedFindings(findingLines));
 
     return indicators;
+  }
+
+  private buildSpecialFindingLines(lines: string[]): string[] {
+    const filtered: string[] = [];
+    let inEducationalSection = false;
+    let inHistorySection = false;
+
+    for (const rawLine of lines) {
+      const line = this.normalizeReportLine(rawLine);
+      if (!line) {
+        continue;
+      }
+
+      if (/^--- PAGE \d+ ---$/.test(line)) {
+        inEducationalSection = false;
+        inHistorySection = false;
+        filtered.push(line);
+        continue;
+      }
+
+      if (this.isEducationalSectionHeader(line)) {
+        inEducationalSection = true;
+        continue;
+      }
+
+      if (this.isHistorySectionHeader(line)) {
+        inHistorySection = true;
+        continue;
+      }
+
+      if (this.isResultSectionHeader(line)) {
+        inEducationalSection = false;
+        inHistorySection = false;
+      }
+
+      if (inEducationalSection || inHistorySection) {
+        continue;
+      }
+
+      filtered.push(line);
+    }
+
+    return filtered;
+  }
+
+  private isEducationalSectionHeader(line: string): boolean {
+    return /(专家建议与指导|【医学解释】|【常见原因及后果】|【建议】|报告阅读说明|体检结果说明|名词科普|医学名词科普|健康知识内容|报告解读专线|医疗小常识|最新体检技术和健康建议|温馨提示|定期健康体检|有氧运动改变你我|深度咨询或风险评估产品建议)/.test(line);
+  }
+
+  private isHistorySectionHeader(line: string): boolean {
+    return /(个人基本信息|家族史、疾病史、药物过敏史|家族史|既往史|传染病史|药物过敏史|有无输血史|个人生活习惯|您的既往体检情况|现病史及近三个月的身体健康状况|三年关键指标对比|两次历史对比|历史对比|关键指标对比)/.test(line);
+  }
+
+  private isResultSectionHeader(line: string): boolean {
+    return /(阳性结果和异常情况|异常结果复查建议|发现的异常结果|健康体检结果|汇总分析|一般检查|眼科|腹部超声|盆腔超声|甲状腺彩超|乳腺彩超|心电图|胸部摄片|血常规|生化检验|尿常规|检查项目|检查所见|检查结果|异常描述|初步意见|小结|印象|诊断|超声提示|超声所见|体检所见)/.test(line);
   }
 
   private extractRuleBasedFindings(lines: string[]): ReportIndicator[] {
@@ -1249,6 +1327,10 @@ export class ReportService {
     }
 
     if (/(什么是|怎么办|如何|治疗|预防|很多人|一般|通常|可能导致|需要注意|原因|科普|医生提醒|是指|简称|又称|又译为|主要症状|主要表现|多见于|常见于|属于|包括|可分为|引自|参考区间|正常值范围|指导原则|WS\/T|T-Score|等疾病)/.test(normalized)) {
+      return false;
+    }
+
+    if (/(注意用眼卫生|重新验光|配戴合适的眼镜|多做深呼吸|提高机体抵抗力|请遵从临床医师意见|若出现咳嗽|建议戒烟)/.test(normalized)) {
       return false;
     }
 
@@ -1555,10 +1637,11 @@ ${indicatorList}
         `~/.local/bin/opencode run ${JSON.stringify(prompt)} 2>/dev/null`,
         { encoding: 'utf-8', timeout: 60000, maxBuffer: 1024 * 1024 }
       );
-      return result.trim() || this.generateDefaultAnalysis(anomalyItems);
+      const analysis = result.trim() || this.generateDefaultAnalysis(anomalyItems);
+      return this.ensureAnalysisIncludesAllAnomalies(analysis, anomalyItems);
     } catch (error) {
       console.error('AI分析失败:', error);
-      return this.generateDefaultAnalysis(anomalyItems);
+      return this.ensureAnalysisIncludesAllAnomalies(this.generateDefaultAnalysis(anomalyItems), anomalyItems);
     }
   }
 
@@ -1566,16 +1649,13 @@ ${indicatorList}
     const summary = '您的体检报告提示存在需要关注的异常指标，建议结合既往病史、近期症状与复查结果综合判断。';
 
     const abnormalList = anomalyItems
-      .slice(0, 12)
       .map((i) => {
         const range = i.referenceRange ? `（参考范围：${i.referenceRange}）` : '';
         return `- ${i.name}: ${i.value}${i.unit}${range}`;
       })
       .join('\n');
-    const omitted = anomalyItems.length > 12 ? '\n- （其余内容略）' : '';
 
     const perItemNotes = anomalyItems
-      .slice(0, 8)
       .map((i, idx) => {
         const value = i.value === undefined || i.value === null || i.value === '' ? '--' : String(i.value);
         const unit = i.unit ? i.unit : '';
@@ -1591,7 +1671,6 @@ ${indicatorList}
         return `${idx + 1}. ${i.name}：${value}${unit}${range}（${severityLabel}）\n   - 建议：${suggestion}`;
       })
       .join('\n');
-    const perItemOmitted = anomalyItems.length > 8 ? '\n（其余内容建议在页面列表中逐项查看。）' : '';
 
     const categories: Record<string, string[]> = {
       肝功能: anomalyItems.filter(i => i.name.includes('转氨酶') || i.name.includes('ALT') || i.name.includes('AST') || i.name.includes('胆红素')).map(i => i.name),
@@ -1643,7 +1722,70 @@ ${indicatorList}
       '第7天：回顾一周记录，挑 2 个最容易坚持的习惯继续做 4 周，再复查评估。',
     ];
 
-    return `【总体评估】\n${summary}\n\n【异常指标（节选）】\n${abnormalList}${omitted}\n\n【逐项要点（节选）】\n${perItemNotes}${perItemOmitted}\n\n【生活方式建议】\n${lifestyle.join('\n')}\n\n【7天行动计划】\n${actionPlan.join('\n')}\n\n【复查/就医建议】\n${followUp.join('\n')}\n\n【需要立即就医/急诊的情况】\n${redFlags.join('\n')}\n\n仅供参考，如有不适请就医。`;
+    return `【总体评估】\n${summary}\n\n【异常指标】\n${abnormalList}\n\n【逐项要点】\n${perItemNotes}\n\n【生活方式建议】\n${lifestyle.join('\n')}\n\n【7天行动计划】\n${actionPlan.join('\n')}\n\n【复查/就医建议】\n${followUp.join('\n')}\n\n【需要立即就医/急诊的情况】\n${redFlags.join('\n')}\n\n仅供参考，如有不适请就医。`;
+  }
+
+  private ensureAnalysisIncludesAllAnomalies(analysis: string, anomalyItems: ReportIndicator[]): string {
+    const base = String(analysis || '').trim();
+    if (!base || anomalyItems.length === 0) {
+      return base;
+    }
+
+    const normalizedAnalysis = this.normalizeAnalysisLookupText(base);
+    const missingItems = anomalyItems.filter((item) => !this.analysisMentionsIndicator(normalizedAnalysis, item));
+    if (missingItems.length === 0) {
+      return base;
+    }
+
+    const supplementLines = missingItems.map((item) => {
+      const value = item.value === undefined || item.value === null || item.value === '' ? '--' : String(item.value);
+      const unit = item.unit ? item.unit : '';
+      const range = item.referenceRange ? `（参考范围：${item.referenceRange}）` : '';
+      const suggestion = item.suggestion ? `；建议：${item.suggestion}` : '';
+      return `- ${item.name}: ${value}${unit}${range}${suggestion}`;
+    });
+
+    const supplement = `【补充识别结果】\n${supplementLines.join('\n')}`;
+    const safetyLine = '仅供参考，如有不适请就医。';
+    if (base.endsWith(safetyLine)) {
+      const prefix = base.slice(0, -safetyLine.length).trimEnd();
+      return `${prefix}\n\n${supplement}\n\n${safetyLine}`;
+    }
+
+    return `${base}\n\n${supplement}`;
+  }
+
+  private normalizeAnalysisLookupText(text: string): string {
+    return String(text || '')
+      .toLowerCase()
+      .replace(/\s+/g, '')
+      .replace(/[【】\[\]（）()：:，,。；;、\-—·•*]/g, '');
+  }
+
+  private analysisMentionsIndicator(normalizedAnalysis: string, indicator: ReportIndicator): boolean {
+    return this.getIndicatorLookupVariants(indicator).some((variant) => normalizedAnalysis.includes(variant));
+  }
+
+  private getIndicatorLookupVariants(indicator: ReportIndicator): string[] {
+    const variants = new Set<string>();
+    const addVariant = (value: string): void => {
+      const normalized = this.normalizeAnalysisLookupText(value);
+      if (normalized.length >= 2) {
+        variants.add(normalized);
+      }
+    };
+
+    const name = String(indicator.name || '');
+    addVariant(name);
+    addVariant(name.replace(/[（(][^()（）]+[)）]/g, ''));
+
+    const value = String(indicator.value || '');
+    if (/[A-Za-z\u4e00-\u9fa5]/.test(value) && !/^[\d.\s↑↓⇅+-]+$/.test(value)) {
+      addVariant(value);
+      addVariant(value.replace(/[（(][^()（）]+[)）]/g, ''));
+    }
+
+    return Array.from(variants);
   }
 
   private saveReportToFile(report: HealthReport): void {

@@ -3,8 +3,10 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { reportService } from '../services/report.service';
+import { rebuildProfileFromReport } from '../services/report-profile.service';
 import type { HealthReport } from '../services/report.model';
 import { RecommendationService } from '../services/recommendation.service';
+import { getEffectiveHealthProfile } from '../services/user-profile.store';
 import { isUserScopeAllowed, requireAuth, resolveRequestUserId } from '../middleware/auth.middleware';
 import { AuthTokenClaims } from '../services/auth-token.service';
 
@@ -58,6 +60,18 @@ async function attachReportRecommendations<T extends object>(
   return {
     ...payload,
     recommendations,
+  };
+}
+
+function attachEffectiveProfile<T extends object>(payload: T, userId?: string): T & { profile?: unknown } {
+  if (!userId) return payload;
+
+  const profile = getEffectiveHealthProfile(userId);
+  if (!profile) return payload;
+
+  return {
+    ...payload,
+    profile,
   };
 }
 
@@ -122,7 +136,8 @@ router.post('/upload', upload.single('file'), async (req: Request, res: Response
       originalName
     );
     const storedReport = await reportService.getReport(report.id);
-    const responseData = await attachReportRecommendations(
+    rebuildProfileFromReport(storedReport);
+    const responseWithRecommendations = await attachReportRecommendations(
       {
         reportId: report.id,
         status: report.status,
@@ -133,6 +148,7 @@ router.post('/upload', upload.single('file'), async (req: Request, res: Response
       },
       storedReport
     );
+    const responseData = attachEffectiveProfile(responseWithRecommendations, userId);
 
     res.json({
       code: 0,
@@ -207,7 +223,11 @@ router.get('/:reportId', async (req: Request, res: Response) => {
       });
     }
 
-    const responseData = await attachReportRecommendations(report, report);
+    rebuildProfileFromReport(report);
+    const responseData = attachEffectiveProfile(
+      await attachReportRecommendations(report, report),
+      report.userId
+    );
 
     res.json({
       code: 0,
@@ -281,7 +301,11 @@ router.post('/analyze/:reportId', async (req: Request, res: Response) => {
 
     const result = await reportService.reAnalyze(reportId);
     const refreshedReport = await reportService.getReport(reportId);
-    const responseData = await attachReportRecommendations(result, refreshedReport);
+    rebuildProfileFromReport(refreshedReport);
+    const responseData = attachEffectiveProfile(
+      await attachReportRecommendations(result, refreshedReport),
+      refreshedReport?.userId
+    );
 
     res.json({
       code: 0,

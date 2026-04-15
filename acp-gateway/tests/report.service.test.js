@@ -106,6 +106,9 @@ describe('ReportService PDF parsing', () => {
     expect(tg.value).toBe('2.58');
     expect(tg.isAnomaly).toBe(true);
     expect(findIndicator(indicators, '尿酸').value).toBe('181');
+    expect(findIndicator(indicators, '血管弹性减弱')).toMatchObject({ value: '血管弹性重度减弱', isAnomaly: true });
+    expect(findIndicator(indicators, '幽门螺杆菌阳性')).toMatchObject({ value: 'HP 阳性', isAnomaly: true });
+    expect(findIndicator(indicators, '红细胞压积')).toMatchObject({ value: '35.1', isAnomaly: true });
   });
 
   test('repairs mojibake PDFs before extracting indicators', () => {
@@ -117,6 +120,32 @@ describe('ReportService PDF parsing', () => {
     expect(findIndicator(indicators, '空腹血糖').value).toBe('5.5');
     expect(findIndicator(indicators, '谷丙转氨酶').value).toBe('35');
     expect(findIndicator(indicators, '甘油三酯').value).toBe('1.2');
+  });
+
+  test('ignores educational guidance pages when extracting aikang narrative findings', () => {
+    const indicators = parsePdf('report-1775830435729-390647771.pdf');
+    const names = indicators.filter((indicator) => indicator.isAnomaly).map((indicator) => indicator.name);
+
+    expect(names).toEqual(expect.arrayContaining(['甲状腺结节', '乳腺结节', '乳腺增生', '支气管扩张', '窦性心律不齐', '屈光不正']));
+    expect(names).not.toContain('肺结节');
+    expect(names).not.toContain('近视');
+    expect(names).not.toContain('鼻窦炎');
+  });
+
+  test('ignores personal history and historical comparison sections in ciming reports', () => {
+    const indicators = parsePdf('report-1776148669373-595659707.pdf');
+    const anomalies = indicators.filter((indicator) => indicator.isAnomaly);
+    const names = anomalies.map((indicator) => indicator.name);
+
+    expect(names).toContain('屈光不正');
+    expect(names).not.toContain('脂肪肝');
+    expect(names).not.toContain('子宫肌瘤');
+    expect(names).not.toContain('卵巢囊肿');
+    expect(names).not.toContain('胆囊息肉');
+    expect(names).not.toContain('胆囊结石');
+    expect(names).not.toContain('肾结石');
+    expect(names).not.toContain('肺结节');
+    expect(names).not.toContain('高密度脂蛋白(HDL)');
   });
 
   test('rejects non-report PDFs instead of inventing lab data', () => {

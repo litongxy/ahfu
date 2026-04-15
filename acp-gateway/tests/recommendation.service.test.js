@@ -1,8 +1,15 @@
 const path = require('path');
 
 const servicePath = path.resolve(__dirname, '../dist/services/recommendation.service.js');
+const storePath = path.resolve(__dirname, '../dist/services/user-profile.store.js');
 
 describe('RecommendationService', () => {
+  afterEach(() => {
+    const { userProfiles, reportDerivedProfiles } = require(storePath);
+    userProfiles.clear();
+    reportDerivedProfiles.clear();
+  });
+
   test('recommends recipe + exercise based on report lipid anomalies', async () => {
     const { RecommendationService } = require(servicePath);
     const svc = new RecommendationService();
@@ -309,5 +316,30 @@ describe('RecommendationService', () => {
     expect(exercises[0].bvid).toBeTruthy();
     expect(exercises.some((item) => (item.tags || []).includes('肩颈') || (item.tags || []).includes('办公室'))).toBe(true);
     expect(exercises.every((item) => String(item.reason || '').includes('匹配依据：'))).toBe(true);
+  });
+
+  test('uses the rebuilt report persona for follow-up generic diet questions', async () => {
+    const { RecommendationService } = require(servicePath);
+    const { setReportDerivedProfile } = require(storePath);
+    const svc = new RecommendationService();
+
+    setReportDerivedProfile('u_report_persona', {
+      userId: 'u_report_persona',
+      chronicDisease: ['高血压', '脂肪肝', '幽门螺杆菌感染'],
+      healthGoals: ['降压', '控脂', '养胃'],
+      lastCheckup: '2026-04-10',
+      reportReferenceId: 'report_persona_seed',
+    });
+
+    const result = await svc.getRecommendations('diet', {
+      userId: 'u_report_persona',
+      message: '晚饭吃什么比较好？',
+    });
+
+    const recipeTitles = result.contents.filter((c) => c.type === 'recipe').map((c) => c.title);
+    const reasons = result.contents.map((c) => String(c.reason || '')).join('\n');
+
+    expect(recipeTitles).toContain('低盐清蒸鲈鱼');
+    expect(reasons).toMatch(/低盐|控脂|养胃/);
   });
 });

@@ -10,7 +10,7 @@ import { questionsKnowledge } from './questions-knowledge.service';
 import { formatReportSummaryForPrompt } from './report-context.service';
 import type { HealthReport } from './report.model';
 import { reportService } from './report.service';
-import { userProfiles } from './user-profile.store';
+import { getEffectiveHealthProfile } from './user-profile.store';
 import { webSearchService, WebSearchResult } from './web-search.service';
 
 export interface AgentMessage {
@@ -58,7 +58,7 @@ export function buildPantryRecipeSuggestion(message: string): string | null {
 }
 
 function fetchHealthProfile(userId: string): HealthProfile | null {
-  return userProfiles.get(userId) || null;
+  return getEffectiveHealthProfile(userId) || null;
 }
 
 function saveHealthProfile(profile: HealthProfile): void {
