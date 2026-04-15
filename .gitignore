@@ -1,2 +1,9 @@
 node_modules/
 dist/
+.s/
+bootstrap/
+s.yaml
+uploads/
+dist-static/
+*.log
+*.pem
