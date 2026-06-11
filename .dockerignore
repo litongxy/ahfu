@@ -1,0 +1,12 @@
+.git
+.DS_Store
+.env
+**/.env
+**/.DS_Store
+**/node_modules
+**/dist
+**/.runtime-logs
+**/uploads
+acp-gateway/data/phone-accounts.json
+cert.pem
+key.pem
