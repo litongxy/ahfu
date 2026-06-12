@@ -2,10 +2,9 @@ import { Router, Request, Response } from 'express';
 import { ACPProtocol, ACPMessage } from '../protocol/acp-parser';
 import { SessionManager, SessionData } from '../protocol/session-manager';
 import { opencodeAgent } from '../services/opencode-agent.service';
-import { isUserScopeAllowed, requireAuthIfEnabled, resolveRequestUserId } from '../middleware/auth.middleware';
+import { isUserScopeAllowed, resolveRequestUserId } from '../middleware/auth.middleware';
 
 const router = Router();
-router.use(requireAuthIfEnabled);
 
 async function processMessage(
   _acpProtocol: ACPProtocol,
